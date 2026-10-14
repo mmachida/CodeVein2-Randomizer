@@ -1,5 +1,10 @@
 # Progress
 
+## Keep internal documentation out of GitHub (2026-10-14)
+- Confirmed no app runtime code reads files from `docs/`; it is contributor guidance, design history, and audit material. Kept it locally and added `/docs/` to `.gitignore` as requested.
+- Removed the public README and audit-tool references to the ignored release checklist so the published repo won't contain broken links.
+- No tests were needed for this documentation and ignore-rule change.
+
 ## Refresh inventory and prepare source files (2026-10-14)
 - Regenerated the four randomizer inventory outputs from the current catalogs and the latest local READY cache (2,883 extracted packages). Preserved the prior seed and options; the main inventory has 8,616 rows, including renewable Ingredients, Hot Spring bundles, and quest rewards. All 13 report validations passed.
 - Updated `.gitignore` to expose the pinned Retoc 0.1.5 executable, its license, and README. These are required by source Extract and release builds; the local Oodle DLL remains ignored because it comes from the installed game or a local build input.

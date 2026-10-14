@@ -32,6 +32,7 @@ workspace/tools/retoc-v0.1.5/*
 /release/
 /release_compare/
 /Delete/
+/docs/
 /Cache/
 /cache/
 /output/

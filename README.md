@@ -74,7 +74,7 @@ For the full Python test suite, use:
 .\.venv\Scripts\python.exe tools\final_audit.py --full
 ```
 
-These checks do not replace testing Extract and Randomize with a real game installation. See [the release checklist](docs/release_checklist.md) for the manual checks.
+These checks do not replace testing Extract and Randomize with a real game installation. Real-game and gameplay checks still need to be done manually.
 
 To build a Windows release, set up the optional Python packages, install the .NET 10 SDK, and make sure the pinned Retoc CLI and its license are in `workspace/tools/retoc-v0.1.5/`. The build script expects an Oodle DLL at `tools/oo2core_9_win64.dll` and NuGet license files after restore. Then run:
 

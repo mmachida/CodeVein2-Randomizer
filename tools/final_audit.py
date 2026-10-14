@@ -150,7 +150,7 @@ def main() -> int:
         if not _run("UAssetAPI helper Release build", [dotnet, "build", helper_project, "--configuration", "Release"]):
             return 1
 
-    print("\nRepository audit checks passed. Real-game and gameplay checks are listed in docs/release_checklist.md.")
+    print("\nRepository audit checks passed. Real-game and gameplay checks still need manual validation.")
     return 0
 
 
