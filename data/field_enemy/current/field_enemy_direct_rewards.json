@@ -1,0 +1,977 @@
+{
+  "schema_version": 1,
+  "catalog_revision": "current",
+  "feature": "field_enemy_direct_rewards",
+  "semantics": {
+    "role": "WHERE",
+    "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+    "patch_field": "ArticleBulkInfo.Articles[].ArticleDataPath",
+    "preserve_destination_fields": [
+      "Count",
+      "bNotification"
+    ],
+    "dlc_rule": "Each FieldEnemy WHERE slot is eligible only when its Quest package is installed."
+  },
+  "locations": [
+    {
+      "id": "QST_FieldEnemy_Uni_C_DarkLowerArea",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_C",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_C_DarkLowerArea",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_C_DarkLowerArea.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "984e9b9f927728c80965559a7aea2e3b6b57adfd65fb8b57b533603557570957",
+        "files": {
+          ".uasset": "902bbca698751adc96eddc4d8e6e99c05e84d3778494bdd2113f6550793c7048",
+          ".uexp": "3ad043b9b98d21849df736a9b4b58a753dd3bb145ee1127e8ddb8ab4cfa92945"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Weapon/DLC/DA_DualSword_UNQv1",
+        "package_name_number": 0,
+        "asset_name_value": "DA_DualSword_UNQv1",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Weapon/DLC/DA_DualSword_UNQv1",
+          "asset_name": "DA_DualSword_UNQv1",
+          "count": 1,
+          "notification": true,
+          "category": "WEAPON"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_C_FireXSlash",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_C",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_C_FireXSlash",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_C_FireXSlash.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "da1c1f0e242b85ffcceba14f04d87cc97400d2bfd57edb8ae06c2b9b650530dc",
+        "files": {
+          ".uasset": "0fba26f61fe9da88de9ad7d1ad11027aa9307eff993e1e4e026688a03841750e",
+          ".uexp": "edc4a17ac1e82cf26e0a143f444c529859ba3cd2a1155233b153a9f7b29ae165"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/DA_FireXSlash",
+        "package_name_number": 0,
+        "asset_name_value": "DA_FireXSlash",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/DA_FireXSlash",
+          "asset_name": "DA_FireXSlash",
+          "count": 1,
+          "notification": true,
+          "category": "GADGET"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_C_GB_UNQ02_FistAtkBreakUp",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_C",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_C_GB_UNQ02_FistAtkBreakUp",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_C_GB_UNQ02_FistAtkBreakUp.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "8e2b17cc31f4a62749b62288188740eda5f8ca38d7abd4a8b0b426e903f5196c",
+        "files": {
+          ".uasset": "c533d76b6049b3997b4bce3c6451ade1d76b0cd5bca5686d9d2e462b12c99e50",
+          ".uexp": "16368277dd990e4bc25e3a5cfb65aac1ac9aa849746f87a0456163eca6b56505"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Support/DA_GB_UNQ02_FistAtkBreakUp",
+        "package_name_number": 0,
+        "asset_name_value": "DA_GB_UNQ02_FistAtkBreakUp",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Support/DA_GB_UNQ02_FistAtkBreakUp",
+          "asset_name": "DA_GB_UNQ02_FistAtkBreakUp",
+          "count": 1,
+          "notification": true,
+          "category": "GADGET"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_C_GM_UNQ07_AerialGeyser",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_C",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_C_GM_UNQ07_AerialGeyser",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_C_GM_UNQ07_AerialGeyser.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "1f4979d71d489f155ba11d30db5b6654de04164fdb8b36eb83f7481cc7e2e3c2",
+        "files": {
+          ".uasset": "acc9cec934815954804b57072fef747ad0bea56b2d0d38d2a1be6fafb48de0e2",
+          ".uexp": "96207a58a599a9d70c88728f3474c6a56287952edc3566f9f64a599b18446f9f"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Magic/DA_GM_UNQ07_AerialGeyser",
+        "package_name_number": 0,
+        "asset_name_value": "DA_GM_UNQ07_AerialGeyser",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Magic/DA_GM_UNQ07_AerialGeyser",
+          "asset_name": "DA_GM_UNQ07_AerialGeyser",
+          "count": 1,
+          "notification": true,
+          "category": "GADGET"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_C_Item_MatLevelUpSAGadgetA_05",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_C",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_C_Item_MatLevelUpSAGadgetA_05",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_C_Item_MatLevelUpSAGadgetA_05.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "df165b4a8daa742c0e5026a822d3e89bc79123a06814cf46b03a5b021009dafc",
+        "files": {
+          ".uasset": "9806b1c1cf827a62222e94fb428a0b1c6344f0344694eb1bbe63c90ac1095f05",
+          ".uexp": "c412cbda9d19f9833a7fbe8f59c14e21616dd9c2dc2fd3614e9f15c58df77314"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Item/EnhancementMaterial/DA_Item_MatLevelUpSAGadgetA_05",
+        "package_name_number": 0,
+        "asset_name_value": "DA_Item_MatLevelUpSAGadgetA_05",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Item/EnhancementMaterial/DA_Item_MatLevelUpSAGadgetA_05",
+          "asset_name": "DA_Item_MatLevelUpSAGadgetA_05",
+          "count": 1,
+          "notification": true,
+          "category": "ENHANCEMENT_MATERIAL"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_C_PowerShoot_V2",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_C",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_C_PowerShoot_V2",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_C_PowerShoot_V2.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "ce7f581cf2101f4f34ab20bfa5e9d5b8c5eeba6eb07fee460cb4667d8d0a75d2",
+        "files": {
+          ".uasset": "8a5c736760407193f0c44549956b08689434d064cbed4285c2bbf015b5f09ca2",
+          ".uexp": "5785a042d651be1bbacb26e922ccfb5bbaad0d56d75bb5b430f77dc6db3a8759"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/DA_PowerShoot_V2",
+        "package_name_number": 0,
+        "asset_name_value": "DA_PowerShoot_V2",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/DA_PowerShoot_V2",
+          "asset_name": "DA_PowerShoot_V2",
+          "count": 1,
+          "notification": true,
+          "category": "GADGET"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_C_SpiralBlade",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_C",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_C_SpiralBlade",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_C_SpiralBlade.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "dfe3db7e183a108c92fc84c281198b4479e2c3519451cf522f0d024088310d89",
+        "files": {
+          ".uasset": "40d833e777944dbb6d63b82af5657aa3d4087a41b98821bff9ae9009537678c4",
+          ".uexp": "289fda05e9a037f6943fa0ca964a39d42629690041842f428409f0a51fd23d33"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/DA_SpiralBlade",
+        "package_name_number": 0,
+        "asset_name_value": "DA_SpiralBlade",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/DA_SpiralBlade",
+          "asset_name": "DA_SpiralBlade",
+          "count": 1,
+          "notification": true,
+          "category": "GADGET"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_Fo_GB_UNQ12_InfiniteIchor",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_FO",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_Fo_GB_UNQ12_InfiniteIchor",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_Fo_GB_UNQ12_InfiniteIchor.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "0164a50cf55847e472372de6ec9922ad6a4cc339577a1e3e46b19142d553f417",
+        "files": {
+          ".uasset": "7c0e103e177cb7e2fcce0cda50545fcd6ad5aa93c44b7799b3ed834aeb4c79dd",
+          ".uexp": "5ec6b4075ed801b40adf9ef9a3da3d91c71f10d2407b25fc582866ef876dd6f3"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Support/DA_GB_UNQ12_InfiniteIchor",
+        "package_name_number": 0,
+        "asset_name_value": "DA_GB_UNQ12_InfiniteIchor",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Support/DA_GB_UNQ12_InfiniteIchor",
+          "asset_name": "DA_GB_UNQ12_InfiniteIchor",
+          "count": 1,
+          "notification": true,
+          "category": "GADGET"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_Fo_GM_UNQ06_HomingTracer",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_FO",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_Fo_GM_UNQ06_HomingTracer",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_Fo_GM_UNQ06_HomingTracer.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "4ca552ad1e0f4a9139a5964d71ecf4cc3a63a26b9b606f3c93f6c958940bb37f",
+        "files": {
+          ".uasset": "99ed8898ff9d8a71c08425fb89f526cce98c751a7f1181d7fbf9b71f3b05c1a8",
+          ".uexp": "d9d64619c994219c2a67493728100f9cb381177e7c2b29ba1d7bc78433ed27f6"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Magic/DA_GM_UNQ06_HomingTracer",
+        "package_name_number": 0,
+        "asset_name_value": "DA_GM_UNQ06_HomingTracer",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Magic/DA_GM_UNQ06_HomingTracer",
+          "asset_name": "DA_GM_UNQ06_HomingTracer",
+          "count": 1,
+          "notification": true,
+          "category": "GADGET"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_Fo_HellsFlash",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_FO",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_Fo_HellsFlash",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_Fo_HellsFlash.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "9f8eef4df269c5ac5dc66ee139500db6022ccfa12672f48db763a1c6717496f3",
+        "files": {
+          ".uasset": "b5608e6b0f4a9bad594489db5dfad49925bd7ac457f11bbf3617be8f13a970ea",
+          ".uexp": "a6fbe322de384580f85003e882be0daab653ba37c8d9b6d3b94a499594a94a6f"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/DA_HellsFlash",
+        "package_name_number": 0,
+        "asset_name_value": "DA_HellsFlash",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/DA_HellsFlash",
+          "asset_name": "DA_HellsFlash",
+          "count": 1,
+          "notification": true,
+          "category": "GADGET"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_P_DefGadget_ZenonGreatShield",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_P",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_P_DefGadget_ZenonGreatShield",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_P_DefGadget_ZenonGreatShield.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "110c8d8262b796f7151ee2e0a8106c4904df5fc0418de8e9b8342cb556e2197c",
+        "files": {
+          ".uasset": "a1eefda7bdf3561d740e54692a24e6161d5cc5e91330ac483a7bf8d0411c2e87",
+          ".uexp": "bb33f26402fe3d242c2be93f82d3d3f0efbd819972c117c1ccb456b2116bcef4"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Gadget/DLC/DA_DefGadget_ZenonGreatShield",
+        "package_name_number": 0,
+        "asset_name_value": "DA_DefGadget_ZenonGreatShield",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Gadget/DLC/DA_DefGadget_ZenonGreatShield",
+          "asset_name": "DA_DefGadget_ZenonGreatShield",
+          "count": 1,
+          "notification": true,
+          "category": "DEFENSIVE_GADGET"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_P_GB_UNQ03_RecoveryDamageConvert",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_P",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_P_GB_UNQ03_RecoveryDamageConvert",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_P_GB_UNQ03_RecoveryDamageConvert.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "74dd373c142d4303959114041bcbdc096275a6ca818f66c25f6fc4e770dbf12b",
+        "files": {
+          ".uasset": "32f6bc2e1e14938e5c312c941a7d160e75aed6b3a355d98fd6ecf26a4567a168",
+          ".uexp": "3d495c3eac598625ebd70a341f801db00b221ca7827beb578a031df306b5b307"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Support/DA_GB_UNQ03_RecoveryDamageConvert",
+        "package_name_number": 0,
+        "asset_name_value": "DA_GB_UNQ03_RecoveryDamageConvert",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Support/DA_GB_UNQ03_RecoveryDamageConvert",
+          "asset_name": "DA_GB_UNQ03_RecoveryDamageConvert",
+          "count": 1,
+          "notification": true,
+          "category": "GADGET"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_P_GB_UNQ07_SustainAtkUp",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_P",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_P_GB_UNQ07_SustainAtkUp",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_P_GB_UNQ07_SustainAtkUp.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "0c5b53c8e9a3144f507915fe97ebeebb9805d5aebbf83dc675c1fdf80e3c63c3",
+        "files": {
+          ".uasset": "45008d8e93f2f629cdc2780d4878583cd633bfe57b152de7979625aa8bf796f6",
+          ".uexp": "0a80e38e59150720ee5b94d186522ef22e410ceb167122ff9036dcb34d541b55"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Support/DA_GB_UNQ07_SustainAtkUp",
+        "package_name_number": 0,
+        "asset_name_value": "DA_GB_UNQ07_SustainAtkUp",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Support/DA_GB_UNQ07_SustainAtkUp",
+          "asset_name": "DA_GB_UNQ07_SustainAtkUp",
+          "count": 1,
+          "notification": true,
+          "category": "GADGET"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_P_GB_UNQ08_IchorRevoveryZone",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_P",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_P_GB_UNQ08_IchorRevoveryZone",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_P_GB_UNQ08_IchorRevoveryZone.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "9dc785fe3a4c16a34111c7260c7e1692a0b86c59b19fccaddf259321b4b7f21d",
+        "files": {
+          ".uasset": "d97a05acb99702e31e1c06c711f25d354beba18f053998a4426a950cd181dfab",
+          ".uexp": "3c97a07ef1f5ff7ee584c6060b22bcf3c8ed1e16ef73268dd10539b967aae805"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Support/DA_GB_UNQ08_IchorRevoveryZone",
+        "package_name_number": 0,
+        "asset_name_value": "DA_GB_UNQ08_IchorRevoveryZone",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Support/DA_GB_UNQ08_IchorRevoveryZone",
+          "asset_name": "DA_GB_UNQ08_IchorRevoveryZone",
+          "count": 1,
+          "notification": true,
+          "category": "GADGET"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_P_GB_UNQ13_LastJourney",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_P",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_P_GB_UNQ13_LastJourney",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_P_GB_UNQ13_LastJourney.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "150a0ee239f2cb5d05a53e2a3b848ce9a7c965f81701e81a173b180acd4f95c2",
+        "files": {
+          ".uasset": "d11add53009f5539626594c96907267b138b3256a300f045d381693ce5212e0f",
+          ".uexp": "cfd77ccd2219e1551ce1a5fb7c035bd943a06ff497e08ceb94639221f221a377"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Support/DA_GB_UNQ13_LastJourney",
+        "package_name_number": 0,
+        "asset_name_value": "DA_GB_UNQ13_LastJourney",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Support/DA_GB_UNQ13_LastJourney",
+          "asset_name": "DA_GB_UNQ13_LastJourney",
+          "count": 1,
+          "notification": true,
+          "category": "GADGET"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_P_GM_UNQ11_JustThunderBeam",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_P",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_P_GM_UNQ11_JustThunderBeam",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_P_GM_UNQ11_JustThunderBeam.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "583156bba5a5a9449236f869a99286eeaef2f9bece2d1b7446438336bdd1e1cf",
+        "files": {
+          ".uasset": "eb28ddd5a5cf6373955fce948b702e66e406af40f52dcd688296e926ebd2f7ac",
+          ".uexp": "97e3d627da4e3acb25bef9efa757008e0bfe1a1ba06225af6178ba621ec46abc"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Magic/DA_GM_UNQ11_JustThunderBeam",
+        "package_name_number": 0,
+        "asset_name_value": "DA_GM_UNQ11_JustThunderBeam",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Magic/DA_GM_UNQ11_JustThunderBeam",
+          "asset_name": "DA_GM_UNQ11_JustThunderBeam",
+          "count": 1,
+          "notification": true,
+          "category": "GADGET"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_P_Item_MatLevelUpWeaponA_10_01",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_P",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_P_Item_MatLevelUpWeaponA_10_01",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_P_Item_MatLevelUpWeaponA_10_01.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "f690ad0997eeb4cc7812ecbb8f3364eb9cd80344b679ca1f9378b912c263698b",
+        "files": {
+          ".uasset": "c0a6533ac2c8d956e9acc41aa9cc1b83f61fd18efcd836dc85e02cb924f220f2",
+          ".uexp": "1c30f66e78f89a402761ef0c0e6f6a9fd9576200a50781b4abd24e0bfb95f7ef"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Item/EnhancementMaterial/DA_Item_MatLevelUpWeaponA",
+        "package_name_number": 11,
+        "asset_name_value": "DA_Item_MatLevelUpWeaponA",
+        "asset_name_number": 11,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Item/EnhancementMaterial/DA_Item_MatLevelUpWeaponA_10",
+          "asset_name": "DA_Item_MatLevelUpWeaponA_10",
+          "count": 1,
+          "notification": true,
+          "category": "ENHANCEMENT_MATERIAL"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_P_Item_MatLevelUpWeaponA_10_02",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_P",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_P_Item_MatLevelUpWeaponA_10_02",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_P_Item_MatLevelUpWeaponA_10_02.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "0f1388091d7217a78300af3f133657dc66d8febc531b22571e7271df74ce6680",
+        "files": {
+          ".uasset": "9a339d43294e74629b528520511dad1acbc287a6f26f88f9db9bab74f6e9ee32",
+          ".uexp": "81b12c30cbc9b50ef132be04bd00b7b7172bc0d2314721efa37f4251f5c70660"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Item/EnhancementMaterial/DA_Item_MatLevelUpWeaponA",
+        "package_name_number": 11,
+        "asset_name_value": "DA_Item_MatLevelUpWeaponA",
+        "asset_name_number": 11,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Item/EnhancementMaterial/DA_Item_MatLevelUpWeaponA_10",
+          "asset_name": "DA_Item_MatLevelUpWeaponA_10",
+          "count": 1,
+          "notification": true,
+          "category": "ENHANCEMENT_MATERIAL"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_P_Item_MatLevelUpWeaponB_05",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_P",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_P_Item_MatLevelUpWeaponB_05",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_P_Item_MatLevelUpWeaponB_05.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "2ab45ab5d0f77ec26402216944b1f7cbb487f05f25e0358e9f8c11b7dc985483",
+        "files": {
+          ".uasset": "9f0d60d2f66345a11202b852cc2b5956664d20e3c61ac4893804e3b75c8c79e3",
+          ".uexp": "c4aa9868a8de2c0b254e3f7e0c13cb80d00ad79731e8e871cf2565b5a0972040"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Item/EnhancementMaterial/DA_Item_MatLevelUpWeaponB_05",
+        "package_name_number": 0,
+        "asset_name_value": "DA_Item_MatLevelUpWeaponB_05",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Item/EnhancementMaterial/DA_Item_MatLevelUpWeaponB_05",
+          "asset_name": "DA_Item_MatLevelUpWeaponB_05",
+          "count": 1,
+          "notification": true,
+          "category": "ENHANCEMENT_MATERIAL"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_Vo_DA_LongSlide",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_VO",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_Vo_DA_LongSlide",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_Vo_DA_LongSlide.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "b9c99b76140cb9d61269a80e9b010855a1a9fe75e1e14e5ceb77ce265d20ea7c",
+        "files": {
+          ".uasset": "30f3c81c608b9194784bb741f7a4ccd531809c3314653a1d815c9232950b2f08",
+          ".uexp": "0bbbbefd34a034e8efffce216f03f61cf0d93539e8bdecbf1c12eb3e6ec12f8a"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/DA_LongSlide",
+        "package_name_number": 0,
+        "asset_name_value": "DA_LongSlide",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/DA_LongSlide",
+          "asset_name": "DA_LongSlide",
+          "count": 1,
+          "notification": true,
+          "category": "GADGET"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_Vo_GM_UNQ03_FireLily",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_VO",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_Vo_GM_UNQ03_FireLily",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_Vo_GM_UNQ03_FireLily.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "b3fa075fcd329f9680038429950837a2fa3abf5810e29987bd06763cf94298b7",
+        "files": {
+          ".uasset": "bba3727204a791759efb51edab79b9737fb6d86cdbd3964af2402328b38b8f11",
+          ".uexp": "c634036f8f9e902601a4de5ab47ca99b3390b2eff76dd0167106e19b34318982"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Magic/DA_GM_UNQ03_FireLily",
+        "package_name_number": 0,
+        "asset_name_value": "DA_GM_UNQ03_FireLily",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Magic/DA_GM_UNQ03_FireLily",
+          "asset_name": "DA_GM_UNQ03_FireLily",
+          "count": 1,
+          "notification": true,
+          "category": "GADGET"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_Vo_Item_MatLevelUpWeaponB_05",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_VO",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_Vo_Item_MatLevelUpWeaponB_05",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_Vo_Item_MatLevelUpWeaponB_05.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "5a1246a6a622193387fb41232dfa297d80339dd63773342d2145136457569fe0",
+        "files": {
+          ".uasset": "d2755f1376036dbcfe04af20aa37ff66c5c0cb27ac88e3058b8dc8eca459fdee",
+          ".uexp": "d4c3fea99767b79bdb9d1ab345ae8dcdb9b469774fd747268023038ac939d617"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Item/EnhancementMaterial/DA_Item_MatLevelUpWeaponB_05",
+        "package_name_number": 0,
+        "asset_name_value": "DA_Item_MatLevelUpWeaponB_05",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Item/EnhancementMaterial/DA_Item_MatLevelUpWeaponB_05",
+          "asset_name": "DA_Item_MatLevelUpWeaponB_05",
+          "count": 1,
+          "notification": true,
+          "category": "ENHANCEMENT_MATERIAL"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_Vo_Kamaitachi_V3",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_VO",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_Vo_Kamaitachi_V3",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_Vo_Kamaitachi_V3.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "df4069dabfb95914855c972e7b382add0065f333708770950391613f575b542c",
+        "files": {
+          ".uasset": "a66836c1c316859f5e052be816d6865467dede7dc128e7800d35233900925923",
+          ".uexp": "491557ecea21cda7f453dbf7c0ff706a241d406160d549bab7ef91978f94c144"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/DA_Kamaitachi_V3",
+        "package_name_number": 0,
+        "asset_name_value": "DA_Kamaitachi_V3",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/DA_Kamaitachi_V3",
+          "asset_name": "DA_Kamaitachi_V3",
+          "count": 1,
+          "notification": true,
+          "category": "GADGET"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_Vo_ShortRush_V2",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_VO",
+      "content_class": "DLC",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_Vo_ShortRush_V2",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_Vo_ShortRush_V2.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "84acc6f1e3e2082e0aba220b5af844cf33bcf8be72403b03e4d6a255bdec83e2",
+        "files": {
+          ".uasset": "e8c745422f6cd2eff338f10d948ad4aeadbf3e4e2bd5885245d29594fb15e3e3",
+          ".uexp": "2d66ffb93237d82693e23b080c22b83dcd8c1359f7226bbf17ee7970f419df65"
+        }
+      },
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0,
+        "sub_path_string": "",
+        "package_name_value": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/DA_ShortRush_V2",
+        "package_name_number": 0,
+        "asset_name_value": "DA_ShortRush_V2",
+        "asset_name_number": 0,
+        "articles_count": 1
+      },
+      "rewards": [
+        {
+          "article_path": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/DA_ShortRush_V2",
+          "asset_name": "DA_ShortRush_V2",
+          "count": 1,
+          "notification": true,
+          "category": "GADGET"
+        }
+      ],
+      "protected": false,
+      "protection_reasons": [],
+      "randomizable": true,
+      "where_only": true
+    }
+  ]
+}

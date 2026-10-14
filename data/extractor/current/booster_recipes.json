@@ -1,0 +1,288 @@
+{
+  "schema": "cv2-extractor-booster-recipes-v1",
+  "catalog_revision": "current",
+  "tables": [
+    {
+      "virtual_package": "/Game/Blueprint/GameSystem/ItemSynthetic/Booster/DT_BoosterRecipe",
+      "table_name": "DT_BoosterRecipe",
+      "content_class": "BASE",
+      "expected_row_count": 36,
+      "source_package_sha256": {
+        ".uasset": "df35ceb0b84b20940fad4a7ce3c379946e3a09aa8cf179499b3d63a85b8e436b",
+        ".uexp": "b3016ce90a7da0c0e46cc321994c671284304595e82775932e6b72d8cfee923d"
+      },
+      "rows": [
+        {
+          "row_index": 0,
+          "row_name": "DA_Booster_STRRisky_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Basic/DA_Booster_STRRisky_1",
+          "immutable_fingerprint_sha256": "28bd6413eeb721569dcbc10a99d611c70bdfe812f24dd9a32059301416662c95"
+        },
+        {
+          "row_index": 1,
+          "row_name": "DA_Booster_DexRisky_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Basic/DA_Booster_DexRisky_1",
+          "immutable_fingerprint_sha256": "be7a251a251261eb05275d9526726a2d56df80297b6ae9e80be3d27a928b16a4"
+        },
+        {
+          "row_index": 2,
+          "row_name": "DA_Booster_MNDRisky_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Basic/DA_Booster_MNDRisky_1",
+          "immutable_fingerprint_sha256": "ea995e06c9453be0f3f6932b5fe55e040576e23b699b8bafce1d781f20d3f4d5"
+        },
+        {
+          "row_index": 3,
+          "row_name": "DA_Booster_WILRisky_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Basic/DA_Booster_WILRisky_1",
+          "immutable_fingerprint_sha256": "78266e56b5f5854cb9ec0b08924c1323d7930ce155f5f15b17f6ff0597686505"
+        },
+        {
+          "row_index": 4,
+          "row_name": "DA_Booster_VITRisky_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Basic/DA_Booster_VITRisky_1",
+          "immutable_fingerprint_sha256": "3032bf9156fe6ba7dccbaf5fe9650dea99e2a77448ab00f81ccaf21c12499e4b"
+        },
+        {
+          "row_index": 5,
+          "row_name": "DA_Booster_FORRisky_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Basic/DA_Booster_FORRisky_1",
+          "immutable_fingerprint_sha256": "b213c3bd3d36d886ed57a17df464c2c4059e930d8b5577ffeb43c2b4d29512bf"
+        },
+        {
+          "row_index": 6,
+          "row_name": "DA_Booster_BPMax_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Basic/DA_Booster_BPMax_1",
+          "immutable_fingerprint_sha256": "b0380c9d0a99c92fbf95726414f78cfd74b04691d9bb985472c90dda97162893"
+        },
+        {
+          "row_index": 7,
+          "row_name": "DA_Booster_BPHealEnemyDefeat_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Attack/DA_Booster_BPHealEnemyDefeat_1",
+          "immutable_fingerprint_sha256": "494447daafa49f9a7966e794b1993e65c9de30cc0ad8c80607e7d485c782af28"
+        },
+        {
+          "row_index": 8,
+          "row_name": "DA_Booster_GutsHp_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Defense/DA_Booster_GutsHp_1",
+          "immutable_fingerprint_sha256": "7862efb300307cbb4c344be410381d4a73f6c359fe93b8216042bf6c41d99446"
+        },
+        {
+          "row_index": 9,
+          "row_name": "DA_Booster_StaminaMax_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Basic/DA_Booster_StaminaMax_1",
+          "immutable_fingerprint_sha256": "bdd0a19bbf12b070499f3f69680229aef0176fcdf50008b9ec223ff67d4a8aae"
+        },
+        {
+          "row_index": 10,
+          "row_name": "DA_Booster_StaminaMax_2",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Basic/DA_Booster_StaminaMax_2",
+          "immutable_fingerprint_sha256": "212ddff17440a554d0ace9bfbe8cf85409ad50e63db445c4a72eb9cfce9b1553"
+        },
+        {
+          "row_index": 11,
+          "row_name": "DA_Booster_StaminaRegenUp_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Basic/DA_Booster_StaminaRegenUp_1",
+          "immutable_fingerprint_sha256": "1679c3f7ddf8f94d8d1f0fbf6a6acd8b79c8e0f83ee37ca61cb89d4c04ce20f2"
+        },
+        {
+          "row_index": 12,
+          "row_name": "DA_Booster_StaminaReduceSprint_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Basic/DA_Booster_StaminaReduceSprint_1",
+          "immutable_fingerprint_sha256": "79cf1c23e2bb450b10acb4e1f0104048e2b1f7cd7c576506ad96793a80c2549e"
+        },
+        {
+          "row_index": 13,
+          "row_name": "DA_Booster_IchorMaxRiskyBP_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Basic/DA_Booster_IchorMaxRiskyBP_1",
+          "immutable_fingerprint_sha256": "eeb3051392f445bbd95da73d35c5a346520c22b188eee83cdafa915ce860c341"
+        },
+        {
+          "row_index": 14,
+          "row_name": "DA_Booster_IchorGetChargeSuck_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Attack/DA_Booster_IchorGetChargeSuck_1",
+          "immutable_fingerprint_sha256": "c6b6af24cf45197d1f85d5341d4a5fc3f13014507b2a9f89f49e98c886687c8a"
+        },
+        {
+          "row_index": 15,
+          "row_name": "DA_Booster_IchorReduceNoBP_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Basic/DA_Booster_IchorReduceNoBP_1",
+          "immutable_fingerprint_sha256": "6340a461ed723b918bb9932e170989e642787dd438f73412514c31b85893c3d2"
+        },
+        {
+          "row_index": 16,
+          "row_name": "DA_Booster_BPRecoveryCount_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Basic/DA_Booster_BPRecoveryCount_1",
+          "immutable_fingerprint_sha256": "64142b7d5a85d5c88fd036a6702f0753a82e70d7c315d96053518f57f3f02f3f"
+        },
+        {
+          "row_index": 17,
+          "row_name": "DA_Booster_BPRecoverySwap_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Basic/DA_Booster_BPRecoverySwap_1",
+          "immutable_fingerprint_sha256": "b0d8ed290cc7a443107aec20ebea79e0f038a52cba0ca0844b0822aa01d40d20"
+        },
+        {
+          "row_index": 18,
+          "row_name": "DA_Booster_AttackUpStatusAilment_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Attack/DA_Booster_AttackUpStatusAilment_1",
+          "immutable_fingerprint_sha256": "674a25348adc89ee4b38806f14e4e5c0cbf656798080804c95b4cc57e0671738"
+        },
+        {
+          "row_index": 19,
+          "row_name": "DA_Booster_SurvivalInstinct_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Attack/DA_Booster_SurvivalInstinct_1",
+          "immutable_fingerprint_sha256": "3f2d55b1fdf07cc6fc636c958bf2e7dc6e23f4f185b14aac6e2206ed37e0921e"
+        },
+        {
+          "row_index": 20,
+          "row_name": "DA_Booster_AttackUpChargeSuck_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Attack/DA_Booster_AttackUpChargeSuck_1",
+          "immutable_fingerprint_sha256": "555cb42079f4e1b84c6a7d6cca8cb55c2dd23ab3ef7d36c2c964a153d2b15575"
+        },
+        {
+          "row_index": 21,
+          "row_name": "DA_Booster_AttackUpSpecialSuck_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Attack/DA_Booster_AttackUpSpecialSuck_1",
+          "immutable_fingerprint_sha256": "7f42e334ab62a14caa1bfa1841b4208dd862bf2dd636e54c0c8ac4a00e7d5d6f"
+        },
+        {
+          "row_index": 22,
+          "row_name": "DA_Booster_BleedWeapon_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Attack/DA_Booster_BleedWeapon_1",
+          "immutable_fingerprint_sha256": "167e916f4e33017bcee3f0f3c57f46a832b7ed6f50c3d8153cda1817a285416c"
+        },
+        {
+          "row_index": 23,
+          "row_name": "DA_Booster_BleedVis_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Other/DA_Booster_BleedVis_1",
+          "immutable_fingerprint_sha256": "2240aed77cfd862fb72c69eb93868f6be5304a08f4ed91a376af87dc3e4ca643"
+        },
+        {
+          "row_index": 24,
+          "row_name": "DA_Booster_StatusAilmentAddUp_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Attack/DA_Booster_StatusAilmentAddUp_1",
+          "immutable_fingerprint_sha256": "e96cc71182c9198f1188a73f2068e5dab36233fb32a1bdd2f5a1ff544b8d9030"
+        },
+        {
+          "row_index": 25,
+          "row_name": "DA_Booster_ResCurse_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Defense/DA_Booster_ResCurse_1",
+          "immutable_fingerprint_sha256": "011af51d1c7b905b252f627c1bf941b215e545de6bb16dce8d53bad66370095b"
+        },
+        {
+          "row_index": 26,
+          "row_name": "DA_Booster_ResWound_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Defense/DA_Booster_ResWound_1",
+          "immutable_fingerprint_sha256": "b88ff43d4662e020e2d9dc75c4139197e1198f9da1d045d4876807f6d2762738"
+        },
+        {
+          "row_index": 27,
+          "row_name": "DA_Booster_ResDisease_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Defense/DA_Booster_ResDisease_1",
+          "immutable_fingerprint_sha256": "d233b681df6cf075c87b9ed2b376c675bee47b711627817ee6296141fd445bf4"
+        },
+        {
+          "row_index": 28,
+          "row_name": "DA_Booster_ResBleed_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Defense/DA_Booster_ResBleed_1",
+          "immutable_fingerprint_sha256": "9febc2e74ab08172b708cb6b41ccbb983100a258ca6f6006cda58bef2fa9ea25"
+        },
+        {
+          "row_index": 29,
+          "row_name": "DA_Booster_DefenseFallDamage_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Defense/DA_Booster_DefenseFallDamage_1",
+          "immutable_fingerprint_sha256": "5c7a798248a1d4105c4987800e083e5ef210d775d50452ee3fab28fd14bbf6c0"
+        },
+        {
+          "row_index": 30,
+          "row_name": "DA_Booster_FastnessUp_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Defense/DA_Booster_FastnessUp_1",
+          "immutable_fingerprint_sha256": "b293e6a0303bae6435461260675bccd67a2df2127487a7cdf30c01b92a7f76c0"
+        },
+        {
+          "row_index": 31,
+          "row_name": "DA_Booster_FastnessUpChargeAttack_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Defense/DA_Booster_FastnessUpChargeAttack_1",
+          "immutable_fingerprint_sha256": "37d813ca9f41db75804ae99a77b475c82420a41ecb27867cde891e21ec822805"
+        },
+        {
+          "row_index": 32,
+          "row_name": "DA_Booster_NoiseReduceWalk_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Other/DA_Booster_NoiseReduceWalk_1",
+          "immutable_fingerprint_sha256": "195828418c69958d818df2e22d7869856e95401f28f88fe952e9f088cb4ce598"
+        },
+        {
+          "row_index": 33,
+          "row_name": "DA_Booster_SightReduce_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Other/DA_Booster_SightReduce_1",
+          "immutable_fingerprint_sha256": "ba9903731e8aba30f26367d0f1017266b3f55789697aa1f9fe019aed7d091a8d"
+        },
+        {
+          "row_index": 34,
+          "row_name": "DA_Booster_ExpUp_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Basic/DA_Booster_ExpUp_1",
+          "immutable_fingerprint_sha256": "4c7f6d224fc5f8b1ba4b47abbe766297356f2e43887152012b8ebd21029281c9"
+        },
+        {
+          "row_index": 35,
+          "row_name": "DA_Booster_DropItemRateUp_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/Other/DA_Booster_DropItemRateUp_1",
+          "immutable_fingerprint_sha256": "19897ac992254cd66e5f402ea76fc8c13c96fad7064c472b7b9447cfdecb9d6c"
+        }
+      ]
+    },
+    {
+      "virtual_package": "/Game/Blueprint/GameSystem/ItemSynthetic/Booster/DT_BoosterRecipe_DLC",
+      "table_name": "DT_BoosterRecipe_DLC",
+      "content_class": "DLC",
+      "expected_row_count": 7,
+      "source_package_sha256": {
+        ".uasset": "fd900e952cafeca81823f8138493f90a3669c0715cb167e853a7dbd3f6eec83e",
+        ".uexp": "46a2f41eac68fcc31e96fbaa5492baebaeea84f744f9031546d957efb4350746"
+      },
+      "rows": [
+        {
+          "row_index": 0,
+          "row_name": "DA_Booster_OverloadFavorUp_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/DLC_Basic/DA_Booster_OverloadFavorUp_1",
+          "immutable_fingerprint_sha256": "6c3184e2cf3c49136c1a319b3df1155ede7a90820816596a69176a82c0ea7d74"
+        },
+        {
+          "row_index": 1,
+          "row_name": "DA_Booster_FistAtkBreakUp_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/DLC_Attack/DA_Booster_FistAtkBreakUp_1",
+          "immutable_fingerprint_sha256": "13dda496da223c70c9a0641eaf9b3442d8ad8c49dfc3ecd7ec2fd364944afebb"
+        },
+        {
+          "row_index": 2,
+          "row_name": "DA_Booster_SAGadgetAtkUp_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/DLC_Attack/DA_Booster_SAGadgetAtkUp_1",
+          "immutable_fingerprint_sha256": "07cf5d6c2e88de929dd937900b5813a5254b8716d68fca89f8ac782902783015"
+        },
+        {
+          "row_index": 3,
+          "row_name": "DA_Booster_OverFlowIchorHpHeal_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/DLC_Basic/DA_Booster_OverFlowIchorHpHeal_1",
+          "immutable_fingerprint_sha256": "24821f3daa615b74c5d509d9a3e0c50b72e03dbadf76a8f17695d275f6405a3f"
+        },
+        {
+          "row_index": 4,
+          "row_name": "DA_Booster_GiftHealBloodImpact_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/DLC_Other/DA_Booster_GiftHealBloodImpact_1",
+          "immutable_fingerprint_sha256": "902473a6c81d3de88ad6ea870598fbf1c7e7bd6ce8a0233d863962b6a7cb1f5a"
+        },
+        {
+          "row_index": 5,
+          "row_name": "DA_Booster_ReplaceArrowBomb_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/DLC_Other/DA_Booster_ReplaceArrowBomb_1",
+          "immutable_fingerprint_sha256": "042f9fb98ad978adc372beb790398020545b97d9564b1d1236b1fce24925a5d5"
+        },
+        {
+          "row_index": 6,
+          "row_name": "DA_Booster_BloodSuckAtkUpToRecoveryDamage_1",
+          "original_article_path": "/Game/Blueprint/Article/Booster/DLC_Attack/DA_Booster_AtkUpRecoveryDamageConvert_1",
+          "immutable_fingerprint_sha256": "0f4b0d51d38facc5f68b6ee674861078bb926dd9092c3d544423c4d1b02d3eae"
+        }
+      ]
+    }
+  ]
+}

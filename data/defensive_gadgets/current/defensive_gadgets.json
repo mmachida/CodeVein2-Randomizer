@@ -1,0 +1,212 @@
+{
+  "schema_version": 1,
+  "catalog": "defensive_gadgets",
+  "revision": "defensive_gadgets_v1",
+  "description": "Canonical Defensive Gadget metadata for Code Vein 2 Randomizer. Metadata only; contains no game assets.",
+  "expected_counts": {
+    "total": 17,
+    "BASE": 16,
+    "DLC": 1
+  },
+  "rules": {
+    "world_loot_eligible": "All 17 canonical Defensive Gadgets are eligible as World Loot reward candidates.",
+    "alias_handling": "Aliases without _1 refer to the canonical _1 DataAsset when listed in aliases. They are not separate gadgets.",
+    "npc_grants_scope": "The optional Defensive Gadget NPC option currently randomizes Warp. Jadwiga Servant’s initial Parry reward is a generic Article destination in the World Loot pool.",
+    "initial_inventory": "Not implemented in this phase. Starting Defensive Gadget will use this catalog in a future phase."
+  },
+  "items": [
+    {
+      "object": "DA_DefGadget_BackStep_1",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_BackStep_1",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_Dullahan",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_Dullahan",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_LesserShield_1",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_LesserShield_1",
+      "content_class": "BASE",
+      "aliases": [
+        "DA_DefGadget_LesserShield"
+      ],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_LesserShield_2",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_LesserShield_2",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_OmnidirectionalShield_1",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_OmnidirectionalShield_1",
+      "content_class": "BASE",
+      "aliases": [
+        "DA_DefGadget_OmnidirectionalShield"
+      ],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_OmnidirectionalShield_2",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_OmnidirectionalShield_2",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_Parry_1",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_Parry_1",
+      "content_class": "BASE",
+      "aliases": [
+        "DA_DefGadget_Parry"
+      ],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_Parry_2",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_Parry_2",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_QuickStep_1",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_QuickStep_1",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_Shield_1",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_Shield_1",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_Shield_2",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_Shield_2",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_Shield_3",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_Shield_3",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_TwistStep_1",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_TwistStep_1",
+      "content_class": "BASE",
+      "aliases": [
+        "DA_DefGadget_TwistStep"
+      ],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_TwistStep_2",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_TwistStep_2",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_Warp_1",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_Warp_1",
+      "content_class": "BASE",
+      "aliases": [
+        "DA_DefGadget_Warp"
+      ],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_Warp_2",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_Warp_2",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_ZenonGreatShield",
+      "asset_path": "/Game/Blueprint/Article/Gadget/DLC/DA_DefGadget_ZenonGreatShield",
+      "content_class": "DLC",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    }
+  ],
+  "known_npc_or_quest_grants": [
+    {
+      "id": "parry_npc_grant",
+      "family": "Parry",
+      "content_class": "BASE",
+      "vanilla_reward_candidates": [
+        "DA_DefGadget_Parry_1",
+        "DA_DefGadget_Parry_2"
+      ],
+      "source_type": "NPC",
+      "source_description": "Jadwiga Servant3 directly grants the initial Parry reward before its normal Parry progression logic.",
+      "package_path": "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/Common/Test/JadwigaServant/BP_SmallScenario_JadwigaServant3",
+      "export_name": "Default__BP_SmallScenario_JadwigaServant3_C",
+      "export_index": 2,
+      "property_path": "RawExport.Data[0x16,0x1A,0x1E,0x22] (literal Article identity only)",
+      "exact_vanilla_reward": "DA_DefGadget_Parry_1",
+      "research_status": "STRUCTURALLY_CONFIRMED_RAW_ARTICLE_GRANT_GAMEPLAY_TESTED",
+      "implementation_note": "Integrated as a generic Article destination in the existing World Loot pool; it is not part of the Defensive Gadget-only NPC reward pool. Only this package uses the confirmed 55-byte RawExport layout.",
+      "package_file_hint": "Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/Common/Test/JadwigaServant/BP_SmallScenario_JadwigaServant3.uasset"
+    },
+    {
+      "id": "warp_lise_grant",
+      "family": "Warp",
+      "content_class": "BASE",
+      "vanilla_reward_candidates": [
+        "DA_DefGadget_Warp_1",
+        "DA_DefGadget_Warp_2"
+      ],
+      "source_type": "QUEST",
+      "source_description": "Warp Defensive Gadget grant associated with Lise's character episode/final quest.",
+      "package_path": "/Game/Quest/CharacterEpisode/CharacterEpisode_Lise/QST_CharacterEpisode_Lise_c02070",
+      "package_file_hint": "Quest/CharacterEpisode/CharacterEpisode_Lise/QST_CharacterEpisode_Lise_c02070.uasset",
+      "export_name": null,
+      "export_index": null,
+      "property_path": null,
+      "exact_vanilla_reward": null,
+      "research_status": "PACKAGE_CONFIRMED_EXPORT_NOT_YET_STRUCTURALLY_CATALOGUED",
+      "implementation_note": "Codex must inspect the package and confirm the exact reward export/property before patching. Preserve all quest conditions, flags, count, notification and unrelated fields."
+    }
+  ],
+  "future": {
+    "starting_defensive_gadget": {
+      "implemented": false,
+      "source_asset": "DA_InitialInventory_Player",
+      "note": "Future work only. Reuse this same canonical gadget catalog when implemented."
+    }
+  }
+}

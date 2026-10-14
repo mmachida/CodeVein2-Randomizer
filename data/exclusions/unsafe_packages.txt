@@ -1,0 +1,8 @@
+# Code Vein 2 Randomizer - generated maps that must remain vanilla until parsing is memory-bounded.
+
+# One generated map exhausts the current UAssetAPI parser on a 31 GiB RAM host (27 GiB observed).
+# Keep vanilla until the parser can process it within a bounded memory budget.
+3TZQY8KTP83X39VD1QMH1152D.umap
+
+# This map also exceeds the current parser memory budget when loaded by itself (29.5 GiB observed).
+75Z36FWXWUVOJG361NBC6YK52.umap

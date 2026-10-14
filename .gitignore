@@ -1,0 +1,52 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.coverage
+# Local Oodle runtime stays out of source control; the release builder copies the supplied file into the release bundle.
+tools/oo2core_9_win64.dll
+# Local research assets, extraction, and generated workspaces
+workspace/*
+!workspace/.gitkeep
+# The application needs this one canonical mapping at runtime and when building a release.
+!workspace/research_assets/
+workspace/research_assets/*
+!workspace/research_assets/CV2.usmap
+# Source Extract and packaging need this pinned third-party tool.
+!workspace/tools/
+workspace/tools/*
+!workspace/tools/retoc-v0.1.5/
+workspace/tools/retoc-v0.1.5/*
+!workspace/tools/retoc-v0.1.5/retoc.exe
+!workspace/tools/retoc-v0.1.5/LICENSE
+!workspace/tools/retoc-v0.1.5/README.md
+
+**/bin/
+**/obj/
+
+# Generated release archives and local investigation scratch files
+/release/
+/release_compare/
+/Delete/
+/Cache/
+/cache/
+/output/
+/logs/
+.env
+.env.*
+*.log
+*.dmp
+
+# Game packages and generated IoStore containers must never enter the source repository.
+*.uasset
+*.umap
+*.uexp
+*.ubulk
+*.uptnl
+*.pak
+*.utoc
+*.ucas

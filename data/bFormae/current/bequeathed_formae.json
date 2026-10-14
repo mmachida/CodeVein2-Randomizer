@@ -1,0 +1,223 @@
+{
+  "schema_version": 1,
+  "catalog": "bequeathed_formae",
+  "revision": "bequeathed_formae_v2",
+  "description": "Canonical player Bequeathed Formae metadata for Code Vein 2 Randomizer. Metadata only; no copyrighted game assets are included.",
+  "expected_counts": {
+    "total": 10,
+    "BASE": 8,
+    "DLC": 2,
+    "WORLD": 1,
+    "SHOP": 7,
+    "DIRECT_QUEST": 2
+  },
+  "rules": {
+    "player_only": true,
+    "exclude_buddy_assets": true,
+    "world_reward_eligible": "All 10 canonical Bequeathed Formae are valid reward identities for future World Loot participation.",
+    "shop_reward_eligible": "All 10 canonical Bequeathed Formae are valid reward identities for future World+Shop mixed pools, subject to existing DLC/content rules.",
+    "direct_grant_behavior": "Direct quest rewards are logical reward groups. Every physical quest grant in the same logical group must receive the same randomized item.",
+    "destination_semantics": "Destination Count, bNotification, shop price, unlock conditions, actor identity, flags, SaveID and all other destination fields remain fixed.",
+    "world_shop_mix": "Future option only unless explicitly implemented in the current phase. When enabled, World and Shop reward identities may cross between pools, while destination semantics remain fixed."
+  },
+  "items": [
+    {
+      "object": "DA_Bow",
+      "game_name": "Statesman's Longbow",
+      "asset_path": "/Game/Blueprint/Article/Gadget/StandAlone/DA_Bow",
+      "content_class": "BASE",
+      "source_class": "WORLD",
+      "world_reward_eligible": true,
+      "shop_reward_eligible": true,
+      "vanilla_source": {
+        "type": "TREASURE_BOX",
+        "actor_class": "BP_it00_002_A_0_C",
+        "package_path": "/Game/Map/MainWorld/MainWorld/_Generated_/DUVH1M0DS6LXCFAJRSYJTNN29",
+        "export_index": 48,
+        "reward_index": 0,
+        "count": 1,
+        "notification": true,
+        "save_id": "C7EDBAD2-473A-A4A3-D7AA-B88ECEAE09A2",
+        "protected": false
+      }
+    },
+    {
+      "object": "DA_ExecutionSword",
+      "game_name": "Absolute Executioner",
+      "asset_path": "/Game/Blueprint/Article/Gadget/StandAlone/DA_ExecutionSword",
+      "content_class": "BASE",
+      "source_class": "DIRECT_QUEST",
+      "world_reward_eligible": true,
+      "shop_reward_eligible": true,
+      "logical_reward_group": "BEQUEATHED_EXECUTIONER",
+      "direct_grants": [
+        {
+          "quest_asset": "/Game/Quest/MainEpisode_Lyle/QST_MainEpisode_Lyle_e00382",
+          "relative_file": "Quest/MainEpisode_Lyle/QST_MainEpisode_Lyle_e00382.uasset",
+          "ui_export_number": 6,
+          "json_export_index": 5,
+          "count": 1,
+          "notification": true
+        },
+        {
+          "quest_asset": "/Game/Quest/MainEpisode_Lyle/QST_MainEpisode_Lyle_e00560",
+          "relative_file": "Quest/MainEpisode_Lyle/QST_MainEpisode_Lyle_e00560.uasset",
+          "ui_export_number": 20,
+          "json_export_index": 19,
+          "count": 1,
+          "notification": true
+        }
+      ],
+      "world_loot_destination_id": "bequeathed_executioner_lyle_quest"
+    },
+    {
+      "object": "DA_Gatling",
+      "game_name": "MK Rosenritter",
+      "asset_path": "/Game/Blueprint/Article/Gadget/StandAlone/DA_Gatling",
+      "content_class": "BASE",
+      "source_class": "SHOP",
+      "world_reward_eligible": true,
+      "shop_reward_eligible": true,
+      "vanilla_source": {
+        "family": "NORMAL",
+        "shop_row": "Shop_Jadwiga_Weapon",
+        "product_index": 22,
+        "price": 8000,
+        "stock": 1,
+        "uses_stock": true,
+        "protected": false
+      }
+    },
+    {
+      "object": "DA_IaiKatana",
+      "game_name": "Bloodreaver Blade",
+      "asset_path": "/Game/Blueprint/Article/Gadget/StandAlone/DA_IaiKatana",
+      "content_class": "BASE",
+      "source_class": "SHOP",
+      "world_reward_eligible": true,
+      "shop_reward_eligible": true,
+      "vanilla_source": {
+        "family": "NORMAL",
+        "shop_row": "Shop_Jadwiga_Weapon",
+        "product_index": 19,
+        "price": 8000,
+        "stock": 1,
+        "uses_stock": true,
+        "protected": false
+      }
+    },
+    {
+      "object": "DA_IdrisWing",
+      "game_name": "Wings of Eternity",
+      "asset_path": "/Game/Blueprint/Article/Gadget/StandAlone/DA_IdrisWing",
+      "content_class": "BASE",
+      "source_class": "SHOP",
+      "world_reward_eligible": true,
+      "shop_reward_eligible": true,
+      "vanilla_source": {
+        "family": "NORMAL",
+        "shop_row": "Shop_Jadwiga_Weapon",
+        "product_index": 24,
+        "price": 10000,
+        "stock": 1,
+        "uses_stock": true,
+        "protected": false
+      }
+    },
+    {
+      "object": "DA_LouAxe",
+      "game_name": "Battle Axe: Idris's Conceit",
+      "asset_path": "/Game/Blueprint/Article/Gadget/StandAlone/DA_LouAxe",
+      "content_class": "BASE",
+      "source_class": "DIRECT_QUEST",
+      "world_reward_eligible": true,
+      "shop_reward_eligible": true,
+      "logical_reward_group": "BEQUEATHED_LOU_AXE",
+      "direct_grants": [
+        {
+          "quest_asset": "/Game/Quest/MainEpisode_Beginning/QST_MainEpisode_Beginning_e10365",
+          "relative_file": "Quest/MainEpisode_Beginning/QST_MainEpisode_Beginning_e10365.uasset",
+          "ui_export_number": 28,
+          "json_export_index": 27,
+          "count": 1,
+          "notification": true,
+          "gameplay_tested": true,
+          "test_replacement": "DA_Bow"
+        }
+      ],
+      "world_loot_destination_id": "bequeathed_lou_axe_magmell_quest"
+    },
+    {
+      "object": "DA_Trident",
+      "game_name": "Warhammer of the Fool",
+      "asset_path": "/Game/Blueprint/Article/Gadget/StandAlone/DA_Trident",
+      "content_class": "BASE",
+      "source_class": "SHOP",
+      "world_reward_eligible": true,
+      "shop_reward_eligible": true,
+      "vanilla_source": {
+        "family": "NORMAL",
+        "shop_row": "Shop_Jadwiga_Weapon",
+        "product_index": 25,
+        "price": 8000,
+        "stock": 1,
+        "uses_stock": true,
+        "protected": false
+      }
+    },
+    {
+      "object": "DA_ValentinHand",
+      "game_name": "Manus Rapacis",
+      "asset_path": "/Game/Blueprint/Article/Gadget/StandAlone/DA_ValentinHand",
+      "content_class": "BASE",
+      "source_class": "SHOP",
+      "world_reward_eligible": true,
+      "shop_reward_eligible": true,
+      "vanilla_source": {
+        "family": "NORMAL",
+        "shop_row": "Shop_Jadwiga_Weapon",
+        "product_index": 23,
+        "price": 10000,
+        "stock": 1,
+        "uses_stock": true,
+        "protected": false
+      }
+    },
+    {
+      "object": "DA_DeadSentimentsAxe",
+      "game_name": "Edge of Days Gone",
+      "asset_path": "/Game/Blueprint/Article/Gadget/DLC/DA_DeadSentimentsAxe",
+      "content_class": "DLC",
+      "source_class": "SHOP",
+      "world_reward_eligible": true,
+      "shop_reward_eligible": true,
+      "vanilla_source": {
+        "family": "DLC",
+        "shop_row": "Shop_DLC_Normal1",
+        "product_index": 18,
+        "price": 5400,
+        "stock": 1,
+        "uses_stock": true,
+        "protected": false
+      }
+    },
+    {
+      "object": "DA_SentimentsLoadSword",
+      "game_name": "Sword of Karma: Idris",
+      "asset_path": "/Game/Blueprint/Article/Gadget/DLC/DA_SentimentsLoadSword",
+      "content_class": "DLC",
+      "source_class": "SHOP",
+      "world_reward_eligible": true,
+      "shop_reward_eligible": true,
+      "vanilla_source": {
+        "family": "DLC",
+        "shop_row": "Shop_DLC_Normal1",
+        "product_index": 17,
+        "price": 5400,
+        "stock": 1,
+        "uses_stock": true,
+        "protected": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+﻿table,rows,product_slots,unique_items,important_locked_slots,randomizable_slots_v1,row_names
+Normal,23,374,274,16,358,Shop_Jadwiga_Weapon | Shop_Jadwiga_Item | Shop_MM_Normal1 | Shop_MM_Secret1 | Shop_SC_Normal1 | Shop_SC_Normal2 | Shop_SC_Secret1 | Shop_SC_Secret2 | Shop_SC_Secret3 | Shop_VoA_Normal1 | Shop_VoA_Normal2 | Shop_VoA_Secret1 | Shop_VoA_Secret2 | Shop_FoC_Normal1 | Shop_FoC_Normal2 | Shop_FoC_Secret1 | Shop_FoC_Secret2 | Shop_FoC_Secret3 | Shop_FoC_Secret4 | Shop_PI_Normal1 | Shop_PI_Secret1 | Shop_PI_Secret2 | Shop_ToM_Secret1
+DLC,1,23,22,0,23,Shop_DLC_Normal1
+Luxury,1,35,35,0,35,Shop_MM_Special1
+Trade,12,392,161,119,273,Character.Type.Buddy.Lou | Character.Type.Buddy.Noah | Character.Type.Buddy.Iris | Character.Type.Buddy.Jadwiga | Character.Type.Buddy.Lavinia | Character.Type.Buddy.Josee | Character.Type.Buddy.Lise | Character.Type.Buddy.Valentin | Character.Type.Buddy.Lyle | Character.Type.Buddy.Craig | Character.Type.Buddy.Holly | Character.Type.Buddy.Zenon
+Trade_DLC,1,31,25,0,31,Character.Type.Buddy.Liv

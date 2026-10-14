@@ -1,0 +1,16 @@
+{
+  "schema": "cv2-extractor-catalog-v1",
+  "catalog_revision": "current",
+  "source": "IoStoreAssetExtractor/Retoc; exact two package paths only",
+  "files": {
+    "booster_recipes.json": {
+      "sha256": "455c04cbe0b0bd730a601f7346dd75a0894103821e8a49755ad9bca7f49f54f1",
+      "table_count": 2,
+      "row_count": 43
+    }
+  },
+  "table_counts": {
+    "BASE": 36,
+    "DLC": 7
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "catalog_revision": "current",
+  "classifications": {
+    "NORMAL_ONLY": 189,
+    "SHARED_BOSS_NORMAL": 12,
+    "UNRESOLVED": 32
+  },
+  "files": {
+    "enemy_drops_pool_v1.csv": {
+      "count": 233,
+      "sha256": "97a7cdfe395124b16493676709cfe9dbfa3a66bcf40b46cf73e22fdc9cec5153"
+    }
+  },
+  "schema": "cv2-enemy-drop-catalog-v1",
+  "source_sha256": {
+    "drop_row_usage_summary.csv": "835f4d0531eacef2712f02839accf92b4bcce0cea65e23564986c7431e3e75c3"
+  },
+  "table_shapes": {
+    "AFTER_ENDING": {
+      "eligible_rows": 3,
+      "eligible_slots": 27,
+      "rows": 3,
+      "slots": 27
+    },
+    "BASE": {
+      "eligible_rows": 130,
+      "eligible_slots": 762,
+      "rows": 154,
+      "slots": 877
+    },
+    "DLC": {
+      "eligible_rows": 68,
+      "eligible_slots": 522,
+      "rows": 76,
+      "slots": 594
+    }
+  },
+  "one_time_enemy_rewards": {
+    "schema": "cv2-one-time-enemy-reward-audit-v1",
+    "json_file": "one_time_enemy_rewards.json",
+    "json_sha256": "c7f718e90f61c3d5bbece19346fb40dc8b445e2053d8d0a915975d4bf2691b08",
+    "csv_file": "one_time_enemy_rewards.csv",
+    "csv_sha256": "cc0b6bb9f854ad9bc9afc84ebe7a572dbbe2d0a94d3a95f2455ec75b66dfa8f9",
+    "new_world_loot_locations": 15,
+    "existing_field_enemy_locations": 24,
+    "protected_key_or_progression_slots": 10,
+    "ordinary_article_locations_added": 15,
+    "quest_packages_scanned": 1088,
+    "enemy_defeat_graphs_parsed": 76,
+    "protected_quest_graph_rewards": 22,
+    "blood_code_slots_separate": 8,
+    "repeatable_multiplayer_slots_excluded": 6,
+    "unresolved_enemy_drop_rows": 32,
+    "dungeon_locations": 13,
+    "dlc_locations": 2,
+    "existing_harmony_moon_locations": 5,
+    "latest_validation_status": "package_validated_local_unverified",
+    "latest_validation_seed": "one-time-boss-rewards-2026-01",
+    "latest_retoc_package_count": 688,
+    "latest_spoiler_file": "packaged/Spoiler.txt"
+  }
+}

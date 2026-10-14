@@ -1,0 +1,298 @@
+{
+  "schema_version": 1,
+  "catalog_revision": "current",
+  "feature": "field_enemy_key_exclusions",
+  "match_policy": "EXACT_IDENTITY_ONLY",
+  "exclusions": [
+    {
+      "id": "QST_FieldEnemy_FoC_RiversideChurch_Key01",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "FIELD_ENEMY_OTHER",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_FoC_RiversideChurch_Key01",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_FoC_RiversideChurch_Key01.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "b3133ec8466b7ea201224737bae2370dcbe1e88dea7d9682ecb9162b3eedfbeb",
+        "files": {
+          ".uasset": "d55944b4b04dfc9fb57bf1ed45f1a92baa4f91fca1fd88a336e8b30826026920",
+          ".uexp": "b818549cfbdd60cb979ce8df863a0d6e47cbffc49bee5c3f1c2ebb3484036f99"
+        }
+      },
+      "article_path": "/Game/Blueprint/Article/Item/DA_Dungeon_FOC_RBMedium11_Key01",
+      "asset_name": "DA_Dungeon_FOC_RBMedium11_Key01",
+      "count": 1,
+      "notification": true,
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0
+      },
+      "protected": true,
+      "protection_reasons": [
+        "KEY_OR_PROGRESSION_ITEM"
+      ],
+      "randomizable": false
+    },
+    {
+      "id": "QST_FieldEnemy_FoC_RiversideChurch_Key02",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "FIELD_ENEMY_OTHER",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_FoC_RiversideChurch_Key02",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_FoC_RiversideChurch_Key02.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "be7bd1065287d3e501b75e2c4f9be8eeab0364302f41844cbe99f60723e4304f",
+        "files": {
+          ".uasset": "8f3e59f4482d398ba854258534e2b7034ba5daf7f71900d285a72e711b51e12e",
+          ".uexp": "4bfc11788f1d1f6bd14b48a6bab52eb489d30168fbfbd21ba11f4da8cb054d1a"
+        }
+      },
+      "article_path": "/Game/Blueprint/Article/Item/DA_Dungeon_FOC_RBMedium11_Key02",
+      "asset_name": "DA_Dungeon_FOC_RBMedium11_Key02",
+      "count": 1,
+      "notification": true,
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0
+      },
+      "protected": true,
+      "protection_reasons": [
+        "KEY_OR_PROGRESSION_ITEM"
+      ],
+      "randomizable": false
+    },
+    {
+      "id": "QST_FieldEnemy_PI_Prison_Key",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "FIELD_ENEMY_OTHER",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_PI_Prison_Key",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_PI_Prison_Key.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "3b4d68c125631235b90d035e6995e5fe8612e060b61d25e6669734eb2f3b16dc",
+        "files": {
+          ".uasset": "ccbd7b019eb1f6429be8e05e80f6c9b5fc95cefd285af578db8a02a751fc7e66",
+          ".uexp": "42053a0f0e9863dc91f3a956b12cba331e08d5f92f1cc3ce856a4517e2c11562"
+        }
+      },
+      "article_path": "/Game/Blueprint/Article/Item/DA_PrisonKey",
+      "asset_name": "DA_PrisonKey",
+      "count": 1,
+      "notification": true,
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0
+      },
+      "protected": true,
+      "protection_reasons": [
+        "KEY_OR_PROGRESSION_ITEM"
+      ],
+      "randomizable": false
+    },
+    {
+      "id": "QST_FieldEnemy_SC_RadioTowerKey",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "FIELD_ENEMY_OTHER",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_SC_RadioTowerKey",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_SC_RadioTowerKey.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "8c3f441bc70567aa49d71b96012762a43a49a5f99573f38e53eb2178233b2d93",
+        "files": {
+          ".uasset": "6e92cce63feae0c3e808c782d4c4bedd2ade3e6347b72074bd84057e90d2e667",
+          ".uexp": "a5ed33e393c962d04eb2c2418315827624e1c3a32f78695a16d5793209f0fd30"
+        }
+      },
+      "article_path": "/Game/Blueprint/Article/Item/DA_SC_Dungion_RadioTowerKey",
+      "asset_name": "DA_SC_Dungion_RadioTowerKey",
+      "count": 1,
+      "notification": true,
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0
+      },
+      "protected": true,
+      "protection_reasons": [
+        "KEY_OR_PROGRESSION_ITEM"
+      ],
+      "randomizable": false
+    },
+    {
+      "id": "QST_FieldEnemy_ToM_Cathedral_Key",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "TOWER_OF_MEMORY",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_ToM_Cathedral_Key",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_ToM_Cathedral_Key.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "dd0c7532ed0b7f9e8f0eb6d16e2a166101eb37884e948cc5d09bc953b47c3a35",
+        "files": {
+          ".uasset": "ad8466ee6abfa8690dc050ae136bcc96e7ee41e6d019f8ba5b93dcbef80d94dd",
+          ".uexp": "dbd1306ec3e9c73d1367e4c4f07807bd2c589f172b7bce3e7133f334072ac147"
+        }
+      },
+      "article_path": "/Game/Blueprint/Article/Item/TOM_level/DA_TOM_CathedralKey",
+      "asset_name": "DA_TOM_CathedralKey",
+      "count": 1,
+      "notification": true,
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0
+      },
+      "protected": true,
+      "protection_reasons": [
+        "KEY_OR_PROGRESSION_ITEM"
+      ],
+      "randomizable": false
+    },
+    {
+      "id": "QST_FieldEnemy_ToM_GrandStair_key01",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "TOWER_OF_MEMORY",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_ToM_GrandStair_key01",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_ToM_GrandStair_key01.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "4affec8b4382b33ac855ffd4e7e326f1f7bd7a04ef4f0495585ce593e488d9c8",
+        "files": {
+          ".uasset": "aa3e3df10b49bdea6445deb57e007366d6146d3ce7390b02b728d4dbd30a8ba8",
+          ".uexp": "74fec27c82886403793216aaf101328f208134cd2a578d3d9c0d2e528782efc9"
+        }
+      },
+      "article_path": "/Game/Blueprint/Article/Item/TOM_level/DA_TOM_GrandStaircasekey01",
+      "asset_name": "DA_TOM_GrandStaircasekey01",
+      "count": 1,
+      "notification": true,
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0
+      },
+      "protected": true,
+      "protection_reasons": [
+        "KEY_OR_PROGRESSION_ITEM"
+      ],
+      "randomizable": false
+    },
+    {
+      "id": "QST_FieldEnemy_ToM_GrandStair_key02",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "TOWER_OF_MEMORY",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_ToM_GrandStair_key02",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_ToM_GrandStair_key02.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "aa812ea495216f9270c0cda403ffdb12762ba2f61d7423cdf9417d71d567815e",
+        "files": {
+          ".uasset": "a139960cf6837fa3fd617779305ecee25161ac0193ecaa8265ffb27cf10c6a03",
+          ".uexp": "7a879bf21961b897e1db47148a19d238a867159806d68b4c655bdca233fa2615"
+        }
+      },
+      "article_path": "/Game/Blueprint/Article/Item/TOM_level/DA_TOM_GrandStaircaseKey02",
+      "asset_name": "DA_TOM_GrandStaircaseKey02",
+      "count": 1,
+      "notification": true,
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0
+      },
+      "protected": true,
+      "protection_reasons": [
+        "KEY_OR_PROGRESSION_ITEM"
+      ],
+      "randomizable": false
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_Fo_AmusemenPark",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_FO",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_Fo_AmusemenPark",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_Fo_AmusemenPark.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "6908b0362b9433b6dfb75285dba531dc242cd8ef4cb8e2124ac6168920edcc9f",
+        "files": {
+          ".uasset": "cbfc62c643b275640c44fb5d93d56b9a9a2c6b65e1d350d48a74ad1ecde6dfde",
+          ".uexp": "0900d0b26908ececd9f3e3cc3730cd260d06611fd07d2e01596eac9832a7cbc0"
+        }
+      },
+      "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_DLC_ForestKey02",
+      "asset_name": "DA_Item_Important_DLC_ForestKey02",
+      "count": 1,
+      "notification": true,
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0
+      },
+      "protected": true,
+      "protection_reasons": [
+        "KEY_OR_PROGRESSION_ITEM"
+      ],
+      "randomizable": false
+    },
+    {
+      "id": "QST_FieldEnemy_Uni_P_Item_Important_DLC_PrisonKey",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "UNI_P",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_P_Item_Important_DLC_PrisonKey",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_Uni_P_Item_Important_DLC_PrisonKey.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "ba54160f36238b5e9fe3a5118ad6773f8c17cd6ee4bd827af5579497b2367096",
+        "files": {
+          ".uasset": "fc173ecc36342aa8e9676b371f047f0d4a94ac31f6b04ab6763f9871d228dd40",
+          ".uexp": "bc80cdb40c392ca52617041c1bc9c025aa70a5347a09db9e254a1e1e25829fe9"
+        }
+      },
+      "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_DLC_PrisonKey",
+      "asset_name": "DA_Item_Important_DLC_PrisonKey",
+      "count": 1,
+      "notification": true,
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0
+      },
+      "protected": true,
+      "protection_reasons": [
+        "KEY_OR_PROGRESSION_ITEM"
+      ],
+      "randomizable": false
+    },
+    {
+      "id": "QST_FieldEnemy_VoA_PioneerCastle_Key",
+      "location_type": "FIELD_ENEMY_DIRECT_REWARD",
+      "quest_group": "FIELD_ENEMY_OTHER",
+      "virtual_package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_VoA_PioneerCastle_Key",
+      "source_file": "Quest\\FieldEnemy\\QST_FieldEnemy_VoA_PioneerCastle_Key.uasset",
+      "source_fingerprint": {
+        "combined_sha256": "1289b39d933815d1172ee86ca5415e11838f03a9965021e233dcb62f835ca619",
+        "files": {
+          ".uasset": "f60efe33dab2b7a2e94309f4cf1e6a64277eca2eb22b817887a977b135838f82",
+          ".uexp": "18c3ebe158fa62a61e96cc228f07dd75c519db32e870c0b8501e1f35263c9ce6"
+        }
+      },
+      "article_path": "/Game/Blueprint/Article/Item/DA_Item_Important_UnderfloorKey",
+      "asset_name": "DA_Item_Important_UnderfloorKey",
+      "count": 1,
+      "notification": true,
+      "patch_identity": {
+        "export_index": 7,
+        "export_name": "QSTask_GainItem_0",
+        "bulk_index": 0,
+        "reward_index": 0
+      },
+      "protected": true,
+      "protection_reasons": [
+        "KEY_OR_PROGRESSION_ITEM"
+      ],
+      "randomizable": false
+    }
+  ]
+}

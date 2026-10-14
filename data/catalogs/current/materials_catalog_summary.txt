@@ -1,0 +1,11 @@
+Code Vein 2 - Renewable Material Catalog
+=========================================
+
+Candidate maps available: 73
+Candidate maps processed: 73
+Material instances found: 763
+Unique resource classes: 39
+Resolved instances/rewards: 734
+Unique resolved reward items: 38
+Missing resource-class assets: 0
+Failures: 0

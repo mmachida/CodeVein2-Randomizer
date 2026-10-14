@@ -1,0 +1,462 @@
+{
+  "catalog_revision": "current",
+  "content_class_counts": {
+    "BASE": 56,
+    "AFTER_ENDING": 13,
+    "DLC": 10
+  },
+  "files": {
+    "blood_code_grants.json": {
+      "count": 79,
+      "sha256": "92cc7c4699d85501b31a8918eec5592d243d0ed6906ed3ae829586b28f7d3292"
+    }
+  },
+  "schema": "cv2-blood-code-catalog-v1",
+  "source_package_sha256": {
+    "/Game/Quest/DLC/QST_MainEpisode_DLC_GainBC_LouDisp": {
+      ".uasset": "6a0f0bbd16f8cb1729e7ddd80fb4c5c421c352a9d392de8d5c3e28239fd61a18",
+      ".uexp": "4fcf7fe38b1c4919dce9c99b7a46f3b3520d1a3ec0ce81bb868463f1cfc87349"
+    },
+    "/Game/Quest/DLC/QST_MainEpisode_DLC_e90070": {
+      ".uasset": "a8a5308d1b25a7d34e533d8078118a41bb8f0ff3c4e4a342d814afa88f42aa25",
+      ".uexp": "1cdaa42a91b149169cdf32f15e6c7b4c7f49f53d85a88f1e700975be9e7d4186"
+    },
+    "/Game/Quest/DLC/QST_MainEpisode_DLC_e90155": {
+      ".uasset": "a3dd79d6b6ac00b17e41fd74f7c568de50e0fd9733a40aa5c0ec5fbb10684202",
+      ".uexp": "c0448696f4f4965ffca8c79a86d7b489f95bb7df4dfdee0eabd53ee0f2905796"
+    },
+    "/Game/Quest/DLC/QST_MainEpisode_DLC_e90175": {
+      ".uasset": "a8f49b64958df99814e5479c752812b628ef50e0cef401a3232842e1d43d47f0",
+      ".uexp": "f089e3652d5885ce200916227ba9056eb1f6d066da333793fece0d27cb9043cc"
+    },
+    "/Game/Quest/DLC/QST_MainEpisode_DLC_e90195": {
+      ".uasset": "1da639aa11228c3cca32683fbdec8fb97011e8f62bd698dbdb579186403ddc2d",
+      ".uexp": "8b36c39da7957f3ef06ed635afd19ae4273dde4a693ef405eff38db12fddfcee"
+    },
+    "/Game/Quest/DLC/QST_MainEpisode_DLC_e90290": {
+      ".uasset": "214f884b3f1a2bbc37dbaf956dfd894daca73372e319c897fa72f68d11bef893",
+      ".uexp": "ea385694dfa03cf467f277e52e1db67188c4be5757f7220e864909e6d1da7ff6"
+    },
+    "/Game/Quest/DLC/QST_MainEpisode_DLC_e90360": {
+      ".uasset": "366831e1077f1498a9e96f05ca6f1b75a7a28535efd9003656dd8adac24e2e82",
+      ".uexp": "606cb7345fce02504f847c27eb990852eddd030c0250538078109089bf6980e4"
+    },
+    "/Game/Quest/Epilogue_AfterEnding/Drain_AfterEnding/QST_Drain_a51140_Lou": {
+      ".uasset": "564a4f1140fcde49c27cac4468ff92f7ba719d4fd80a7151c5a38e6babc30a56",
+      ".uexp": "08d7332dd23eda49632b17301446316592c50b1355ad3aa2f39415b0b5fcb3d3"
+    },
+    "/Game/Quest/Epilogue_AfterEnding/Drain_AfterEnding/QST_Drain_a51150_Lavinia": {
+      ".uasset": "712be5e6b707fd5c934b2d664858d89409b5a1976d15c392051ff7eb20a598c4",
+      ".uexp": "d9dd9de5536776f58099b56fe135c6a1ba2bba966699b09e0b17cc2c4f848421"
+    },
+    "/Game/Quest/Epilogue_AfterEnding/Drain_AfterEnding/QST_Drain_a51160_Noah": {
+      ".uasset": "601b5e43b474ae03c4fea183127bb0ed81ccf0c0ed402e7824d5edac9833d440",
+      ".uexp": "a9b2dd38a92872e1c2444facae152e053f4bb89a47bd2e1a29a8f4c25b015250"
+    },
+    "/Game/Quest/Epilogue_AfterEnding/Drain_AfterEnding/QST_Drain_a51170_Iris": {
+      ".uasset": "bc7f6d1c201988efc03f485b8dcadf6fcd5c6a2019a3fed0906ebff4bda63ad1",
+      ".uexp": "d5793f0cd0c14a17be7c9f3743d572d27ad0e5fbc2dc2fb640f8eaa95d41ad35"
+    },
+    "/Game/Quest/Epilogue_AfterEnding/Drain_AfterEnding/QST_Drain_a51180_Jadwiga": {
+      ".uasset": "5bb8bfb1ec16fe9d19c596add90784e025ed948bd53986795330cb95eccf043d",
+      ".uexp": "1784b74f8da4ffae74d219af8e95d167da382923229bb7c32769adb44ecc696a"
+    },
+    "/Game/Quest/Epilogue_AfterEnding/Drain_AfterEnding/QST_Drain_a51190_Valentin": {
+      ".uasset": "3e11d3e08c383c5989a3e010d0cbbc470b7b69fb9645b57d81f420a40eea8af1",
+      ".uexp": "a1637337c2d9026c836292ce1ed96f706503356fd8c1754cc3fc11c4cc59da6b"
+    },
+    "/Game/Quest/Epilogue_AfterEnding/Drain_AfterEnding/QST_Drain_a51200_Josee": {
+      ".uasset": "29e7ec77dd2644788882dca0417186ff7b3271325f93a543a677932cb9d2f8e8",
+      ".uexp": "53c5f087447641a2ef5e42a90e45d1fa0dbafc96a7b9203ff45eb1229f006338"
+    },
+    "/Game/Quest/Epilogue_AfterEnding/Drain_AfterEnding/QST_Drain_a51210_Lyle": {
+      ".uasset": "29ec89c98409a9421d957933b1f384988318d53144d7c932c31e48d9fbf11837",
+      ".uexp": "4356b6a7f85b67a7a48c770a99e2d42ed1085177e3a3c37bc21506320c62194c"
+    },
+    "/Game/Quest/Epilogue_AfterEnding/Drain_AfterEnding/QST_Drain_a51220_Holly": {
+      ".uasset": "0c941f370f9d5810d8e556f98a7656f6ede55507eda6619d2f623e89892f7a0f",
+      ".uexp": "d520fb67a38f8a050a6a0010c318e1766309d7bf701c8648c9b963d20960e083"
+    },
+    "/Game/Quest/Epilogue_AfterEnding/Drain_AfterEnding/QST_Drain_a51230_Zenon": {
+      ".uasset": "213fc0f0004efd00973f6f352ff2a4970dee3b6a56cf4430c758851198e5daa4",
+      ".uexp": "56df83e557556290b89dade9e262f16d91f8b17fc6a868767664cbde5bb99963"
+    },
+    "/Game/Quest/Epilogue_AfterEnding/Drain_AfterEnding/QST_Drain_a51240_Lise": {
+      ".uasset": "28b3ca4a59d890b7691e8aafe2a189a116997b68970908a5e44c60bdf183554e",
+      ".uexp": "4e333b9bfa7ea507c6036345694568e05bc956ea2ebeffe47090d21ad7c2adeb"
+    },
+    "/Game/Quest/Epilogue_AfterEnding/Drain_AfterEnding/QST_Drain_a51250_Craig": {
+      ".uasset": "19c424501e4709bec4c9128822984d7c0d0b04a8129014274607bad6bdf16046",
+      ".uexp": "31f8a7e1b14817c6999151ef0d55b758e0fbbd7e0ca035b8417b9abb5e2aa7ae"
+    },
+    "/Game/Quest/Epilogue_AfterEnding/Drain_AfterEnding/QST_Drain_a51260_Liv": {
+      ".uasset": "67664ef543404ece7f472c991bea6a169ead5e9211255a4526f937a9e4077fd2",
+      ".uexp": "a5e859df8d8bbdcf1e036985ae30e15534f7d9509a8e8747b90540c8eb3008fd"
+    },
+    "/Game/Quest/LastEpisode_CursedMoon/QST_LastEpisode_CursedMoon_e50010": {
+      ".uasset": "41cf59e73c588988b69bbe8cde0799fe0c31ae04df59355747641024dcc7f362",
+      ".uexp": "8074f6622c724002f457d40b943b9cddf0b78c75eda93e254b223d77ecac35f6"
+    },
+    "/Game/Quest/LastEpisode_CursedMoon/QST_LastEpisode_CursedMoon_e50290": {
+      ".uasset": "47eb0cf3d9604744a1389e18e2c149bed95100d1c4b89889d0485bc3225733f6",
+      ".uexp": "e473378f99110e02b1c3e4738c91019b6ac3335378c04dd8e662f046a96b84b9"
+    },
+    "/Game/Quest/LastEpisode_Disaster/QST_LastEpisode_Disaster_e60327": {
+      ".uasset": "aecc38195f8c64b1d1ab0c6ae271c79982b002c990534ae4081c7f60203f8a4a",
+      ".uexp": "ec6f09f1571bbe0940fd5e48329866f031e86c67d68e7fd76ff940c73a0f2d9c"
+    },
+    "/Game/Quest/LastEpisode_HarmonyMoon/QST_LastEpisode_HarmonyMoon_e60410": {
+      ".uasset": "5a69e014864d7d65e7cebd100d45314a65c38340ab3a976bffd27dcd1f5d3d15",
+      ".uexp": "0565892e5a3292d6e716d9687c777cbbc3e368e9186d68a7780efbed7edf183e"
+    },
+    "/Game/Quest/MainEpisode_Beginning/QST_MainEpisode_Beginning_e10380": {
+      ".uasset": "54723e1a79a9966b7aff8941ef5894fe934dc9d03122238f42d86de9b24725f1",
+      ".uexp": "21b82b38016c223bb22b83b072231a111ac0fa1f85bfbd8223fae08120175ec6"
+    },
+    "/Game/Quest/MainEpisode_Holly/QST_MainEpisode_Holly_e30310": {
+      ".uasset": "3d0b891b79b4b56fdc11df07245b1807de47aa5f9c422fac6cb8e2f37748d8d6",
+      ".uexp": "0554c0c0844bd25528cd1bdf0d226ae0d5fbe98ff81c6a82084a0f1a7e26d657"
+    },
+    "/Game/Quest/MainEpisode_Holly/QST_MainEpisode_Holly_e30355": {
+      ".uasset": "bf6bad9c2fbf492d72154e5aae2dcb510ce80a76712bcf6e38a327d251d01ac0",
+      ".uexp": "ef00e5949e5f9453adb4f42d3b33cf2cefc7a56b747e4275e4a5b989ef9c9f97"
+    },
+    "/Game/Quest/MainEpisode_Holly/QST_MainEpisode_Holly_e30480": {
+      ".uasset": "d538f69df23de40a4edf3aac6ad71d266223182f2657e35ec2eec9d4a9f66288",
+      ".uexp": "f45ac4e5e656c55b0f70332cd5a274e0e435202b0ba70259b5e90e18560456bd"
+    },
+    "/Game/Quest/MainEpisode_Holly/QST_MainEpisode_Holly_e30550": {
+      ".uasset": "852151a27ea759b1eb88415d997d969f94dfee7c37274d3646daad5adf4686dd",
+      ".uexp": "53d8fb22fd8755d157360a223936c90e4a5de710f352a1f71a79cca78f946db6"
+    },
+    "/Game/Quest/MainEpisode_Josee/QST_MainEpisode_Josee_e20600": {
+      ".uasset": "55a978c0bd01d5e907789d2d032848a1fbfb68c1198e9b14e3324d4c68f14851",
+      ".uexp": "b0744b8f3c7dbde259067ad30c552f98d2578ed18435fdbdb03057bf78df7057"
+    },
+    "/Game/Quest/MainEpisode_Josee/QST_MainEpisode_Josee_e20930": {
+      ".uasset": "22f0169b7478284445ab33dc1bd6a57c8064e030b1d6ff2f41f4eb40c0c29cb3",
+      ".uexp": "1b7c43bd964c33354f131d3be69c0dbfdb1e544bcf55273e78681cdf343abc01"
+    },
+    "/Game/Quest/MainEpisode_Lyle/QST_MainEpisode_Lyle_e00400": {
+      ".uasset": "ef9a9a0aea84c0c22494b8cbf77fa911044c78ddf5422d56764a49b3a06825b3",
+      ".uexp": "5a6ff38cf7cb1637021cd8178fca9b9677ae20fa244a3e3bdb18db08b71b7d3f"
+    },
+    "/Game/Quest/MainEpisode_Lyle/QST_MainEpisode_Lyle_e00500": {
+      ".uasset": "468cc993c402284619a039cf6de0d75a2643f02a9a836c4b52543d4d523194fa",
+      ".uexp": "5bb9048aefdaee07a06fd5abaea07a0c188f158e80628ce3a52731276c5258cc"
+    },
+    "/Game/Quest/MainEpisode_Lyle/QST_MainEpisode_Lyle_e00570": {
+      ".uasset": "37f52f0a209a2c9fceedc605b3aa187af36284f58cc0cbfa2e58abc1672e4b9c",
+      ".uexp": "dae282afdec238f2be5fe75e3bb8099349cc0948fecbc0442c10874589f91338"
+    },
+    "/Game/Quest/MainEpisode_Beginning/QST_MainEpisode_Beginning_e10210": {
+      ".uasset": "eb55d4da404e885961f0fabd07fd85c280686c3ddad2d51009ba8d57f6e55e7b",
+      ".uexp": "0aaad67ad2955218ece2d9a05ff324382fca445b7a5998311b59fe2f12ae4ccd"
+    },
+    "/Game/Quest/MainEpisode_Beginning/QST_MainEpisode_Beginning_e10250": {
+      ".uasset": "92b67defe1697d1fb7f53d4290f85988e02297c438c3d5f1239f4625a0e650e0",
+      ".uexp": "7bad6fbbdd5999cefdba64db44a35b87ec1bf0dae55d11025eb8dda8dba5c4a1"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Past_a20170/BP_SmallScenario_Liv_Past_a20170_02": {
+      ".uasset": "c7c7209519470832297eeae4ce7453b8ce009531942a99493376a80b8d32fe68",
+      ".uexp": "ab77ef332c8c49c9bd9343d50631f59589854d290d513d3567a35fc90a35857b"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Past_a20170/BP_SmallScenario_Liv_Past_a20170_02_Yadorigi": {
+      ".uasset": "6aa897e984c4cd6eaf2883e4a26e3a02609ae475c1c679a86d4c177d273d5820",
+      ".uexp": "ba2c8b103b55b3b5e004b816d8eb92ce2a3b08690aeee9732eabf5a9f1246250"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Past_a20180/BP_SmallScenario_Lou_Disp_Past_a20180_01": {
+      ".uasset": "84df412bc05cd9eff2aaf2bc13deca9ed8690a67d2a0c327a8547bdf32cc22b8",
+      ".uexp": "bfeac60906448ce80c728c54725526837c3566ab64cd3b87b0eb89de0cc02a49"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Past_a20180/BP_SmallScenario_Lou_Disp_Past_a20180_01_Yadorigi": {
+      ".uasset": "ae6724f817680f6efc0e40c710b21ef0d8d921560b531b562413b798eb7d6a75",
+      ".uexp": "7e5c106140de1b5cce5cee42aba3801d9b8b4799a08164ea5c3aea6fbadf17e0"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20010/BP_SmallScenario_Lou_Present_a20010_01": {
+      ".uasset": "f83ebc92d25ce91d43aa29eb64b460e7fe42af0dc88d4c13f1ecd340194c2281",
+      ".uexp": "02c61ecf82417c4b14d0762517e5fa33c4c5772cb4f8aee963dcc6fa60cdbf2d"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20010/BP_SmallScenario_Lou_Present_a20010_01_Yadorigi": {
+      ".uasset": "9d48a5ec94bef4c6e61d9751c4b2867a239c5bd26193e65e115b419f5836d629",
+      ".uexp": "c59142210c5481d9c702f96e6f32513d3f7df98b3830cd91825e1c185072713b"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20010/BP_SmallScenario_Lou_Present_a20010_02": {
+      ".uasset": "bb4a2106ac100f77c92ea0a2b1a3c7a3980a4066736069a1c3a54322ac4942d3",
+      ".uexp": "795e4070475c876e86d9c6e66fe8f8a3df4696484d5cfd8b0d9e6fe23b4d3f2f"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20010/BP_SmallScenario_Lou_Present_a20010_02_Yadorigi": {
+      ".uasset": "cd6869ddd37e86c8a73880fdaf77a67de878151dd14f5f521cb70ce4528f40bf",
+      ".uexp": "d472f10aa63a2813bbbd3abd783ff890364f4382fee53047bff895ab035d8499"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20010/BP_SmallScenario_Lou_Present_a20010_03": {
+      ".uasset": "49b74ba78e78aef77c2c7acfa28d66e159a8aa1f63c0c7f285f282519e7beb5e",
+      ".uexp": "9e4f5b0e3106809fe7482ea493bdea21ad1f947080fb1a1465abb4e3b3dc088b"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20010/BP_SmallScenario_Lou_Present_a20010_03_Yadorigi": {
+      ".uasset": "a1ff8ac0609c6ea1482767c05e42da0a02b146d4a4416bf9a8429c64fefe0eb6",
+      ".uexp": "6d903273f39c0189087d756f4b52b0c188f0e441142e0cc3af779324bdf9f5d0"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20010/BP_SmallScenario_Lou_Present_a20010_04": {
+      ".uasset": "4687ab9ba1f5d4d492726b81b0595d8d1f77f51365d3bc9ba933ee3e753171e6",
+      ".uexp": "78a5452a89c120518cedcf337b35c7410a957ed10f95984dca86b073ef69cbb9"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20010/BP_SmallScenario_Lou_Present_a20010_04_Yadorigi": {
+      ".uasset": "a3406a5307f1f2ee86ea9097cc5c65950f477b008fb6397aca9cc99dc36ad602",
+      ".uexp": "ce87dba3d57d7821f81b3487bc8ea3254eb91f063dec8b38fdb194a5fcfa5307"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20020/BP_SmallScenario_Lavinia_Present_a20020": {
+      ".uasset": "c1f85026ce4961a5158ea5a2aac1fddd5cd14c17385634a2cb7dfa72616e2a1b",
+      ".uexp": "e31f6780fe4c2a2e462f1cca8d61da811b78b0004657b7d18bd470a188f20911"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20020/BP_SmallScenario_Lavinia_Present_a20020_Yadorigi": {
+      ".uasset": "8a9a2031c864e6f518d173a961fbd1de22acf873eda79bcbadf441606e52be00",
+      ".uexp": "8e3d1380f1dab8bf8da85c21e4c3eaee828833eb9165f093187165524c46c3bb"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20020/BP_SmallScenario_Lavinia_Present_a20020_2": {
+      ".uasset": "a74fb07875e1d8c95f2718c74608715eaad0c9da4a6f03aae44b8d72e6b369e3",
+      ".uexp": "9b097fbc7e127f8bc81509b635bf392b2267328346ff3092e9f7c7ab29439f53"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20020/BP_SmallScenario_Lavinia_Present_a20020_2_Yadorigi": {
+      ".uasset": "0ccc47a17a9310a3fc6f4e7954adccce7f85f81bedf438a1f76a00b8967b4502",
+      ".uexp": "fbc190078331e5b04ec0d387acd021c249f5e8b72a103938357dc67adf14feaa"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20030/BP_SmallScenario_Noah_Present_a20030_01": {
+      ".uasset": "da252f1cfceafa84adc80bfed34fd4834e1e323e5de18406d5b09e151451208f",
+      ".uexp": "b033c1b542a6d29c9014db1830464f81ba5cb255dfd9aa03dc02b371e7372f31"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20030/BP_SmallScenario_Noah_Present_a20030_01_Yadorigi": {
+      ".uasset": "83da1d359ee896c220f659b0ee06af6584b19bc726f8750f5382c356c7cf9c61",
+      ".uexp": "9f76f4a351f6f2980a99a6fca71aa79434fbda8ee4884c82cbebb25d02bb521a"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20030/BP_SmallScenario_Noah_Present_a20030_02": {
+      ".uasset": "6d33b2efde8adcd835117cac814c5ed39cbf266f647f781380f196e61a1b5477",
+      ".uexp": "16761c717e533d2b39ba438e5ddc90ebf36aa5a9e4f9a970dd445fefc6b15af1"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20030/BP_SmallScenario_Noah_Present_a20030_02_Yadorigi": {
+      ".uasset": "2e49cc4df659615ff62c728f5c1a964007c1ef38de18c57be9247114e7700b2a",
+      ".uexp": "25d0278a535f1192b581b5acd0851528ff734aa89ea7350e8763921cb65cec7a"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20030/BP_SmallScenario_Noah_Present_a20030_03_Yadorigi": {
+      ".uasset": "9724f81a216b21c5cab0924efbbaf749fe3f07553fbd8b473e11e6a0eb225b74",
+      ".uexp": "975acadc6d2e4f87fc53e55f73f22c84d7b8f3baebef3aed317c02d031244529"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20040/BP_SmallScenario_Iris_Present_a20040_01": {
+      ".uasset": "0227e3e4b983ac9057fa9792f3b98367e5d3121aee9579da5674b5eabd72936b",
+      ".uexp": "38e3f589cf9d18ef90fb09e55343f7f585e29ce78df2ba261c5ea3a83f9b950d"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20040/BP_SmallScenario_Iris_Present_a20040_01_Yadorigi": {
+      ".uasset": "95d3d9788d71c66598ef41f1ce0f63b532bb031b2c4e65386196c715ce91d33f",
+      ".uexp": "b1aa39bccfe87b6eea97bdc3154d6bd9f8bb9cc76a76ed3defca822116b0ff6a"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20040/BP_SmallScenario_Iris_Present_a20040_04": {
+      ".uasset": "6be5722a5be36491c577cabeb718d42fce3c33e6cfa220eb129ce967b0c2a222",
+      ".uexp": "c58e8092045ca0498dd5159e32a1985898e7d2cf8ae94a359afa090c4d4616ad"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20040/BP_SmallScenario_Iris_Present_a20040_04_Yadorigi": {
+      ".uasset": "1cf25586671cba808bfbcb638d951cbce60ecd89fe25123782c7df0a2e9f52c7",
+      ".uexp": "c425dc1d86e2ef281465247415d1de6912a8e5cf48300e0f9aade0b45e43bce1"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20050/BP_SmallScenario_Jadwiga_Present_a20050_01": {
+      ".uasset": "1f74984dea66aee1616e0b9053501470650f2b7d60785db245276ead2a126fad",
+      ".uexp": "1e7b735699a560cbce2ade9b8777b0c0a3d8a5e6812511af58997fb960954352"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20050/BP_SmallScenario_Jadwiga_Present_a20050_01_Yadorigi": {
+      ".uasset": "df71a3772e9d1c29801c29c2410f4888ae37bd0c7771cad44ddc4fbb098ca103",
+      ".uexp": "33be99d30bd9aa3fefc986186646bd86c52e1cd6ad915aa97a9cc858630d2914"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20050/BP_SmallScenario_Jadwiga_Present_a20050_04": {
+      ".uasset": "24d28822999d2f92da105d8fd05b35d5ab01b3ed03b59be32e44989656b3bbde",
+      ".uexp": "9fdb102640dd0d1cb9d73b145ab157e0b42ef4fcb5272598a55edcc2d50d306a"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20050/BP_SmallScenario_Jadwiga_Present_a20050_04_Yadorigi": {
+      ".uasset": "d46c5f05ffbb40fe25db7d0f778faed6f5b09436733b096752c253119de4db93",
+      ".uexp": "dcfc2d67f1fcac269277c9bb1c8f7ffff11643d9ab4e602091ccd1b5e44a2a02"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20060/BP_SmallScenario_Valentin_Present_a20060_01": {
+      ".uasset": "7072e4ffc252b11a34ba13572ec73a192bb2c78d98b2a383df63a2d4ed91877d",
+      ".uexp": "c658b52d00763730852a96757722f28fcb803fb8243d95d5654fb225fe7ac7da"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20060/BP_SmallScenario_Valentin_Present_a20060_01_Yadorigi": {
+      ".uasset": "5161e173316a07898198cc3cfdd1fd3dbc45a58ea11e3cf4c9b07b2bf8e658c4",
+      ".uexp": "a59bc385cf9928c351230b86d68051c04cf027560739f6c99da5ffba988b1aec"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20060/BP_SmallScenario_Valentin_Present_a20060_02": {
+      ".uasset": "9408ce57fc5ede28fb649216a69174360cab9abcde199646905571e08f6a9377",
+      ".uexp": "11c2d54374ce4e17ff308296126a921404f8d3b6f8e9b0a61bd52d94937bcb2b"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20060/BP_SmallScenario_Valentin_Present_a20060_02_Yadorigi": {
+      ".uasset": "23a7eb21448d66b57d5735359f1184cffe4daf00a05eae438a6c32a6158aa5b1",
+      ".uexp": "78238a137b461d4181a818aa0dae1e948a44e6cd0afae86f3372ffcdf281f9a3"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20070/BP_SmallScenario_Josee_Present_a20070_01": {
+      ".uasset": "47b7bffed709fe9bc1d00f1b3b1ffbb4ffafa158b1015c02a95aed7eb17c8ca1",
+      ".uexp": "30dbcd16ffac481f6922e26d6e9d2b6075f17861718023717c136260f47f4c51"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20070/BP_SmallScenario_Josee_Present_a20070_01_Yadorigi": {
+      ".uasset": "df1e32acd72a79e4d19163c86b6f437d1a5c85a4da5f02328919a80991b94b64",
+      ".uexp": "e190fc0ff54d16a043efb5f96e944f7254128b4a9846b27e227825ae823fe120"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20070/BP_SmallScenario_Josee_Present_a20070_02": {
+      ".uasset": "36006fea0b67c3fe538ef207dedbab3ac62ce4a75d86f88e0b24d954d490d8a3",
+      ".uexp": "82f005ba33918f1d72a3402260c92b3c4320a42383c463e2dc60e26d1fe921fe"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20070/BP_SmallScenario_Josee_Present_a20070_02_Yadorigi": {
+      ".uasset": "1be48d3a8f8de9d91e5a1da6a3408680ae594c4cbcfecd146e08354bcfb5d024",
+      ".uexp": "2b981d040b1ba6da354573f7a668961eb5592fefb5464a80fadde6daf91bd585"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20070/BP_SmallScenario_Josee_Present_a20070_03_Yadorigi": {
+      ".uasset": "fb177b4857e35f6a6124d059e20e91ff184280a64742cd8181a56e8173057a00",
+      ".uexp": "e107ede8ee4cfa8d049f22e57220c58f787a6eb310c1438e85620b3338a52c4a"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20080/BP_SmallScenario_Josee_Present_a20080_Yadorigi": {
+      ".uasset": "c2f7bb9606444fdeb07a49af0de0e124fcbfa35ad01a56e9f016e59e529fe3ea",
+      ".uexp": "49a957ec324df40bbd915bb3d14484cdf3759f0c3799388d77f7f5c58df4e144"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20090/BP_SmallScenario_Lyle_Present_a20090_01": {
+      ".uasset": "1d49769fc2fc2ae970e27fa007d589c76601cf420ba084e7d1a20d73b460449f",
+      ".uexp": "8f11b027926f3b62377fecd9caa2a82d6cccbdb4807ca24abe906b58e380e93a"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20090/BP_SmallScenario_Lyle_Present_a20090_01_Yadorigi": {
+      ".uasset": "9ff1b67fdd6907810a9c1002fd287770c21e23521f4a99b945e01ea98ff1e086",
+      ".uexp": "fa3f3c3cf86a26ba5b6225b34d8fa4d3c7f758f5e4b8eaa81909a7c7ffbbbbf8"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20090/BP_SmallScenario_Lyle_Present_a20090_02_Yadorigi": {
+      ".uasset": "14830292a1d7d479f83c7cd9bf733c2fbcce4b04b2cd4bf23a6dd1f857245c87",
+      ".uexp": "36fb2a133ca8f5ab5c2ab49dcf4773a23eaeb5c0be845b7e816a289412776b85"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20100/BP_SmallScenario_Lyle_Present_a20100_Yadorigi": {
+      ".uasset": "f482899b5d26ee97b116bc879dbd7d4d069ac11e0a9c9ca04d9cb3fa0fa47e0f",
+      ".uexp": "087729984931e94366b1122e428b30e7da10a1aa259f9c3caf088eeefcb9f98d"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20110/BP_SmallScenario_Holly_Present_a20110_01": {
+      ".uasset": "adacaab5b8185e6c72c59a9b440a20208947329d55b56d59ec5f9f6f00c9471f",
+      ".uexp": "faea79365797bd5e54147849fc31188b3277e891b3b76f8f4d16bfafee40b257"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20110/BP_SmallScenario_Holly_Present_a20110_01_Yadorigi": {
+      ".uasset": "568ce65c68d0d081113e22b12afa707a175abc39c20e3f1065a8df7abe4659bf",
+      ".uexp": "a188ec658b531a7509e20cee0c9946d0c8af55bf0216bfc8b70efd1828c9ddeb"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20110/BP_SmallScenario_Holly_Present_a20110_03_Yadorigi": {
+      ".uasset": "8c8fb03f07161eea5d063eca65703d8ac451491f141a112541b8abadd0b7f779",
+      ".uexp": "6172d4eecb0dabef6c6af9b1b753969d9fcbfb2cf4fa1f0639bcffe025830446"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20120/BP_SmallScenario_Holly_Present_a20120_Yadorigi": {
+      ".uasset": "c9d7bd5b068eaec11e4fb5befd6bf88cdbf7de58e7da38ce8c76b23bdffe901a",
+      ".uexp": "08f84ca57463e8150c94b7ced57cbcffcb3aa0673c375382243c024d42c2c41f"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20130/BP_SmallScenario_Zenon_Present_a20130_Yadorigi": {
+      ".uasset": "166989c06327627151a42c1af970e320573c2dbfd3fd5cc497aa4495942b58d2",
+      ".uexp": "37fdb0f92a1b4d885a4028a244d1b45e7710b63cff668924ea2cb70c69d3f53d"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20140/BP_SmallScenario_Lise_Present_a20140": {
+      ".uasset": "e652dd9f9c6f17ea4a0a13d0ccf0c036dd012909c3d8c135f5f09bf960919c41",
+      ".uexp": "a7df30e5da6b9a795ebd45810c19ed4f7b4619be76e476e56bee99e8b7384347"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20140/BP_SmallScenario_Lise_Present_a20140_Yadorigi": {
+      ".uasset": "6a6a3896fc54333e6f9945b3f175cbe488dc600ebd89e76b5a235dd381a74ece",
+      ".uexp": "98444d625449ee13210e6b24282e4dd7e659b0bc5c868ada3c6f946e268ba48f"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20150/BP_SmallScenario_Craig_Present_a20150_03": {
+      ".uasset": "94248b24e84bb6cdeb297503f1c65589347639ba8bb405386ecb6518fcdf014d",
+      ".uexp": "01daf126ee36911867184c8fb631994224dc73deb1423b0b64cda8c4b2b3e845"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20150/BP_SmallScenario_Craig_Present_a20150_03_Yadorigi": {
+      ".uasset": "80c4e483cfc8f9b8862eebc4683ecc9bd7f977687c703332d6e3f605fc9890f6",
+      ".uexp": "82d3483c6fe651541a4bb0a94aa24a59c190b5d867a44044441cbf7b91a70f37"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/BloodCode/Present_a20160/BP_SmallScenario_Lycoris_Present_a20160_Yadorigi": {
+      ".uasset": "f6193eb7a7c18a703b418422c793a953904be3b01f7f425b697afe1c7e30cac8",
+      ".uexp": "039c4e8440db65f1ac32cc75c10efc77c56ca75d57b2fcc61cc13c7faf41fbfd"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/Base/BP_SmallScenarioBase": {
+      ".uasset": "e37bb2a09b5c92f5df35771f89429191a68d855c4f27d3d8f984553e13dcc95d",
+      ".uexp": "372f778dac17ddc0942738453da5388eb62a9baefdc5a41545334661360f5d4d"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/Base/BP_SmallScenarioGainBloodCodeBase": {
+      ".uasset": "95682f01a3b6185a5fe35c939148bc4ca7c2d197cc71bed0b41429ed6c2881ab",
+      ".uexp": "a2c04158f9ede95d54e84aaf7ada066b289697a512c7216b5b290a37ead23223"
+    },
+    "/Game/Blueprint/Characters/NPC/Buddy/BuddyCharacters/craig/DA_BuddySettings_Craig": {
+      ".uasset": "1fe548f7f2c1f77c540eaae13582af1d54f1c33a25bced8b0e45db522156f4e8",
+      ".uexp": "906eff359866d7a7008f84a8becf9ec017f2cb5c7137cb61c8e452701b92efed"
+    },
+    "/Game/Blueprint/Characters/NPC/Buddy/BuddyCharacters/holly/DA_BuddySettings_Holly": {
+      ".uasset": "5bf4a63b01fdfdcf2c7e8c194719a9d9cc9958dc7712696ea39d62cfd3b2696e",
+      ".uexp": "c3654a583ff62d66289a3f03af799d11618109498ef36d390f2220b6de2a2356"
+    },
+    "/Game/Blueprint/Characters/NPC/Buddy/BuddyCharacters/Iris/DA_BuddySettings_Iris": {
+      ".uasset": "2427e6657f757db378118b38e3fc6b412b23ed5b58b855800e3cc99e04aec503",
+      ".uexp": "d35e8eff279b9cf0cb2bfa9503c5577d170972033c80156897526b2b781b6a07"
+    },
+    "/Game/Blueprint/Characters/NPC/Buddy/BuddyCharacters/jadwiga/DA_BuddySettings_Jadwiga": {
+      ".uasset": "6c13165ed59aa940819c17d53ad1899b81f23d8c5ff180a5d6eb90600b5ef76d",
+      ".uexp": "671fcfa841765c7eee6b1bd1074a240a336cbfd7aa2b35470ffa78ae69a2f5b5"
+    },
+    "/Game/Blueprint/Characters/NPC/Buddy/BuddyCharacters/Josee/DA_BuddySettings_Josee": {
+      ".uasset": "a88f4bf3b03dba1fd4077206c6ab1e3de38cb8276fc6b90e068c7ecb903231c8",
+      ".uexp": "59e6a6ff59d91e627fe29108c5a60196964c3bcd63b764f9da9b12bad3b72092"
+    },
+    "/Game/Blueprint/Characters/NPC/Buddy/BuddyCharacters/Lavinia/DA_BuddySettings_Lavinia": {
+      ".uasset": "ae84ccf53eb0a3a4316c5ee366c3fa9d960285a1d27a1ece8d1439ea561d1602",
+      ".uexp": "f02ed33c1c0bb626f2cb6a9e7d717a9445d3d399680be151e108f2f5c55e5ff7"
+    },
+    "/Game/Blueprint/Characters/NPC/Buddy/BuddyCharacters/lise/DA_BuddySettings_Lise": {
+      ".uasset": "d9d04026af16c70f5c825620f0dc4861cc3107a9106fd2902b4307ea16d9b2f1",
+      ".uexp": "a0e8158a136559c86fb93380649f35093efa17dea392768501609e90732d594f"
+    },
+    "/Game/Blueprint/Characters/NPC/Buddy/BuddyCharacters/lycoris/DA_BuddySettings_Lycoris": {
+      ".uasset": "52d7449e534547e647e16c21631c46848e2336361a396e4c87cc8cd309690cf0",
+      ".uexp": "5fd59461d33d5d4f8f633501110f0f16dcc277e1c5fa36a562b4ae22a64b7eb0"
+    },
+    "/Game/Blueprint/Characters/NPC/Buddy/BuddyCharacters/Lyle/DA_BuddySettings_Lyle": {
+      ".uasset": "6605600f578df15dd76e7aa29fa30c502ae2bd3c41fbc90dbd46ca7f4728ad77",
+      ".uexp": "1bde6c4d7eb2065b4a14cb4f8c0781b344c07225c0b4fe846ade6589005d0a82"
+    },
+    "/Game/Blueprint/Characters/NPC/Buddy/BuddyCharacters/valentin/DA_BuddySettings_Valentin": {
+      ".uasset": "0f793645ddc6eb4e3d0659289dc97d77fec086bc10d311cada6433f0b71a3733",
+      ".uexp": "639f7a0fc2df96f434f2f4598bf7c3aea48164a8f19f68fddaf49dbc1b3e1865"
+    },
+    "/Game/Blueprint/Characters/NPC/Buddy/BuddyCharacters/Zenon/DA_BuddySettings_Zenon": {
+      ".uasset": "4cb9dd490b2feb734eacaa56403a9f8a74f1ddec056e745582dbcecda2b172b2",
+      ".uexp": "701d6295cb2346f9608cc2a1fd02d217332a56addde3f22a36217e9779a975d2"
+    },
+    "/Game/Blueprint/Characters/NPC/Buddy/BuddyCharacters/liv/DA_BuddySettings_Liv": {
+      ".uasset": "18a3c057f707673ce704427bfe3b7bbe7886731058f546e97f8403abb380962d",
+      ".uexp": "3ae22027e45c97f3a00b46e369bf408e4f22876cac596b71f02989b584a2d1fb"
+    },
+    "/Game/Blueprint/Characters/NPC/Buddy/BuddyCharacters/noah/DA_BuddySettings_Noah": {
+      ".uasset": "56289d9d74c5f05bb3b0419294a6716c09e4127bba9b620f586fece47cf734f4",
+      ".uexp": "27c63585cf3dbfaed1cf9a5a43f3ad26f2998c1d3c07de9e86ad2bbbac130796"
+    },
+    "/Game/Blueprint/Characters/NPC/Buddy/BuddyCharacters/GuardianHert/DA_BuddySettings_GuardianHert": {
+      ".uasset": "ac222975e233cb47a586353539d974c80dc0259a2058a55a124ad731d35ca3ff",
+      ".uexp": "715c973b7e82ce4f31c439d6046cdd08f19661952791e279c8103175318c7bb6"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/CharacterEpisode/CharacterEpisodeLavinia/Present_c08010/BP_SmallScenario_Lavinia_Present_c08010_B": {
+      ".uasset": "8efa9e44065eb82a63ff9c56b3c4dac8087126902795283742640830d3e2b1c0",
+      ".uexp": "8bc689bb7d3cec416567cfbcd75e582df93220b1e6e5ce79a58d9d04ce00b843"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/CharacterEpisode/CharacterEpisodeLavinia/Present_c08030/BP_SmallScenario_Lavinia_Present_c08030_B": {
+      ".uasset": "d8e2f627ddb0b3fd64711fb15b2cf5aff5634c6cf5f79b959abb629165a31613",
+      ".uexp": "73e67f2e4193e0d7c25a22d0def1022ae584e74d399a809c726d48b880ef5985"
+    },
+    "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/Base/BP_SmallScenarioGainBoosterBase": {
+      ".uasset": "c551e6314d74c4a299eda6381d7e25dbf19ce34795b53a2d764736408cfd4067",
+      ".uexp": "3d0760653015d1c68e1a379008d555b3674dc122ad52803cf9c10d7a78c3fabc"
+    }
+  },
+  "source_scan": {
+    "failures": 0,
+    "grant_count": 35,
+    "parsed_gainitem_exports": 228,
+    "quest_assets": 1088,
+    "logical_reference_count": 2,
+    "companion_logical_events": 31,
+    "companion_physical_packages": 55,
+    "buddy_settings_exports_inspected": 16,
+    "buddy_settings_unlock_locations_added": 0,
+    "installed_blood_code_articles": 81,
+    "proficiency_only_locations_converted_to_buddy_owners": 0
+  }
+}

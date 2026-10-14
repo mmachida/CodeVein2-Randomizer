@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "script_revision": 2,
+  "pickup_types_sha256": "c70c7a9760331ba49ef962f26a3ff12b9aaaced77746ad034ee2bd5564c34843",
+  "candidate_maps_available": 73,
+  "candidate_maps_processed": 73,
+  "material_instances": 763,
+  "unique_resource_classes": 39,
+  "resolved_instances": 734,
+  "unique_resolved_items": 38,
+  "missing_class_assets": 0,
+  "failures": 0
+}

@@ -1,0 +1,1784 @@
+{
+  "schema": "cv2-one-time-enemy-reward-audit-v1",
+  "catalog_revision": "current",
+  "semantics": {
+    "pool": "World Loot",
+    "enemy_drop_separation": "RESPAWNING/farmable enemy DropItem rows remain in Enemy Drops; one-time quest-completion Article grants are World Loot locations.",
+    "classification": "Per reward slot, using serialized enemy-defeat quest completion and persistent story-flag signals; no name-substring rule."
+  },
+  "audit_scope": {
+    "installed_iostore_packages": 216218,
+    "dungeon_quest_packages": 13,
+    "associated_boss_data_layers_extracted": 13,
+    "field_enemy_quest_packages": 41,
+    "field_enemy_existing_eligible_locations": 24,
+    "field_enemy_existing_protected_key_or_progression_locations": 10,
+    "field_enemy_quests_without_article_reward": 7,
+    "main_episode_boss_quest_packages_inspected": 1,
+    "main_episode_boss_quests_without_article_reward": 1,
+    "enemy_drop_table_rows": {
+      "normal_only": 189,
+      "shared_boss_normal": 12,
+      "unresolved": 32
+    },
+    "dungeon_ordinary_article_reward_slots_added": 13,
+    "total_one_time_enemy_where_locations_after_integration": 44,
+    "quest_packages_scanned": 1088,
+    "quest_article_grant_packages": 193,
+    "quest_article_grant_slots": 244,
+    "enemy_defeat_candidate_graph_packages": 76,
+    "enemy_defeat_graphs_parsed": 76,
+    "reachable_gainitem_task_exports": 54,
+    "reachable_gainitem_reward_slots_including_null_article": 59,
+    "reachable_concrete_article_reward_slots": 56,
+    "enemy_defeat_graph_classification_counts": {
+      "already_world_loot_locations": 18,
+      "key_quest_or_progression_excluded": 22,
+      "blood_code_routed_to_blood_code_pool": 8,
+      "repeatable_multiplayer_rewards_excluded": 6,
+      "new_dlc_ordinary_article_slots_added": 2,
+      "gainitem_tasks_without_concrete_article": 3
+    },
+    "ordinary_enemy_reward_locations_added": 15,
+    "dlc_ordinary_article_reward_slots_added": 2,
+    "harmony_moon_enemy_defeat_rewards_already_in_world_loot": 5,
+    "unresolved_generic_enemy_drop_rows_left_unchanged": 32,
+    "audit_boundary": "All 1,088 installed Quest packages were scanned for Article GainItem tasks. The 76 packages with EnemyDefeat event graphs connected to GainItem nodes were parsed and classified. The scan does not prove respawn semantics for the 32 shared/unresolved generic DropItem rows or unrelated GainItem tasks without a reachable EnemyDefeat path."
+  },
+  "enemy_drop_separation": {
+    "adrenaline_article_in_standard_enemy_drop_tables": false,
+    "dungeon_articles_duplicated_in_standard_enemy_drop_catalog": false,
+    "shared_boss_normal_rows_moved_to_world_loot": false,
+    "unresolved_rows_moved_to_world_loot": false
+  },
+  "protected_existing_field_enemy_rewards": [
+    {
+      "location_id": "QST_FieldEnemy_FoC_RiversideChurch_Key01",
+      "article_path": "/Game/Blueprint/Article/Item/DA_Dungeon_FOC_RBMedium11_Key01",
+      "reason": "KEY_OR_PROGRESSION_ITEM"
+    },
+    {
+      "location_id": "QST_FieldEnemy_FoC_RiversideChurch_Key02",
+      "article_path": "/Game/Blueprint/Article/Item/DA_Dungeon_FOC_RBMedium11_Key02",
+      "reason": "KEY_OR_PROGRESSION_ITEM"
+    },
+    {
+      "location_id": "QST_FieldEnemy_PI_Prison_Key",
+      "article_path": "/Game/Blueprint/Article/Item/DA_PrisonKey",
+      "reason": "KEY_OR_PROGRESSION_ITEM"
+    },
+    {
+      "location_id": "QST_FieldEnemy_SC_RadioTowerKey",
+      "article_path": "/Game/Blueprint/Article/Item/DA_SC_Dungion_RadioTowerKey",
+      "reason": "KEY_OR_PROGRESSION_ITEM"
+    },
+    {
+      "location_id": "QST_FieldEnemy_ToM_Cathedral_Key",
+      "article_path": "/Game/Blueprint/Article/Item/TOM_level/DA_TOM_CathedralKey",
+      "reason": "KEY_OR_PROGRESSION_ITEM"
+    },
+    {
+      "location_id": "QST_FieldEnemy_ToM_GrandStair_key01",
+      "article_path": "/Game/Blueprint/Article/Item/TOM_level/DA_TOM_GrandStaircasekey01",
+      "reason": "KEY_OR_PROGRESSION_ITEM"
+    },
+    {
+      "location_id": "QST_FieldEnemy_ToM_GrandStair_key02",
+      "article_path": "/Game/Blueprint/Article/Item/TOM_level/DA_TOM_GrandStaircaseKey02",
+      "reason": "KEY_OR_PROGRESSION_ITEM"
+    },
+    {
+      "location_id": "QST_FieldEnemy_Uni_Fo_AmusemenPark",
+      "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_DLC_ForestKey02",
+      "reason": "KEY_OR_PROGRESSION_ITEM"
+    },
+    {
+      "location_id": "QST_FieldEnemy_Uni_P_Item_Important_DLC_PrisonKey",
+      "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_DLC_PrisonKey",
+      "reason": "KEY_OR_PROGRESSION_ITEM"
+    },
+    {
+      "location_id": "QST_FieldEnemy_VoA_PioneerCastle_Key",
+      "article_path": "/Game/Blueprint/Article/Item/DA_Item_Important_UnderfloorKey",
+      "reason": "KEY_OR_PROGRESSION_ITEM"
+    }
+  ],
+  "field_enemy_quests_without_article_reward": [
+    {
+      "package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_ToM_Cathedral",
+      "reason": "UAssetAPI inspection found no Article QSTask_GainItem reward."
+    },
+    {
+      "package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_Fo_Courtyard01",
+      "reason": "UAssetAPI inspection found no Article QSTask_GainItem reward."
+    },
+    {
+      "package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_Fo_Courtyard02",
+      "reason": "UAssetAPI inspection found no Article QSTask_GainItem reward."
+    },
+    {
+      "package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_Fo_Courtyard03",
+      "reason": "UAssetAPI inspection found no Article QSTask_GainItem reward."
+    },
+    {
+      "package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_Fo_Courtyard04",
+      "reason": "UAssetAPI inspection found no Article QSTask_GainItem reward."
+    },
+    {
+      "package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_VoA_RiverPortObservationPost_Enemy01",
+      "reason": "UAssetAPI inspection found no Article QSTask_GainItem reward."
+    },
+    {
+      "package": "/Game/Quest/FieldEnemy/QST_FieldEnemy_VoA_RiverPortObservationPost_Enemy02",
+      "reason": "UAssetAPI inspection found no Article QSTask_GainItem reward."
+    }
+  ],
+  "main_episode_boss_quest_check": {
+    "package": "/Game/Quest/MainEpisode_Josee/QST_MainEpisode_Josee_e20100_Boss",
+    "result": "no Article GainItem reward found; no World Loot slot added."
+  },
+  "reward_slots": [
+    {
+      "location_id": "one_time_enemy_dlc_e90153_female_knight",
+      "enemy_id": "BP_BA_01_1401ABDWFemaleKnight_SldFist_Elite_N02_Uni_C_01_C",
+      "enemy_name": null,
+      "enemy_class": [
+        "BP_BA_01_1401ABDWFemaleKnight_SldFist_Elite_N02_Uni_C_01_C"
+      ],
+      "encounter_id": "main-episode-quest:/Game/Quest/DLC/QST_MainEpisode_DLC_e90153",
+      "map": null,
+      "map_data_layer": null,
+      "dungeon_area": null,
+      "respawn_classification": "ONE_TIME_ENEMY",
+      "respawn_evidence": {
+        "quest_package": "/Game/Quest/DLC/QST_MainEpisode_DLC_e90153",
+        "enemy_actor_name": "BP_BA_01_1401ABDWFemaleKnight_SldFist_Elite_N02_Uni_C_01_C_UAID_A8A159F1B78F51A402_1598030168",
+        "enemy_defeat_event": "QSEventTrigger_EnemyDefeat_0",
+        "reachable_graph_path": [
+          "QSNode_Event_6",
+          "QSNode_Slot_23",
+          "QSTask_GainItem_0"
+        ],
+        "quest_task_export": "QSTask_GainItem_0",
+        "quest_task_export_index": 25,
+        "completion_graph_signals": [
+          "QSEventTrigger_EnemyDefeat",
+          "QSNode_Completed",
+          "QSTask_SetStoryFlagByBoolean",
+          "QSTask_GainItem"
+        ],
+        "basis": "The exact placed actor is named by QSEventTrigger_EnemyDefeat_0; its event node reaches QSNode_Slot_23 containing QSTask_GainItem_0. The quest has a completion/story-flag branch. This is a direct one-time story encounter grant, not a generic farmable DropItem table row."
+      },
+      "reward_source_type": "QUEST_COMPLETION_GRANT",
+      "reward_owner": "/Game/Quest/DLC/QST_MainEpisode_DLC_e90153",
+      "package": "/Game/Quest/DLC/QST_MainEpisode_DLC_e90153",
+      "export_index": 25,
+      "export_task": "QSTask_GainItem_0",
+      "bulk_index": 0,
+      "reward_index": 0,
+      "literal_fname": {
+        "package_name": {
+          "value": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Support/DA_GB_UNQ09_IchorRevoveryOnJustGuard",
+          "number": 0
+        },
+        "asset_name": {
+          "value": "DA_GB_UNQ09_IchorRevoveryOnJustGuard",
+          "number": 0
+        },
+        "sub_path_string": ""
+      },
+      "vanilla_article": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/Support/DA_GB_UNQ09_IchorRevoveryOnJustGuard",
+      "count": 1,
+      "drop_chance": null,
+      "guaranteed_semantics": "Count=1 is granted by the enemy-defeat quest task; no drop-chance field exists in this Article grant.",
+      "key_item": false,
+      "quest_item": false,
+      "protection_reason": null,
+      "eligible_world_source": true,
+      "eligible_world_destination": true,
+      "planner_present": true,
+      "assigned_article": "/Game/Blueprint/Article/Item/Recover/DA_Item_IchorRecover_1",
+      "patched_by_world_loot_direct_quest_serializer": true,
+      "source_fingerprint": {
+        "uasset_sha256": "5957b45c3013a84c3b58bc356002afb6959d933ae8d2ac549530052d042fc4c9",
+        "uexp_sha256": "1f0f2fae4c96f651680a45bbdba8f33d869cb9f4c5ebc7a5676a5f1c2de8fb4f"
+      },
+      "source_file": "Quest/DLC/QST_MainEpisode_DLC_e90153.uasset",
+      "articles_count": 1,
+      "texture_asset": null,
+      "patched": true,
+      "reopened_valid": true,
+      "spoiler_entry": "One-Time Enemy Reward - DLC e90153: ABD Female Knight (/Game/Quest/DLC/QST_MainEpisode_DLC_e90153#25 QSTask_GainItem_0): DA_GB_UNQ09_IchorRevoveryOnJustGuard x1 -> DA_Item_IchorRecover_1 x1"
+    },
+    {
+      "location_id": "one_time_enemy_dlc_e90193_zenon_servant",
+      "enemy_id": "BP_01_0701ZenonServant_Hlbd_Boss_N01_Uni_P_01_Spawner_C",
+      "enemy_name": null,
+      "enemy_class": [
+        "BP_01_0701ZenonServant_Hlbd_Boss_N01_Uni_P_01_Spawner_C"
+      ],
+      "encounter_id": "main-episode-quest:/Game/Quest/DLC/QST_MainEpisode_DLC_e90193",
+      "map": null,
+      "map_data_layer": null,
+      "dungeon_area": null,
+      "respawn_classification": "ONE_TIME_ENEMY",
+      "respawn_evidence": {
+        "quest_package": "/Game/Quest/DLC/QST_MainEpisode_DLC_e90193",
+        "enemy_actor_name": "BP_01_0701ZenonServant_Hlbd_Boss_N01_Uni_P_01_Spawner_C_UAID_A8A159F1B78F1BC302_1724273237",
+        "enemy_defeat_event": "QSEventTrigger_EnemyDefeat_0",
+        "reachable_graph_path": [
+          "QSNode_Event_6",
+          "QSNode_Slot_23",
+          "QSTask_GainItem_0"
+        ],
+        "quest_task_export": "QSTask_GainItem_0",
+        "quest_task_export_index": 25,
+        "completion_graph_signals": [
+          "QSEventTrigger_EnemyDefeat",
+          "QSNode_Completed",
+          "QSTask_SetStoryFlagByBoolean",
+          "QSTask_GainItem"
+        ],
+        "basis": "The exact placed actor is named by QSEventTrigger_EnemyDefeat_0; its event node reaches QSNode_Slot_23 containing QSTask_GainItem_0. The quest has a completion/story-flag branch. This is a direct one-time story encounter grant, not a generic farmable DropItem table row."
+      },
+      "reward_source_type": "QUEST_COMPLETION_GRANT",
+      "reward_owner": "/Game/Quest/DLC/QST_MainEpisode_DLC_e90193",
+      "package": "/Game/Quest/DLC/QST_MainEpisode_DLC_e90193",
+      "export_index": 25,
+      "export_task": "QSTask_GainItem_0",
+      "bulk_index": 0,
+      "reward_index": 0,
+      "literal_fname": {
+        "package_name": {
+          "value": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/DA_SpinFireSlam",
+          "number": 0
+        },
+        "asset_name": {
+          "value": "DA_SpinFireSlam",
+          "number": 0
+        },
+        "sub_path_string": ""
+      },
+      "vanilla_article": "/Game/Blueprint/Article/Gadget/DLC/WeaponAddOn/DA_SpinFireSlam",
+      "count": 1,
+      "drop_chance": null,
+      "guaranteed_semantics": "Count=1 is granted by the enemy-defeat quest task; no drop-chance field exists in this Article grant.",
+      "key_item": false,
+      "quest_item": false,
+      "protection_reason": null,
+      "eligible_world_source": true,
+      "eligible_world_destination": true,
+      "planner_present": true,
+      "assigned_article": "/Game/Blueprint/Article/Item/EnhancementMaterial/DA_Item_MatLevelUpJailA_03",
+      "patched_by_world_loot_direct_quest_serializer": true,
+      "source_fingerprint": {
+        "uasset_sha256": "a481c0b96b7c807bea369e966389a5141993890c768aa0217820d4aca49f4f11",
+        "uexp_sha256": "dedb1b6bc17c560f117185dfbba452aaf1d97a7573efa0f1fe21e472879ec226"
+      },
+      "source_file": "Quest/DLC/QST_MainEpisode_DLC_e90193.uasset",
+      "articles_count": 1,
+      "texture_asset": null,
+      "patched": true,
+      "reopened_valid": true,
+      "spoiler_entry": "One-Time Enemy Reward - DLC e90193: Zenon Servant (/Game/Quest/DLC/QST_MainEpisode_DLC_e90193#25 QSTask_GainItem_0): DA_SpinFireSlam x1 -> DA_Item_MatLevelUpJailA_03 x1"
+    },
+    {
+      "location_id": "one_time_enemy_foc_mountainsidecave",
+      "enemy_id": "BP_BA_01_0101GiantNoLegs_Fist_Elite_N01_FoC_01_Boss_C",
+      "enemy_name": null,
+      "enemy_class": [
+        "BP_BA_01_0101GiantNoLegs_Fist_Elite_N01_FoC_01_Boss_C"
+      ],
+      "encounter_id": "dungeon-quest:/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_MountainsideCave_Boss",
+      "map": null,
+      "map_data_layer": "/Game/Environment/DataLayer/Quest/Dungeon/FoC_SubDungeon/DL_QuestDungeon_FoC_MountainsideCave_Boss",
+      "dungeon_area": "FoC_MountainsideCave",
+      "respawn_classification": "ONE_TIME_ENEMY",
+      "respawn_evidence": {
+        "quest_package": "/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_MountainsideCave_Boss",
+        "quest_task_export": "QSTask_GainItem_0",
+        "quest_task_export_index": 28,
+        "completion_graph_signals": [
+          "QSEventTrigger_EnemyDefeat",
+          "QSNode_Completed",
+          "QSTask_SetStoryFlagByBoolean",
+          "QSTask_GainItem"
+        ],
+        "data_layer_package": "/Game/Environment/DataLayer/Quest/Dungeon/FoC_SubDungeon/DL_QuestDungeon_FoC_MountainsideCave_Boss",
+        "basis": "The Article is granted by the enemy-defeat quest completion graph and persistent story-flag task, not by a repeatable enemy drop-table row."
+      },
+      "reward_source_type": "QUEST_COMPLETION_GRANT",
+      "reward_owner": "/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_MountainsideCave_Boss",
+      "package": "/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_MountainsideCave_Boss",
+      "export_index": 28,
+      "export_task": "QSTask_GainItem_0",
+      "bulk_index": 0,
+      "reward_index": 0,
+      "literal_fname": {
+        "package_name": {
+          "value": "/Game/Blueprint/Article/Gadget/WeaponAddOn/WeaponAction/DA_ChargeCrash_V2",
+          "number": 0
+        },
+        "asset_name": {
+          "value": "DA_ChargeCrash_V2",
+          "number": 0
+        },
+        "sub_path_string": ""
+      },
+      "vanilla_article": "/Game/Blueprint/Article/Gadget/WeaponAddOn/WeaponAction/DA_ChargeCrash_V2",
+      "count": 1,
+      "drop_chance": null,
+      "guaranteed_semantics": "Count=1 granted by the completed quest task; no chance field exists in this Article grant.",
+      "key_item": false,
+      "quest_item": false,
+      "protection_reason": null,
+      "eligible_world_source": true,
+      "eligible_world_destination": true,
+      "planner_present": true,
+      "assigned_article": "/Game/Blueprint/Article/Item/Support/DA_Item_ResUpCapture_1",
+      "patched_by_world_loot_direct_quest_serializer": true,
+      "source_fingerprint": {
+        "uasset_sha256": "cad0a0ee94e21878ea5ed2c4c0834b76f466699553eb9c16c2071ccef4f30444",
+        "uexp_sha256": "f5130480349a84d8d444a9858231a67f7c27baba61fb3ae29f3e52577f5e2f46"
+      },
+      "source_file": "Quest/Dungeon/FOC/QST_QuestDungeon_FoC_MountainsideCave_Boss.uasset",
+      "articles_count": 1,
+      "texture_asset": null,
+      "patched": true,
+      "reopened_valid": true,
+      "spoiler_entry": "One-Time Enemy Reward - FoC: Mountainside Cave (/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_MountainsideCave_Boss#28 QSTask_GainItem_0): DA_ChargeCrash_V2 x1 -> DA_Item_ResUpCapture_1 x1"
+    },
+    {
+      "location_id": "one_time_enemy_foc_outskirtsobservationpost",
+      "enemy_id": "dungeon-quest:/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_OutskirtsObservationPost_Boss",
+      "enemy_name": null,
+      "enemy_class": [
+        "BP_BA_01_0401VampireHunter_DSwd_Strong_N01_FoC_01_Boss_C",
+        "BP_BA_01_0401VampireHunter_RuneBlade_Strong_N01_FoC_01_Boss_C"
+      ],
+      "encounter_id": "dungeon-quest:/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_OutskirtsObservationPost_Boss",
+      "map": null,
+      "map_data_layer": "/Game/Environment/DataLayer/Quest/Dungeon/FoC_SubDungeon/DL_QuestDungeon_FoC_OutskirtsObservationPost_Boss",
+      "dungeon_area": "FoC_OutskirtsObservationPost",
+      "respawn_classification": "ONE_TIME_ENEMY",
+      "respawn_evidence": {
+        "quest_package": "/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_OutskirtsObservationPost_Boss",
+        "quest_task_export": "QSTask_GainItem_0",
+        "quest_task_export_index": 28,
+        "completion_graph_signals": [
+          "QSEventTrigger_EnemyDefeat",
+          "QSNode_Completed",
+          "QSTask_SetStoryFlagByBoolean",
+          "QSTask_GainItem"
+        ],
+        "data_layer_package": "/Game/Environment/DataLayer/Quest/Dungeon/FoC_SubDungeon/DL_QuestDungeon_FoC_OutskirtsObservationPost_Boss",
+        "basis": "The Article is granted by the enemy-defeat quest completion graph and persistent story-flag task, not by a repeatable enemy drop-table row."
+      },
+      "reward_source_type": "QUEST_COMPLETION_GRANT",
+      "reward_owner": "/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_OutskirtsObservationPost_Boss",
+      "package": "/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_OutskirtsObservationPost_Boss",
+      "export_index": 28,
+      "export_task": "QSTask_GainItem_0",
+      "bulk_index": 0,
+      "reward_index": 0,
+      "literal_fname": {
+        "package_name": {
+          "value": "/Game/Blueprint/Article/Gadget/WeaponAddOn/MagicLongRange/DA_GM_New29_BuddyBoomerang",
+          "number": 0
+        },
+        "asset_name": {
+          "value": "DA_GM_New29_BuddyBoomerang",
+          "number": 0
+        },
+        "sub_path_string": ""
+      },
+      "vanilla_article": "/Game/Blueprint/Article/Gadget/WeaponAddOn/MagicLongRange/DA_GM_New29_BuddyBoomerang",
+      "count": 1,
+      "drop_chance": null,
+      "guaranteed_semantics": "Count=1 granted by the completed quest task; no chance field exists in this Article grant.",
+      "key_item": false,
+      "quest_item": false,
+      "protection_reason": null,
+      "eligible_world_source": true,
+      "eligible_world_destination": true,
+      "planner_present": true,
+      "assigned_article": "/Game/Blueprint/Article/Item/Growth/DA_Item_ExpA_17",
+      "patched_by_world_loot_direct_quest_serializer": true,
+      "source_fingerprint": {
+        "uasset_sha256": "97f09780755381b9fee8db802a88f924669d213fed1ba9452a80b9435014a2b7",
+        "uexp_sha256": "d542dbd9c4151343ea740be0a4ae25a362a43fc12307032ea414e3fe7b9d4090"
+      },
+      "source_file": "Quest/Dungeon/FOC/QST_QuestDungeon_FoC_OutskirtsObservationPost_Boss.uasset",
+      "articles_count": 1,
+      "texture_asset": null,
+      "patched": true,
+      "reopened_valid": true,
+      "spoiler_entry": "One-Time Enemy Reward - FoC: Outskirts Observation Post (/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_OutskirtsObservationPost_Boss#28 QSTask_GainItem_0): DA_GM_New29_BuddyBoomerang x1 -> DA_Item_ExpA_17 x1"
+    },
+    {
+      "location_id": "one_time_enemy_foc_patientsvillagefacility",
+      "enemy_id": "BP_BA_02_0204KnightW_Swd_Elite_N03_FoC_01_Boss_C",
+      "enemy_name": null,
+      "enemy_class": [
+        "BP_BA_02_0204KnightW_Swd_Elite_N03_FoC_01_Boss_C"
+      ],
+      "encounter_id": "dungeon-quest:/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_PatientsVillageFacility_Boss",
+      "map": null,
+      "map_data_layer": "/Game/Environment/DataLayer/Quest/Dungeon/FoC_SubDungeon/DL_QuestDungeon_FoC_PatientsVillageFacility_Boss",
+      "dungeon_area": "FoC_PatientsVillageFacility",
+      "respawn_classification": "ONE_TIME_ENEMY",
+      "respawn_evidence": {
+        "quest_package": "/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_PatientsVillageFacility_Boss",
+        "quest_task_export": "QSTask_GainItem_0",
+        "quest_task_export_index": 28,
+        "completion_graph_signals": [
+          "QSEventTrigger_EnemyDefeat",
+          "QSNode_Completed",
+          "QSTask_SetStoryFlagByBoolean",
+          "QSTask_GainItem"
+        ],
+        "data_layer_package": "/Game/Environment/DataLayer/Quest/Dungeon/FoC_SubDungeon/DL_QuestDungeon_FoC_PatientsVillageFacility_Boss",
+        "basis": "The Article is granted by the enemy-defeat quest completion graph and persistent story-flag task, not by a repeatable enemy drop-table row."
+      },
+      "reward_source_type": "QUEST_COMPLETION_GRANT",
+      "reward_owner": "/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_PatientsVillageFacility_Boss",
+      "package": "/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_PatientsVillageFacility_Boss",
+      "export_index": 28,
+      "export_task": "QSTask_GainItem_0",
+      "bulk_index": 0,
+      "reward_index": 0,
+      "literal_fname": {
+        "package_name": {
+          "value": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportAttack/DA_GB_CV17_HPtoAtkUp",
+          "number": 0
+        },
+        "asset_name": {
+          "value": "DA_GB_CV17_HPtoAtkUp",
+          "number": 0
+        },
+        "sub_path_string": ""
+      },
+      "vanilla_article": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportAttack/DA_GB_CV17_HPtoAtkUp",
+      "count": 1,
+      "drop_chance": null,
+      "guaranteed_semantics": "Count=1 granted by the completed quest task; no chance field exists in this Article grant.",
+      "key_item": false,
+      "quest_item": false,
+      "protection_reason": null,
+      "eligible_world_source": true,
+      "eligible_world_destination": true,
+      "planner_present": true,
+      "assigned_article": "/Game/Blueprint/Article/Item/Support/DA_Item_DefUpIce_1",
+      "patched_by_world_loot_direct_quest_serializer": true,
+      "source_fingerprint": {
+        "uasset_sha256": "7a0721f433d4684c8d846461d8ca7f622527cb12b877e424bb184db07dcc63e9",
+        "uexp_sha256": "2437c76f9abcee0a75a9c7b18c86096d4f6bd69ab52aac286f4b60f4d24a0fc0"
+      },
+      "source_file": "Quest/Dungeon/FOC/QST_QuestDungeon_FoC_PatientsVillageFacility_Boss.uasset",
+      "articles_count": 1,
+      "texture_asset": null,
+      "patched": true,
+      "reopened_valid": true,
+      "spoiler_entry": "One-Time Enemy Reward - FoC: Patients Village Facility (/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_PatientsVillageFacility_Boss#28 QSTask_GainItem_0): DA_GB_CV17_HPtoAtkUp x1 -> DA_Item_DefUpIce_1 x1"
+    },
+    {
+      "location_id": "one_time_enemy_foc_riversidechurch",
+      "enemy_id": "dungeon-quest:/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_RiversideChurch_Boss",
+      "enemy_name": null,
+      "enemy_class": [
+        "BP_BA_02_0102SolMili_Bynt_Normal_F02_VoA_01_C",
+        "BP_BA_02_0201Knight_GSwd_Elite_N01_FoC_01_Boss_C"
+      ],
+      "encounter_id": "dungeon-quest:/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_RiversideChurch_Boss",
+      "map": null,
+      "map_data_layer": "/Game/Environment/DataLayer/Quest/Dungeon/FoC_SubDungeon/DL_QuestDungeon_FoC_RiversideChurch_Boss",
+      "dungeon_area": "FoC_RiversideChurch",
+      "respawn_classification": "ONE_TIME_ENEMY",
+      "respawn_evidence": {
+        "quest_package": "/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_RiversideChurch_Boss",
+        "quest_task_export": "QSTask_GainItem_0",
+        "quest_task_export_index": 36,
+        "completion_graph_signals": [
+          "QSEventTrigger_EnemyDefeat",
+          "QSNode_Completed",
+          "QSTask_SetStoryFlagByBoolean",
+          "QSTask_GainItem"
+        ],
+        "data_layer_package": "/Game/Environment/DataLayer/Quest/Dungeon/FoC_SubDungeon/DL_QuestDungeon_FoC_RiversideChurch_Boss",
+        "basis": "The Article is granted by the enemy-defeat quest completion graph and persistent story-flag task, not by a repeatable enemy drop-table row."
+      },
+      "reward_source_type": "QUEST_COMPLETION_GRANT",
+      "reward_owner": "/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_RiversideChurch_Boss",
+      "package": "/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_RiversideChurch_Boss",
+      "export_index": 36,
+      "export_task": "QSTask_GainItem_0",
+      "bulk_index": 0,
+      "reward_index": 0,
+      "literal_fname": {
+        "package_name": {
+          "value": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportDefense/DA_GB_New24_PreHeal",
+          "number": 0
+        },
+        "asset_name": {
+          "value": "DA_GB_New24_PreHeal",
+          "number": 0
+        },
+        "sub_path_string": ""
+      },
+      "vanilla_article": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportDefense/DA_GB_New24_PreHeal",
+      "count": 1,
+      "drop_chance": null,
+      "guaranteed_semantics": "Count=1 granted by the completed quest task; no chance field exists in this Article grant.",
+      "key_item": false,
+      "quest_item": false,
+      "protection_reason": null,
+      "eligible_world_source": true,
+      "eligible_world_destination": true,
+      "planner_present": true,
+      "assigned_article": "/Game/Blueprint/Article/Item/Support/DA_Item_AddGiveSun_1",
+      "patched_by_world_loot_direct_quest_serializer": true,
+      "source_fingerprint": {
+        "uasset_sha256": "12843c9960ce5565427d4ad6503d2dace94b8a3c241eeac7752d2c088e08131e",
+        "uexp_sha256": "ad2961471e78750d58ef6e80d1229baf219805780b267e6ee69ed7b2b09cd41a"
+      },
+      "source_file": "Quest/Dungeon/FOC/QST_QuestDungeon_FoC_RiversideChurch_Boss.uasset",
+      "articles_count": 1,
+      "texture_asset": null,
+      "patched": true,
+      "reopened_valid": true,
+      "spoiler_entry": "One-Time Enemy Reward - FoC: Riverside Church (/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_RiversideChurch_Boss#36 QSTask_GainItem_0): DA_GB_New24_PreHeal x1 -> DA_Item_AddGiveSun_1 x1"
+    },
+    {
+      "location_id": "one_time_enemy_mm_medium08",
+      "enemy_id": "BP_BA_01_0201ZakoB_RuneBlade_Elite_N01_MM_01_Boss_C",
+      "enemy_name": "Alexis the Heartless Bodyguard",
+      "enemy_class": [
+        "BP_BA_01_0201ZakoB_RuneBlade_Elite_N01_MM_01_Boss_C"
+      ],
+      "encounter_id": "dungeon-quest:/Game/Quest/Dungeon/MM/QST_QuestDungeon_MM_Medium08_Boss",
+      "map": "East Bay Underground Ruins",
+      "map_data_layer": "/Game/Environment/DataLayer/Quest/Dungeon/MM_SubDungeon/DL_QuestDungeon_MM_Medium08_Boss",
+      "dungeon_area": "MM_Medium08",
+      "respawn_classification": "ONE_TIME_ENEMY",
+      "respawn_evidence": {
+        "quest_package": "/Game/Quest/Dungeon/MM/QST_QuestDungeon_MM_Medium08_Boss",
+        "quest_task_export": "QSTask_GainItem_0",
+        "quest_task_export_index": 28,
+        "completion_graph_signals": [
+          "QSEventTrigger_EnemyDefeat",
+          "QSNode_Completed",
+          "QSTask_SetStoryFlagByBoolean",
+          "QSTask_GainItem"
+        ],
+        "data_layer_package": "/Game/Environment/DataLayer/Quest/Dungeon/MM_SubDungeon/DL_QuestDungeon_MM_Medium08_Boss",
+        "basis": "The Article is granted by the enemy-defeat quest completion graph and persistent story-flag task, not by a repeatable enemy drop-table row."
+      },
+      "reward_source_type": "QUEST_COMPLETION_GRANT",
+      "reward_owner": "/Game/Quest/Dungeon/MM/QST_QuestDungeon_MM_Medium08_Boss",
+      "package": "/Game/Quest/Dungeon/MM/QST_QuestDungeon_MM_Medium08_Boss",
+      "export_index": 28,
+      "export_task": "QSTask_GainItem_0",
+      "bulk_index": 0,
+      "reward_index": 0,
+      "literal_fname": {
+        "package_name": {
+          "value": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportAttack/DA_GB_CV19_AtkUpFixed",
+          "number": 0
+        },
+        "asset_name": {
+          "value": "DA_GB_CV19_AtkUpFixed",
+          "number": 0
+        },
+        "sub_path_string": ""
+      },
+      "vanilla_article": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportAttack/DA_GB_CV19_AtkUpFixed",
+      "count": 1,
+      "drop_chance": null,
+      "guaranteed_semantics": "Count=1 granted by the completed quest task; no chance field exists in this Article grant.",
+      "key_item": false,
+      "quest_item": false,
+      "protection_reason": null,
+      "eligible_world_source": true,
+      "eligible_world_destination": true,
+      "planner_present": true,
+      "assigned_article": "/Game/Blueprint/Article/Item/EnhancementMaterial/DA_Item_MatLevelUpJailA_01",
+      "patched_by_world_loot_direct_quest_serializer": true,
+      "source_fingerprint": {
+        "uasset_sha256": "2dc49b08d1a958f70f72a472782b19efed4bb0e1715c52a05f422dba2150970a",
+        "uexp_sha256": "31537120b8cd63dc07d9af3eab5e4195a37cbe4eacc48a04ae91393a83bf153e"
+      },
+      "source_file": "Quest/Dungeon/MM/QST_QuestDungeon_MM_Medium08_Boss.uasset",
+      "articles_count": 1,
+      "texture_asset": "/Game/UI/Common/Textures/Gadget/Weapon/T_UI_SGadget_StrikeRiser",
+      "patched": true,
+      "reopened_valid": true,
+      "spoiler_entry": "One-Time Enemy Reward - MagMell: Alexis the Heartless Bodyguard (Adrenaline Formae) (/Game/Quest/Dungeon/MM/QST_QuestDungeon_MM_Medium08_Boss#28 QSTask_GainItem_0): DA_GB_CV19_AtkUpFixed x1 -> DA_Item_MatLevelUpJailA_01 x1"
+    },
+    {
+      "location_id": "one_time_enemy_mm_pbmedium01",
+      "enemy_id": "dungeon-quest:/Game/Quest/Dungeon/MM/QST_QuestDungeon_MM_PBMedium01_Boss",
+      "enemy_name": null,
+      "enemy_class": [
+        "BP_BA_02_0101Sol_Fist_Weak_N01_Boss_C",
+        "BP_BA_02_0303SkgShell_Swd_Normal_N01_MM_01_Boss_C"
+      ],
+      "encounter_id": "dungeon-quest:/Game/Quest/Dungeon/MM/QST_QuestDungeon_MM_PBMedium01_Boss",
+      "map": null,
+      "map_data_layer": "/Game/Environment/DataLayer/Quest/Dungeon/MM_SubDungeon/DL_QuestDungeon_PB_Medium_01_Boss",
+      "dungeon_area": "MM_PBMedium01",
+      "respawn_classification": "ONE_TIME_ENEMY",
+      "respawn_evidence": {
+        "quest_package": "/Game/Quest/Dungeon/MM/QST_QuestDungeon_MM_PBMedium01_Boss",
+        "quest_task_export": "QSTask_GainItem_1",
+        "quest_task_export_index": 36,
+        "completion_graph_signals": [
+          "QSEventTrigger_EnemyDefeat",
+          "QSNode_Completed",
+          "QSTask_SetStoryFlagByBoolean",
+          "QSTask_GainItem"
+        ],
+        "data_layer_package": "/Game/Environment/DataLayer/Quest/Dungeon/MM_SubDungeon/DL_QuestDungeon_PB_Medium_01_Boss",
+        "basis": "The Article is granted by the enemy-defeat quest completion graph and persistent story-flag task, not by a repeatable enemy drop-table row."
+      },
+      "reward_source_type": "QUEST_COMPLETION_GRANT",
+      "reward_owner": "/Game/Quest/Dungeon/MM/QST_QuestDungeon_MM_PBMedium01_Boss",
+      "package": "/Game/Quest/Dungeon/MM/QST_QuestDungeon_MM_PBMedium01_Boss",
+      "export_index": 36,
+      "export_task": "QSTask_GainItem_1",
+      "bulk_index": 0,
+      "reward_index": 0,
+      "literal_fname": {
+        "package_name": {
+          "value": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportDefense/DA_GB_CV46_BloodDefUp",
+          "number": 0
+        },
+        "asset_name": {
+          "value": "DA_GB_CV46_BloodDefUp",
+          "number": 0
+        },
+        "sub_path_string": ""
+      },
+      "vanilla_article": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportDefense/DA_GB_CV46_BloodDefUp",
+      "count": 1,
+      "drop_chance": null,
+      "guaranteed_semantics": "Count=1 granted by the completed quest task; no chance field exists in this Article grant.",
+      "key_item": false,
+      "quest_item": false,
+      "protection_reason": null,
+      "eligible_world_source": true,
+      "eligible_world_destination": true,
+      "planner_present": true,
+      "assigned_article": "/Game/Blueprint/Article/Item/Support/DA_Item_AtkUpPhysical_1",
+      "patched_by_world_loot_direct_quest_serializer": true,
+      "source_fingerprint": {
+        "uasset_sha256": "896377896ca475e915b3234f3dc378de80531e08bf3deda75f82639d30a69c0f",
+        "uexp_sha256": "ec51a004670b9d5b6f03b75ab24c852bb85e37a075cd387a3459104df9d7bc25"
+      },
+      "source_file": "Quest/Dungeon/MM/QST_QuestDungeon_MM_PBMedium01_Boss.uasset",
+      "articles_count": 1,
+      "texture_asset": null,
+      "patched": true,
+      "reopened_valid": true,
+      "spoiler_entry": "One-Time Enemy Reward - MagMell: PB Medium 01 (/Game/Quest/Dungeon/MM/QST_QuestDungeon_MM_PBMedium01_Boss#36 QSTask_GainItem_1): DA_GB_CV46_BloodDefUp x1 -> DA_Item_AtkUpPhysical_1 x1"
+    },
+    {
+      "location_id": "one_time_enemy_sc_arcadebuilding",
+      "enemy_id": "dungeon-quest:/Game/Quest/Dungeon/MM/QST_QuestDungeon_SC_ArcadeBuilding_Boss",
+      "enemy_name": null,
+      "enemy_class": [
+        "BP_BA_02_0106SolW_Hlbd_Normal_N01_SC_01_C",
+        "BP_BA_02_0302SkgCold_GSwd_Strong_N01_SC_01_Boss_C"
+      ],
+      "encounter_id": "dungeon-quest:/Game/Quest/Dungeon/MM/QST_QuestDungeon_SC_ArcadeBuilding_Boss",
+      "map": null,
+      "map_data_layer": "/Game/Environment/DataLayer/Quest/Dungeon/MM_SubDungeon/DL_QuestDungeon_SC_ArcadeBuilding",
+      "dungeon_area": "SC_ArcadeBuilding",
+      "respawn_classification": "ONE_TIME_ENEMY",
+      "respawn_evidence": {
+        "quest_package": "/Game/Quest/Dungeon/MM/QST_QuestDungeon_SC_ArcadeBuilding_Boss",
+        "quest_task_export": "QSTask_GainItem_0",
+        "quest_task_export_index": 36,
+        "completion_graph_signals": [
+          "QSEventTrigger_EnemyDefeat",
+          "QSNode_Completed",
+          "QSTask_SetStoryFlagByBoolean",
+          "QSTask_GainItem"
+        ],
+        "data_layer_package": "/Game/Environment/DataLayer/Quest/Dungeon/MM_SubDungeon/DL_QuestDungeon_SC_ArcadeBuilding",
+        "basis": "The Article is granted by the enemy-defeat quest completion graph and persistent story-flag task, not by a repeatable enemy drop-table row."
+      },
+      "reward_source_type": "QUEST_COMPLETION_GRANT",
+      "reward_owner": "/Game/Quest/Dungeon/MM/QST_QuestDungeon_SC_ArcadeBuilding_Boss",
+      "package": "/Game/Quest/Dungeon/MM/QST_QuestDungeon_SC_ArcadeBuilding_Boss",
+      "export_index": 36,
+      "export_task": "QSTask_GainItem_0",
+      "bulk_index": 0,
+      "reward_index": 0,
+      "literal_fname": {
+        "package_name": {
+          "value": "/Game/Blueprint/Article/Gadget/WeaponAddOn/MagicLongRange/DA_GM_New15_ChainLightning",
+          "number": 0
+        },
+        "asset_name": {
+          "value": "DA_GM_New15_ChainLightning",
+          "number": 0
+        },
+        "sub_path_string": ""
+      },
+      "vanilla_article": "/Game/Blueprint/Article/Gadget/WeaponAddOn/MagicLongRange/DA_GM_New15_ChainLightning",
+      "count": 1,
+      "drop_chance": null,
+      "guaranteed_semantics": "Count=1 granted by the completed quest task; no chance field exists in this Article grant.",
+      "key_item": false,
+      "quest_item": false,
+      "protection_reason": null,
+      "eligible_world_source": true,
+      "eligible_world_destination": true,
+      "planner_present": true,
+      "assigned_article": "/Game/Blueprint/Article/Item/Support/DA_Item_IchorConvertUp_1",
+      "patched_by_world_loot_direct_quest_serializer": true,
+      "source_fingerprint": {
+        "uasset_sha256": "bd55343f09e2bd9e5cd835411ab664823a4acb4492f37f9a640337706a414896",
+        "uexp_sha256": "87e0e57e15c3436b0fdb67e192071b0a412a942d3c352e64ea6f826cf272be3f"
+      },
+      "source_file": "Quest/Dungeon/MM/QST_QuestDungeon_SC_ArcadeBuilding_Boss.uasset",
+      "articles_count": 1,
+      "texture_asset": null,
+      "patched": true,
+      "reopened_valid": true,
+      "spoiler_entry": "One-Time Enemy Reward - MagMell: Arcade Building (/Game/Quest/Dungeon/MM/QST_QuestDungeon_SC_ArcadeBuilding_Boss#36 QSTask_GainItem_0): DA_GM_New15_ChainLightning x1 -> DA_Item_IchorConvertUp_1 x1"
+    },
+    {
+      "location_id": "one_time_enemy_sc_buildinghill",
+      "enemy_id": "BP_BA_01_0801Goliath_Fist_Elite_F01_SC_01_Boss_C",
+      "enemy_name": null,
+      "enemy_class": [
+        "BP_BA_01_0801Goliath_Fist_Elite_F01_SC_01_Boss_C"
+      ],
+      "encounter_id": "dungeon-quest:/Game/Quest/Dungeon/SC/QST_QuestDungeon_SC_BuildingHill_Boss",
+      "map": null,
+      "map_data_layer": "/Game/Environment/DataLayer/Quest/Dungeon/SC_SubDungeon/DL_QuestDungeon_SC_BuildingHill_Boss",
+      "dungeon_area": "SC_BuildingHill",
+      "respawn_classification": "ONE_TIME_ENEMY",
+      "respawn_evidence": {
+        "quest_package": "/Game/Quest/Dungeon/SC/QST_QuestDungeon_SC_BuildingHill_Boss",
+        "quest_task_export": "QSTask_GainItem_0",
+        "quest_task_export_index": 28,
+        "completion_graph_signals": [
+          "QSEventTrigger_EnemyDefeat",
+          "QSNode_Completed",
+          "QSTask_SetStoryFlagByBoolean",
+          "QSTask_GainItem"
+        ],
+        "data_layer_package": "/Game/Environment/DataLayer/Quest/Dungeon/SC_SubDungeon/DL_QuestDungeon_SC_BuildingHill_Boss",
+        "basis": "The Article is granted by the enemy-defeat quest completion graph and persistent story-flag task, not by a repeatable enemy drop-table row."
+      },
+      "reward_source_type": "QUEST_COMPLETION_GRANT",
+      "reward_owner": "/Game/Quest/Dungeon/SC/QST_QuestDungeon_SC_BuildingHill_Boss",
+      "package": "/Game/Quest/Dungeon/SC/QST_QuestDungeon_SC_BuildingHill_Boss",
+      "export_index": 28,
+      "export_task": "QSTask_GainItem_0",
+      "bulk_index": 0,
+      "reward_index": 0,
+      "literal_fname": {
+        "package_name": {
+          "value": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportDefense/DA_GB_CV71_AtkToDef",
+          "number": 0
+        },
+        "asset_name": {
+          "value": "DA_GB_CV71_AtkToDef",
+          "number": 0
+        },
+        "sub_path_string": ""
+      },
+      "vanilla_article": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportDefense/DA_GB_CV71_AtkToDef",
+      "count": 1,
+      "drop_chance": null,
+      "guaranteed_semantics": "Count=1 granted by the completed quest task; no chance field exists in this Article grant.",
+      "key_item": false,
+      "quest_item": false,
+      "protection_reason": null,
+      "eligible_world_source": true,
+      "eligible_world_destination": true,
+      "planner_present": true,
+      "assigned_article": "/Game/Blueprint/Article/Item/Luxury/DA_Item_LuxuryArtSupplies_1",
+      "patched_by_world_loot_direct_quest_serializer": true,
+      "source_fingerprint": {
+        "uasset_sha256": "c365c5e6e7f1e48d2b6372cc716d463ec1082207b14294fed3080ebb3e0e560d",
+        "uexp_sha256": "fb46648024475cdb2eeaea7936b19e293f357b7b2e76aa38dd46e8003f1c6c64"
+      },
+      "source_file": "Quest/Dungeon/SC/QST_QuestDungeon_SC_BuildingHill_Boss.uasset",
+      "articles_count": 1,
+      "texture_asset": null,
+      "patched": true,
+      "reopened_valid": true,
+      "spoiler_entry": "One-Time Enemy Reward - SC: Building Hill (/Game/Quest/Dungeon/SC/QST_QuestDungeon_SC_BuildingHill_Boss#28 QSTask_GainItem_0): DA_GB_CV71_AtkToDef x1 -> DA_Item_LuxuryArtSupplies_1 x1"
+    },
+    {
+      "location_id": "one_time_enemy_sc_mountainsidefacility",
+      "enemy_id": "BP_BA_02_0105SolGiantMili_Hmmr_Strong_N01_SC_01_Boss_C",
+      "enemy_name": null,
+      "enemy_class": [
+        "BP_BA_02_0105SolGiantMili_Hmmr_Strong_N01_SC_01_Boss_C"
+      ],
+      "encounter_id": "dungeon-quest:/Game/Quest/Dungeon/SC/QST_QuestDungeon_SC_MountainsideFacility_Boss",
+      "map": null,
+      "map_data_layer": "/Game/Environment/DataLayer/Quest/Dungeon/SC_SubDungeon/DL_QuestDungeon_SC_MountainsideFacility_Boss",
+      "dungeon_area": "SC_MountainsideFacility",
+      "respawn_classification": "ONE_TIME_ENEMY",
+      "respawn_evidence": {
+        "quest_package": "/Game/Quest/Dungeon/SC/QST_QuestDungeon_SC_MountainsideFacility_Boss",
+        "quest_task_export": "QSTask_GainItem_0",
+        "quest_task_export_index": 28,
+        "completion_graph_signals": [
+          "QSEventTrigger_EnemyDefeat",
+          "QSNode_Completed",
+          "QSTask_SetStoryFlagByBoolean",
+          "QSTask_GainItem"
+        ],
+        "data_layer_package": "/Game/Environment/DataLayer/Quest/Dungeon/SC_SubDungeon/DL_QuestDungeon_SC_MountainsideFacility_Boss",
+        "basis": "The Article is granted by the enemy-defeat quest completion graph and persistent story-flag task, not by a repeatable enemy drop-table row."
+      },
+      "reward_source_type": "QUEST_COMPLETION_GRANT",
+      "reward_owner": "/Game/Quest/Dungeon/SC/QST_QuestDungeon_SC_MountainsideFacility_Boss",
+      "package": "/Game/Quest/Dungeon/SC/QST_QuestDungeon_SC_MountainsideFacility_Boss",
+      "export_index": 28,
+      "export_task": "QSTask_GainItem_0",
+      "bulk_index": 0,
+      "reward_index": 0,
+      "literal_fname": {
+        "package_name": {
+          "value": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportOther/DA_GB_CV27_BPRecoveryUp",
+          "number": 0
+        },
+        "asset_name": {
+          "value": "DA_GB_CV27_BPRecoveryUp",
+          "number": 0
+        },
+        "sub_path_string": ""
+      },
+      "vanilla_article": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportOther/DA_GB_CV27_BPRecoveryUp",
+      "count": 1,
+      "drop_chance": null,
+      "guaranteed_semantics": "Count=1 granted by the completed quest task; no chance field exists in this Article grant.",
+      "key_item": false,
+      "quest_item": false,
+      "protection_reason": null,
+      "eligible_world_source": true,
+      "eligible_world_destination": true,
+      "planner_present": true,
+      "assigned_article": "/Game/Blueprint/Article/Item/Food/DA_Item_FoodKiritanpoHotPot_1",
+      "patched_by_world_loot_direct_quest_serializer": true,
+      "source_fingerprint": {
+        "uasset_sha256": "f0852f8893086f40c4425f410a9bc707c6bd9a1ef0fdece7fc8397c62beb7067",
+        "uexp_sha256": "866791cec65f6e0896bb4bb50e0455b56995d1d0c517c62d94fb9b8fa49bc6df"
+      },
+      "source_file": "Quest/Dungeon/SC/QST_QuestDungeon_SC_MountainsideFacility_Boss.uasset",
+      "articles_count": 1,
+      "texture_asset": null,
+      "patched": true,
+      "reopened_valid": true,
+      "spoiler_entry": "One-Time Enemy Reward - SC: Mountainside Facility (/Game/Quest/Dungeon/SC/QST_QuestDungeon_SC_MountainsideFacility_Boss#28 QSTask_GainItem_0): DA_GB_CV27_BPRecoveryUp x1 -> DA_Item_FoodKiritanpoHotPot_1 x1"
+    },
+    {
+      "location_id": "one_time_enemy_voa_northobservationpost",
+      "enemy_id": "dungeon-quest:/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_NorthObservationPost",
+      "enemy_name": null,
+      "enemy_class": [
+        "BP_BA_02_0102SolMili_Swd_Elite_N01_VoA_01_Boss_C",
+        "BP_BA_02_0106SolW_Hlbd_Normal_N01_VoA_02_Boss_C"
+      ],
+      "encounter_id": "dungeon-quest:/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_NorthObservationPost",
+      "map": null,
+      "map_data_layer": "/Game/Environment/DataLayer/Quest/Dungeon/VoA_SubDungeon/DL_QuestDungeon_VoA_NorthObservationPost_Boss",
+      "dungeon_area": "VoA_NorthObservationPost",
+      "respawn_classification": "ONE_TIME_ENEMY",
+      "respawn_evidence": {
+        "quest_package": "/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_NorthObservationPost",
+        "quest_task_export": "QSTask_GainItem_0",
+        "quest_task_export_index": 36,
+        "completion_graph_signals": [
+          "QSEventTrigger_EnemyDefeat",
+          "QSNode_Completed",
+          "QSTask_SetStoryFlagByBoolean",
+          "QSTask_GainItem"
+        ],
+        "data_layer_package": "/Game/Environment/DataLayer/Quest/Dungeon/VoA_SubDungeon/DL_QuestDungeon_VoA_NorthObservationPost_Boss",
+        "basis": "The Article is granted by the enemy-defeat quest completion graph and persistent story-flag task, not by a repeatable enemy drop-table row."
+      },
+      "reward_source_type": "QUEST_COMPLETION_GRANT",
+      "reward_owner": "/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_NorthObservationPost",
+      "package": "/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_NorthObservationPost",
+      "export_index": 36,
+      "export_task": "QSTask_GainItem_0",
+      "bulk_index": 0,
+      "reward_index": 0,
+      "literal_fname": {
+        "package_name": {
+          "value": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportAttack/DA_GB_CV26_DefPiercingOnce",
+          "number": 0
+        },
+        "asset_name": {
+          "value": "DA_GB_CV26_DefPiercingOnce",
+          "number": 0
+        },
+        "sub_path_string": ""
+      },
+      "vanilla_article": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportAttack/DA_GB_CV26_DefPiercingOnce",
+      "count": 1,
+      "drop_chance": null,
+      "guaranteed_semantics": "Count=1 granted by the completed quest task; no chance field exists in this Article grant.",
+      "key_item": false,
+      "quest_item": false,
+      "protection_reason": null,
+      "eligible_world_source": true,
+      "eligible_world_destination": true,
+      "planner_present": true,
+      "assigned_article": "/Game/Blueprint/Article/Weapon/Halberd/DA_Halberd_BlackKnight_1",
+      "patched_by_world_loot_direct_quest_serializer": true,
+      "source_fingerprint": {
+        "uasset_sha256": "23acd52ff6f899c60bfd10ddae5403b2c48ff783e01b011de631ae087ee3e394",
+        "uexp_sha256": "5a6f11c01c4266393b3bf4bbdd3cc121e3d91384b9a6a5f952d780596d991fb6"
+      },
+      "source_file": "Quest/Dungeon/VoA/QST_QuestDungeon_VoA_NorthObservationPost.uasset",
+      "articles_count": 1,
+      "texture_asset": null,
+      "patched": true,
+      "reopened_valid": true,
+      "spoiler_entry": "One-Time Enemy Reward - VoA: North Observation Post (/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_NorthObservationPost#36 QSTask_GainItem_0): DA_GB_CV26_DefPiercingOnce x1 -> DA_Halberd_BlackKnight_1 x1"
+    },
+    {
+      "location_id": "one_time_enemy_voa_riverportobservationpost",
+      "enemy_id": "BP_BA_02_0201Knight_SldSwd_Elite_N01_VoA_01_Boss_C",
+      "enemy_name": null,
+      "enemy_class": [
+        "BP_BA_02_0201Knight_SldSwd_Elite_N01_VoA_01_Boss_C"
+      ],
+      "encounter_id": "dungeon-quest:/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_RiverPortObservationPost",
+      "map": null,
+      "map_data_layer": "/Game/Environment/DataLayer/Quest/Dungeon/VoA_SubDungeon/DL_QuestDungeon_VoA_RiverPortObservationPost_Boss",
+      "dungeon_area": "VoA_RiverPortObservationPost",
+      "respawn_classification": "ONE_TIME_ENEMY",
+      "respawn_evidence": {
+        "quest_package": "/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_RiverPortObservationPost",
+        "quest_task_export": "QSTask_GainItem_0",
+        "quest_task_export_index": 28,
+        "completion_graph_signals": [
+          "QSEventTrigger_EnemyDefeat",
+          "QSNode_Completed",
+          "QSTask_SetStoryFlagByBoolean",
+          "QSTask_GainItem"
+        ],
+        "data_layer_package": "/Game/Environment/DataLayer/Quest/Dungeon/VoA_SubDungeon/DL_QuestDungeon_VoA_RiverPortObservationPost_Boss",
+        "basis": "The Article is granted by the enemy-defeat quest completion graph and persistent story-flag task, not by a repeatable enemy drop-table row."
+      },
+      "reward_source_type": "QUEST_COMPLETION_GRANT",
+      "reward_owner": "/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_RiverPortObservationPost",
+      "package": "/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_RiverPortObservationPost",
+      "export_index": 28,
+      "export_task": "QSTask_GainItem_0",
+      "bulk_index": 0,
+      "reward_index": 0,
+      "literal_fname": {
+        "package_name": {
+          "value": "/Game/Blueprint/Article/Gadget/WeaponAddOn/MagicShortMiddleRange/DA_GM_CV19_BloodBlade",
+          "number": 0
+        },
+        "asset_name": {
+          "value": "DA_GM_CV19_BloodBlade",
+          "number": 0
+        },
+        "sub_path_string": ""
+      },
+      "vanilla_article": "/Game/Blueprint/Article/Gadget/WeaponAddOn/MagicShortMiddleRange/DA_GM_CV19_BloodBlade",
+      "count": 1,
+      "drop_chance": null,
+      "guaranteed_semantics": "Count=1 granted by the completed quest task; no chance field exists in this Article grant.",
+      "key_item": false,
+      "quest_item": false,
+      "protection_reason": null,
+      "eligible_world_source": true,
+      "eligible_world_destination": true,
+      "planner_present": true,
+      "assigned_article": "/Game/Blueprint/Article/Item/Growth/DA_Item_ExpA_03",
+      "patched_by_world_loot_direct_quest_serializer": true,
+      "source_fingerprint": {
+        "uasset_sha256": "701d7113d46676807ec1e209455472230085d91e6815a427740400d501b2c191",
+        "uexp_sha256": "2e955092d248e2464bd4993e9a36e2d25538b9e9e6567b0d9cb8811d67e9e462"
+      },
+      "source_file": "Quest/Dungeon/VoA/QST_QuestDungeon_VoA_RiverPortObservationPost.uasset",
+      "articles_count": 1,
+      "texture_asset": null,
+      "patched": true,
+      "reopened_valid": true,
+      "spoiler_entry": "One-Time Enemy Reward - VoA: River Port Observation Post (/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_RiverPortObservationPost#28 QSTask_GainItem_0): DA_GM_CV19_BloodBlade x1 -> DA_Item_ExpA_03 x1"
+    },
+    {
+      "location_id": "one_time_enemy_voa_undergroundfacility",
+      "enemy_id": "dungeon-quest:/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_UndergroundFacility",
+      "enemy_name": null,
+      "enemy_class": [
+        "BP_BA_02_0301Skg_Hmmr_Strong_N01_VoA_01_Boss_C",
+        "BP_BA_02_0501DWolf_Fist_Normal_N01_VoA_03_C",
+        "BP_BA_02_0601DMonkey_Hmmr_Normal_N01_VoA_01_C"
+      ],
+      "encounter_id": "dungeon-quest:/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_UndergroundFacility",
+      "map": null,
+      "map_data_layer": "/Game/Environment/DataLayer/Quest/Dungeon/VoA_SubDungeon/DL_QuestDungeon_VoA_UndergroundFacility_Boss",
+      "dungeon_area": "VoA_UndergroundFacility",
+      "respawn_classification": "ONE_TIME_ENEMY",
+      "respawn_evidence": {
+        "quest_package": "/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_UndergroundFacility",
+        "quest_task_export": "QSTask_GainItem_0",
+        "quest_task_export_index": 36,
+        "completion_graph_signals": [
+          "QSEventTrigger_EnemyDefeat",
+          "QSNode_Completed",
+          "QSTask_SetStoryFlagByBoolean",
+          "QSTask_GainItem"
+        ],
+        "data_layer_package": "/Game/Environment/DataLayer/Quest/Dungeon/VoA_SubDungeon/DL_QuestDungeon_VoA_UndergroundFacility_Boss",
+        "basis": "The Article is granted by the enemy-defeat quest completion graph and persistent story-flag task, not by a repeatable enemy drop-table row."
+      },
+      "reward_source_type": "QUEST_COMPLETION_GRANT",
+      "reward_owner": "/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_UndergroundFacility",
+      "package": "/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_UndergroundFacility",
+      "export_index": 36,
+      "export_task": "QSTask_GainItem_0",
+      "bulk_index": 0,
+      "reward_index": 0,
+      "literal_fname": {
+        "package_name": {
+          "value": "/Game/Blueprint/Article/Weapon/RuneBlade/DA_RuneBlade_BurningSword",
+          "number": 2
+        },
+        "asset_name": {
+          "value": "DA_RuneBlade_BurningSword",
+          "number": 2
+        },
+        "sub_path_string": ""
+      },
+      "vanilla_article": "/Game/Blueprint/Article/Weapon/RuneBlade/DA_RuneBlade_BurningSword_1",
+      "count": 1,
+      "drop_chance": null,
+      "guaranteed_semantics": "Count=1 granted by the completed quest task; no chance field exists in this Article grant.",
+      "key_item": false,
+      "quest_item": false,
+      "protection_reason": null,
+      "eligible_world_source": true,
+      "eligible_world_destination": true,
+      "planner_present": true,
+      "assigned_article": "/Game/Blueprint/Article/Item/Support/DA_Item_ResUpAcid_1",
+      "patched_by_world_loot_direct_quest_serializer": true,
+      "source_fingerprint": {
+        "uasset_sha256": "e4c0c631654ce200f462e03cb96e2523744b4c6503f894a483ec22cbb8353ec7",
+        "uexp_sha256": "43810f6081db37d7a45741b1062ed2dcf35d45b89e90f378e8b3e89fc9150179"
+      },
+      "source_file": "Quest/Dungeon/VoA/QST_QuestDungeon_VoA_UndergroundFacility.uasset",
+      "articles_count": 1,
+      "texture_asset": null,
+      "patched": true,
+      "reopened_valid": true,
+      "spoiler_entry": "One-Time Enemy Reward - VoA: Underground Facility (/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_UndergroundFacility#36 QSTask_GainItem_0): DA_RuneBlade_BurningSword_1 x1 -> DA_Item_ResUpAcid_1 x1"
+    },
+    {
+      "location_id": "one_time_enemy_voa_undergroundshelter",
+      "enemy_id": "dungeon-quest:/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_UndergroundShelter",
+      "enemy_name": null,
+      "enemy_class": [
+        "BP_BA_02_0105SolGiantMili_Hlbd_Strong_N01_VoA_01_Boss_C",
+        "BP_BA_02_0601DMonkey_Swd_Normal_N01_VoA_01_Boss_C"
+      ],
+      "encounter_id": "dungeon-quest:/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_UndergroundShelter",
+      "map": null,
+      "map_data_layer": "/Game/Environment/DataLayer/Quest/Dungeon/VoA_SubDungeon/DL_QuestDungeon_VoA_UndergroundShelter_Boss",
+      "dungeon_area": "VoA_UndergroundShelter",
+      "respawn_classification": "ONE_TIME_ENEMY",
+      "respawn_evidence": {
+        "quest_package": "/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_UndergroundShelter",
+        "quest_task_export": "QSTask_GainItem_0",
+        "quest_task_export_index": 36,
+        "completion_graph_signals": [
+          "QSEventTrigger_EnemyDefeat",
+          "QSNode_Completed",
+          "QSTask_SetStoryFlagByBoolean",
+          "QSTask_GainItem"
+        ],
+        "data_layer_package": "/Game/Environment/DataLayer/Quest/Dungeon/VoA_SubDungeon/DL_QuestDungeon_VoA_UndergroundShelter_Boss",
+        "basis": "The Article is granted by the enemy-defeat quest completion graph and persistent story-flag task, not by a repeatable enemy drop-table row."
+      },
+      "reward_source_type": "QUEST_COMPLETION_GRANT",
+      "reward_owner": "/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_UndergroundShelter",
+      "package": "/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_UndergroundShelter",
+      "export_index": 36,
+      "export_task": "QSTask_GainItem_0",
+      "bulk_index": 0,
+      "reward_index": 0,
+      "literal_fname": {
+        "package_name": {
+          "value": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportOther/DA_GB_CV36_JustDodgeStaminaRecovery",
+          "number": 0
+        },
+        "asset_name": {
+          "value": "DA_GB_CV36_JustDodgeStaminaRecovery",
+          "number": 0
+        },
+        "sub_path_string": ""
+      },
+      "vanilla_article": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportOther/DA_GB_CV36_JustDodgeStaminaRecovery",
+      "count": 1,
+      "drop_chance": null,
+      "guaranteed_semantics": "Count=1 granted by the completed quest task; no chance field exists in this Article grant.",
+      "key_item": false,
+      "quest_item": false,
+      "protection_reason": null,
+      "eligible_world_source": true,
+      "eligible_world_destination": true,
+      "planner_present": true,
+      "assigned_article": "/Game/Blueprint/Article/Item/Growth/DA_Item_ExpA_10",
+      "patched_by_world_loot_direct_quest_serializer": true,
+      "source_fingerprint": {
+        "uasset_sha256": "868992f6d7d87a92b09e4222314515180ba7f1b70f748d54f3e02cb1622a0c87",
+        "uexp_sha256": "73de17f86a6fcec1f87a1c6c4e0ac5477989f3f31049cfde00dc02aad0fd41f3"
+      },
+      "source_file": "Quest/Dungeon/VoA/QST_QuestDungeon_VoA_UndergroundShelter.uasset",
+      "articles_count": 1,
+      "texture_asset": null,
+      "patched": true,
+      "reopened_valid": true,
+      "spoiler_entry": "One-Time Enemy Reward - VoA: Underground Shelter (/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_UndergroundShelter#36 QSTask_GainItem_0): DA_GB_CV36_JustDodgeStaminaRecovery x1 -> DA_Item_ExpA_10 x1"
+    }
+  ],
+  "quest_graph_audit": {
+    "source": "workspace/one-time-enemy-rewards-research/quest-inspector/enemydefeat-grant-graph-audit.json",
+    "classification_counts": {
+      "already_world_loot_locations_before_this_change": 18,
+      "key_quest_or_progression_excluded": 22,
+      "blood_code_routed_to_blood_code_pool": 8,
+      "repeatable_multiplayer_rewards_excluded": 6,
+      "one_time_ordinary_article_slots_added": 15,
+      "gainitem_tasks_without_concrete_article": 3
+    },
+    "already_world_loot_slots": [
+      {
+        "package": "/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_MountainsideCave_Boss",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_3",
+        "enemy_actors": [
+          "BP_BA_01_0101GiantNoLegs_Fist_Elite_N01_FoC_01_Boss_C_UAID_A8A159A4A14BFD5102_1862788593"
+        ],
+        "article_path": "/Game/Blueprint/Article/Gadget/WeaponAddOn/WeaponAction/DA_ChargeCrash_V2",
+        "world_location_id": "one_time_enemy_foc_mountainsidecave"
+      },
+      {
+        "package": "/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_OutskirtsObservationPost_Boss",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_3",
+        "enemy_actors": [
+          "BP_BA_01_0401VampireHunter_RuneBlade_Strong_N01_FoC_01_Boss_C_UAID_A8A159A4A14BFC5102_1887622409",
+          "BP_BA_01_0401VampireHunter_DSwd_Strong_N01_FoC_01_Boss_C_UAID_A8A159A4A14BFC5102_1887641410"
+        ],
+        "article_path": "/Game/Blueprint/Article/Gadget/WeaponAddOn/MagicLongRange/DA_GM_New29_BuddyBoomerang",
+        "world_location_id": "one_time_enemy_foc_outskirtsobservationpost"
+      },
+      {
+        "package": "/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_PatientsVillageFacility_Boss",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_3",
+        "enemy_actors": [
+          "BP_BA_02_0204KnightW_Swd_Elite_N03_FoC_01_Boss_C_UAID_A8A159A4A14BFD5102_1192627587"
+        ],
+        "article_path": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportAttack/DA_GB_CV17_HPtoAtkUp",
+        "world_location_id": "one_time_enemy_foc_patientsvillagefacility"
+      },
+      {
+        "package": "/Game/Quest/Dungeon/FOC/QST_QuestDungeon_FoC_RiversideChurch_Boss",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_3",
+        "enemy_actors": [
+          "BP_BA_02_0201Knight_GSwd_Elite_N01_FoC_01_Boss_C_UAID_A8A159A4A14BFA5102_1180654045"
+        ],
+        "article_path": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportDefense/DA_GB_New24_PreHeal",
+        "world_location_id": "one_time_enemy_foc_riversidechurch"
+      },
+      {
+        "package": "/Game/Quest/Dungeon/MM/QST_QuestDungeon_MM_Medium08_Boss",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_3",
+        "enemy_actors": [
+          "BP_BA_01_0201ZakoB_RuneBlade_Elite_N01_MM_01_Boss_C_UAID_A8A159A4A14B6C6502_1206120164"
+        ],
+        "article_path": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportAttack/DA_GB_CV19_AtkUpFixed",
+        "world_location_id": "one_time_enemy_mm_medium08"
+      },
+      {
+        "package": "/Game/Quest/Dungeon/MM/QST_QuestDungeon_MM_PBMedium01_Boss",
+        "task": "QSTask_GainItem_1",
+        "slot": "QSNode_Slot_3",
+        "enemy_actors": [
+          "BP_BA_02_0303SkgShell_Swd_Normal_N01_MM_01_Boss_C_UAID_A8A159A4A14BCB4E02_1417510601"
+        ],
+        "article_path": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportDefense/DA_GB_CV46_BloodDefUp",
+        "world_location_id": "one_time_enemy_mm_pbmedium01"
+      },
+      {
+        "package": "/Game/Quest/Dungeon/MM/QST_QuestDungeon_SC_ArcadeBuilding_Boss",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_3",
+        "enemy_actors": [
+          "BP_BA_02_0302SkgCold_GSwd_Strong_N01_SC_01_Boss_C_UAID_A8A159A4A14BA05102_1575795198"
+        ],
+        "article_path": "/Game/Blueprint/Article/Gadget/WeaponAddOn/MagicLongRange/DA_GM_New15_ChainLightning",
+        "world_location_id": "one_time_enemy_sc_arcadebuilding"
+      },
+      {
+        "package": "/Game/Quest/Dungeon/SC/QST_QuestDungeon_SC_BuildingHill_Boss",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_3",
+        "enemy_actors": [
+          "BP_BA_01_0801Goliath_Fist_Elite_F01_SC_01_Boss_C_UAID_A8A159A4A14BA15102_1340461378"
+        ],
+        "article_path": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportDefense/DA_GB_CV71_AtkToDef",
+        "world_location_id": "one_time_enemy_sc_buildinghill"
+      },
+      {
+        "package": "/Game/Quest/Dungeon/SC/QST_QuestDungeon_SC_MountainsideFacility_Boss",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_3",
+        "enemy_actors": [
+          "BP_BA_02_0105SolGiantMili_Hmmr_Strong_N01_SC_01_Boss_C_UAID_A8A159A4A14BA25102_1469754560"
+        ],
+        "article_path": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportOther/DA_GB_CV27_BPRecoveryUp",
+        "world_location_id": "one_time_enemy_sc_mountainsidefacility"
+      },
+      {
+        "package": "/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_NorthObservationPost",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_3",
+        "enemy_actors": [
+          "BP_BA_02_0102SolMili_Swd_Elite_N01_VoA_01_Boss_C_UAID_A8A159A4A14B3F6E02_1250048748"
+        ],
+        "article_path": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportAttack/DA_GB_CV26_DefPiercingOnce",
+        "world_location_id": "one_time_enemy_voa_northobservationpost"
+      },
+      {
+        "package": "/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_RiverPortObservationPost",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_3",
+        "enemy_actors": [
+          "BP_BA_02_0201Knight_SldSwd_Elite_N01_VoA_01_Boss_C_UAID_A8A159A4A14BB55102_1405836913"
+        ],
+        "article_path": "/Game/Blueprint/Article/Gadget/WeaponAddOn/MagicShortMiddleRange/DA_GM_CV19_BloodBlade",
+        "world_location_id": "one_time_enemy_voa_riverportobservationpost"
+      },
+      {
+        "package": "/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_UndergroundFacility",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_3",
+        "enemy_actors": [
+          "BP_BA_02_0301Skg_Hmmr_Strong_N01_VoA_01_Boss_C_UAID_A8A159A4A14BB55102_2075004922"
+        ],
+        "article_path": "/Game/Blueprint/Article/Weapon/RuneBlade/DA_RuneBlade_BurningSword_1",
+        "world_location_id": "one_time_enemy_voa_undergroundfacility"
+      },
+      {
+        "package": "/Game/Quest/Dungeon/VoA/QST_QuestDungeon_VoA_UndergroundShelter",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_3",
+        "enemy_actors": [
+          "BP_BA_02_0105SolGiantMili_Hlbd_Strong_N01_VoA_01_Boss_C_UAID_A8A159A4A14BB35102_1854314545"
+        ],
+        "article_path": "/Game/Blueprint/Article/Gadget/WeaponAddOn/SupportOther/DA_GB_CV36_JustDodgeStaminaRecovery",
+        "world_location_id": "one_time_enemy_voa_undergroundshelter"
+      },
+      {
+        "package": "/Game/Quest/LastEpisode_HarmonyMoon/QST_LastEpisode_HarmonyMoon_Memory_Holly",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_3",
+        "enemy_actors": [
+          "BP_02_0307VarCold_Fist_ScenarioBoss_N01_ToM_01_Spawner_C_UAID_A8A159BE7374445202_2076752080"
+        ],
+        "article_path": "/Game/Blueprint/Article/Booster/Other/DA_Booster_HarmonyMoon_Holly_1",
+        "world_location_id": "harmony_moon_holly_reward"
+      },
+      {
+        "package": "/Game/Quest/LastEpisode_HarmonyMoon/QST_LastEpisode_HarmonyMoon_Memory_Josee",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_12",
+        "enemy_actors": [
+          "BP_BA__01_0101GiantNoLegs_Fist_Boss_N01_ToM_01_C_UAID_A8A159BE7374C75302_1119053172"
+        ],
+        "article_path": "/Game/Blueprint/Article/Booster/Other/DA_Booster_HarmonyMoon_Josee_1",
+        "world_location_id": "harmony_moon_josee_reward"
+      },
+      {
+        "package": "/Game/Quest/LastEpisode_HarmonyMoon/QST_LastEpisode_HarmonyMoon_Memory_Lyle",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_21",
+        "enemy_actors": [
+          "BP_00_0301Executioner_ToM_01_Spawner_C_UAID_A8A159BE7374905202_1532180452"
+        ],
+        "article_path": "/Game/Blueprint/Article/Booster/Other/DA_Booster_HarmonyMoon_Lyle_1",
+        "world_location_id": "harmony_moon_lyle_reward"
+      },
+      {
+        "package": "/Game/Quest/LastEpisode_HarmonyMoon/QST_LastEpisode_HarmonyMoon_Memory_Noah_02",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_21",
+        "enemy_actors": [
+          "BP_00_0901Dullahan_M2_ToM_01_Spawner_C_UAID_A8A159BE7374445202_1714081079"
+        ],
+        "article_path": "/Game/Blueprint/Article/Booster/Other/DA_Booster_HarmonyMoon_Noah_1",
+        "world_location_id": "harmony_moon_noah_reward"
+      },
+      {
+        "package": "/Game/Quest/LastEpisode_HarmonyMoon/QST_LastEpisode_HarmonyMoon_Memory_Zenon",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_21",
+        "enemy_actors": [
+          "BP_BA_00_1103ZenonClone_Hlbd_Elite_N01_ToM_01_Boss_C_UAID_A8A159BE73748F5202_2073857275"
+        ],
+        "article_path": "/Game/Blueprint/Article/Booster/Other/DA_Booster_HarmonyMoon_Zenon_1",
+        "world_location_id": "harmony_moon_zenon_reward"
+      }
+    ],
+    "protected_key_quest_progression_slots": [
+      {
+        "package": "/Game/Quest/CharacterEpisode/CharacterEpisode_Iris/QST_CharacterEpisode_Iris_VampireFactor1",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_1",
+        "enemy_actors": [
+          "BP_BA_02_0201Knight_SldSwd_Elite_N01_SC_01_Boss_C_UAID_CC96E5108BBEDE4802_1580733639"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_VampireFactor_01",
+        "protection_reason": "PROGRESSION_ITEM"
+      },
+      {
+        "package": "/Game/Quest/CharacterEpisode/CharacterEpisode_Iris/QST_CharacterEpisode_Iris_VampireFactor2",
+        "task": "QSTask_GainItem_1",
+        "slot": "QSNode_Slot_10",
+        "enemy_actors": [
+          "BP_BA_02_0304SkgGiantWh_Hlbd_Elite_N01_VoA_02_Boss_C_UAID_CC96E5108BBEDE4802_1654810641"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_VampireFactor_02",
+        "protection_reason": "PROGRESSION_ITEM"
+      },
+      {
+        "package": "/Game/Quest/CharacterEpisode/CharacterEpisode_Iris/QST_CharacterEpisode_Iris_VampireFactor3",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_9",
+        "enemy_actors": [
+          "BP_BA_02_0302SkgCold_Hlbd_Strong_N01_FoC_01_Boss_C_UAID_CC96E5108BBEDE4802_1613968640"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_VampireFactor_03",
+        "protection_reason": "PROGRESSION_ITEM"
+      },
+      {
+        "package": "/Game/Quest/CharacterEpisode/CharacterEpisode_Josee/QST_CharacterEpisode_Josee_c06060",
+        "task": "QSTask_GainItem_2",
+        "slot": "QSNode_Slot_8",
+        "enemy_actors": [
+          "BP_BA_01_1101AcidValleyPredator_Fist_Elite_N01_VoA_01_Boss_C_UAID_CC96E5108BBED74802_1948511393"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/DA_Dungeon_SC_RBMedium12_Key",
+        "protection_reason": "KEY_ITEM"
+      },
+      {
+        "package": "/Game/Quest/CharacterEpisode/CharacterEpisode_Lyle/QST_CharacterEpisode_Lyle_EnvyMask",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_1",
+        "enemy_actors": [
+          "BP_BA_02_0201Knight_Bynt_Strong_F01_VoA_01_Envy_Boss_C_UAID_CC96E5108BBED04802_1910355142"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_EnvyMask",
+        "protection_reason": "QUEST_ITEM"
+      },
+      {
+        "package": "/Game/Quest/CharacterEpisode/CharacterEpisode_Lyle/QST_CharacterEpisode_Lyle_GluttonyMask",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_1",
+        "enemy_actors": [
+          "BP_BA_02_0102SolMili_Swd_Strong_N02_SC_01_Gluttony_Boss_C_UAID_A8A159BE7374C34F02_1750529263"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_GluttonyMask",
+        "protection_reason": "QUEST_ITEM"
+      },
+      {
+        "package": "/Game/Quest/CharacterEpisode/CharacterEpisode_Lyle/QST_CharacterEpisode_Lyle_LustMask",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_1",
+        "enemy_actors": [
+          "BP_BA_02_0106SolW_Swd_Normal_N01_FoC_01_Lust_Boss_C_UAID_CC96E5108BBED14802_1960518323"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_LustMask",
+        "protection_reason": "QUEST_ITEM"
+      },
+      {
+        "package": "/Game/Quest/CharacterEpisode/CharacterEpisode_Lyle/QST_CharacterEpisode_Lyle_SlothMask",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_1",
+        "enemy_actors": [
+          "BP_BA_02_0102SolMili_SldSwd_Strong_N01_SC_01_Sloth_Boss_C_UAID_CC96E5108BBED14802_1896469322"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_SlothMask",
+        "protection_reason": "QUEST_ITEM"
+      },
+      {
+        "package": "/Game/Quest/CharacterEpisode/CharacterEpisode_Lyle/QST_CharacterEpisode_Lyle_WrathMask",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_1",
+        "enemy_actors": [
+          "BP_BA_02_0306VarShell_Fist_Elite_N01_VoA_01_Wrath_Boss_C_UAID_CC96E5108BBED14802_1697174321"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_WrathMask",
+        "protection_reason": "QUEST_ITEM"
+      },
+      {
+        "package": "/Game/Quest/DLC/QST_MainEpisode_DLC_e90073",
+        "task": "QSTask_GainItem_1",
+        "slot": "QSNode_Slot_23",
+        "enemy_actors": [
+          "BP_BA_01_1501ABDWWarrior_Hlbd_Pride_Boss_N01_Uni_Vo_01_C_UAID_A8A159F1B78FE4A602_1890926924"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_DLC_ValleyKey",
+        "protection_reason": "KEY_ITEM"
+      },
+      {
+        "package": "/Game/Quest/DLC/QST_MainEpisode_DLC_e90155",
+        "task": "QSTask_GainItem_3",
+        "slot": "QSNode_Slot_23",
+        "enemy_actors": [
+          "BP_00_1501JoseeMother_M1_Spawner_C_UAID_A8A159F1B78F6B9D02_1405283172"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_DLC_CityBook",
+        "protection_reason": "QUEST_ITEM"
+      },
+      {
+        "package": "/Game/Quest/DLC/QST_MainEpisode_DLC_e90173",
+        "task": "QSTask_GainItem_1",
+        "slot": "QSNode_Slot_23",
+        "enemy_actors": [
+          "BP_BA_01_1501ABDWWarrior_Hlbd_Wrath_Boss_N01_Uni_Fo_01_C_UAID_A8A159F1B78F5FCF02_1754150812"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_DLC_ForestKey",
+        "protection_reason": "KEY_ITEM"
+      },
+      {
+        "package": "/Game/Quest/DLC/QST_MainEpisode_DLC_e90175",
+        "task": "QSTask_GainItem_1",
+        "slot": "QSNode_Slot_23",
+        "enemy_actors": [
+          "BP_00_1701ABDMonica_M1_Spawner_C_UAID_A8A159F1B78F3BA102_2031241111"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_DLC_PrisonBook",
+        "protection_reason": "QUEST_ITEM"
+      },
+      {
+        "package": "/Game/Quest/DLC/QST_MainEpisode_DLC_e90195",
+        "task": "QSTask_GainItem_1",
+        "slot": "QSNode_Slot_23",
+        "enemy_actors": [
+          "BP_00_1801CPZenon_M1_Spawner_C_UAID_A8A159F1B78F3DA102_1316146469"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_DLC_ForestBook",
+        "protection_reason": "QUEST_ITEM"
+      },
+      {
+        "package": "/Game/Quest/DLC/QST_MainEpisode_DLC_e90290",
+        "task": "QSTask_GainItem_1",
+        "slot": "QSNode_Slot_23",
+        "enemy_actors": [
+          "BP_00_1301SentimentsLoad_Spawner_C_UAID_A8A159F1B78F84A102_1881428749"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_DLC_IdrisBook",
+        "protection_reason": "QUEST_ITEM"
+      },
+      {
+        "package": "/Game/Quest/LastEpisode_HarmonyMoon/QST_LastEpisode_HarmonyMoon_Memory_Holly",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_3",
+        "enemy_actors": [
+          "BP_02_0307VarCold_Fist_ScenarioBoss_N01_ToM_01_Spawner_C_UAID_A8A159BE7374445202_2076752080"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_MessageFromHolly",
+        "protection_reason": "QUEST_ITEM"
+      },
+      {
+        "package": "/Game/Quest/LastEpisode_HarmonyMoon/QST_LastEpisode_HarmonyMoon_Memory_Josee",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_12",
+        "enemy_actors": [
+          "BP_BA__01_0101GiantNoLegs_Fist_Boss_N01_ToM_01_C_UAID_A8A159BE7374C75302_1119053172"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_MessageFromJosee",
+        "protection_reason": "QUEST_ITEM"
+      },
+      {
+        "package": "/Game/Quest/LastEpisode_HarmonyMoon/QST_LastEpisode_HarmonyMoon_Memory_Lyle",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_21",
+        "enemy_actors": [
+          "BP_00_0301Executioner_ToM_01_Spawner_C_UAID_A8A159BE7374905202_1532180452"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_MessageFromLyle",
+        "protection_reason": "QUEST_ITEM"
+      },
+      {
+        "package": "/Game/Quest/LastEpisode_HarmonyMoon/QST_LastEpisode_HarmonyMoon_Memory_Noah_02",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_21",
+        "enemy_actors": [
+          "BP_00_0901Dullahan_M2_ToM_01_Spawner_C_UAID_A8A159BE7374445202_1714081079"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_MessageFromNoah",
+        "protection_reason": "QUEST_ITEM"
+      },
+      {
+        "package": "/Game/Quest/LastEpisode_HarmonyMoon/QST_LastEpisode_HarmonyMoon_Memory_Zenon",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_21",
+        "enemy_actors": [
+          "BP_BA_00_1103ZenonClone_Hlbd_Elite_N01_ToM_01_Boss_C_UAID_A8A159BE73748F5202_2073857275"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_MessageFromZenon",
+        "protection_reason": "QUEST_ITEM"
+      },
+      {
+        "package": "/Game/Quest/MainEpisode_Beginning/QST_MainEpisode_Beginning_e10210",
+        "task": "QSTask_GainItem_1",
+        "slot": "QSNode_Slot_5",
+        "enemy_actors": [
+          "BP_BA_02_0105SolGiantMili_Hmmr_Strong_N01_MM_02_quest_C_UAID_CC96E5108BBECC1202_1543088411"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_SpellForBridge",
+        "protection_reason": "PROGRESSION_ITEM"
+      },
+      {
+        "package": "/Game/Quest/MainEpisode_Beginning/QST_MainEpisode_Beginning_e10250",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_2",
+        "enemy_actors": [
+          "BP_BA_02_0201Knight_Swd_Elite_N01_MM_01_Boss_quest_C_UAID_CC96E51053104C4102_1078194516"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Important/DA_Item_Important_SpellForMotorcycle",
+        "protection_reason": "PROGRESSION_ITEM"
+      }
+    ],
+    "blood_code_slots_kept_in_dedicated_pool": [
+      {
+        "package": "/Game/Quest/DLC/QST_MainEpisode_DLC_e90070",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_23",
+        "enemy_actors": [
+          "BP_00_1601GQImogen_M1_Spawner_C_UAID_A8A159F1B78F1F9D02_1395058768"
+        ],
+        "article_path": "/Game/Blueprint/Article/BloodCode/DLC/DA_BloodCode_GQImogen",
+        "reason": "Blood Code rewards remain in the dedicated Blood Code pool."
+      },
+      {
+        "package": "/Game/Quest/DLC/QST_MainEpisode_DLC_e90155",
+        "task": "QSTask_GainItem_1",
+        "slot": "QSNode_Slot_23",
+        "enemy_actors": [
+          "BP_00_1501JoseeMother_M1_Spawner_C_UAID_A8A159F1B78F6B9D02_1405283172"
+        ],
+        "article_path": "/Game/Blueprint/Article/BloodCode/DLC/DA_BloodCode_JoseeMother",
+        "reason": "Blood Code rewards remain in the dedicated Blood Code pool."
+      },
+      {
+        "package": "/Game/Quest/DLC/QST_MainEpisode_DLC_e90175",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_23",
+        "enemy_actors": [
+          "BP_00_1701ABDMonica_M1_Spawner_C_UAID_A8A159F1B78F3BA102_2031241111"
+        ],
+        "article_path": "/Game/Blueprint/Article/BloodCode/DLC/DA_BloodCode_ABDMonica",
+        "reason": "Blood Code rewards remain in the dedicated Blood Code pool."
+      },
+      {
+        "package": "/Game/Quest/DLC/QST_MainEpisode_DLC_e90195",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_23",
+        "enemy_actors": [
+          "BP_00_1801CPZenon_M1_Spawner_C_UAID_A8A159F1B78F3DA102_1316146469"
+        ],
+        "article_path": "/Game/Blueprint/Article/BloodCode/DLC/DA_BloodCode_CPZenon",
+        "reason": "Blood Code rewards remain in the dedicated Blood Code pool."
+      },
+      {
+        "package": "/Game/Quest/DLC/QST_MainEpisode_DLC_e90290",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_23",
+        "enemy_actors": [
+          "BP_00_1301SentimentsLoad_Spawner_C_UAID_A8A159F1B78F84A102_1881428749"
+        ],
+        "article_path": "/Game/Blueprint/Article/BloodCode/DLC/DA_BloodCode_SentimentsLoad",
+        "reason": "Blood Code rewards remain in the dedicated Blood Code pool."
+      },
+      {
+        "package": "/Game/Quest/DLC/QST_MainEpisode_DLC_e90360",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_23",
+        "enemy_actors": [
+          "BP_00_1401DeadSentiments_M1_Spawner_C_UAID_A8A159F1B78F59A302_1181919443",
+          "BP_00_1401DeadSentiments_M2_Spawner_C_UAID_A8A159F1B78F59A302_1214147444"
+        ],
+        "article_path": "/Game/Blueprint/Article/BloodCode/DLC/DA_BloodCode_DeadSentiments",
+        "reason": "Blood Code rewards remain in the dedicated Blood Code pool."
+      },
+      {
+        "package": "/Game/Quest/LastEpisode_Disaster/QST_LastEpisode_Disaster_e60327",
+        "task": "QSTask_GainItem_1",
+        "slot": "QSNode_Slot_5",
+        "enemy_actors": [
+          "BP_00_1201Idris_M1_Spawner_C_UAID_CC96E51053106D1402_2147244809"
+        ],
+        "article_path": "/Game/Blueprint/Article/BloodCode/DA_BloodCode_BossIdrisBeast",
+        "reason": "Blood Code rewards remain in the dedicated Blood Code pool."
+      },
+      {
+        "package": "/Game/Quest/MainEpisode_Beginning/QST_MainEpisode_Beginning_e10380",
+        "task": "QSTask_GainItem_1",
+        "slot": "QSNode_Slot_20",
+        "enemy_actors": [
+          "BP_00_0901Dullahan_C_UAID_CC96E5108BBED31202_1482137663"
+        ],
+        "article_path": "/Game/Blueprint/Article/BloodCode/DA_BloodCode_BossDullahan",
+        "reason": "Blood Code rewards remain in the dedicated Blood Code pool."
+      }
+    ],
+    "repeatable_multiplayer_slots_excluded": [
+      {
+        "package": "/Game/Quest/Siren/Battle/Battle_Holly/QST_SirenBattle_Holly_05",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_9",
+        "enemy_actors": [
+          "BP_00_0701Shibito2_Siren_01Spawner_C_UAID_A8A159F1B78FFFB902_1871514775"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Material/DA_Item_MultiplayReward_1",
+        "reason": "Repeatable Siren multiplayer reward (Count=25); not a one-time enemy location."
+      },
+      {
+        "package": "/Game/Quest/Siren/Battle/Battle_Josee/QST_SirenBattle_Josee_05",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_7",
+        "enemy_actors": [
+          "BP_00_0501Onihime2_Siren_01_Spawner_C_UAID_A8A159F1B78FC1B902_1301660925"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Material/DA_Item_MultiplayReward_1",
+        "reason": "Repeatable Siren multiplayer reward (Count=25); not a one-time enemy location."
+      },
+      {
+        "package": "/Game/Quest/Siren/Battle/Battle_Lyle/QST_SirenBattle_Lyle_05",
+        "task": "QSTask_GainItem_1",
+        "slot": "QSNode_Slot_7",
+        "enemy_actors": [
+          "BP_00_0201Dancho2_Siren_01_Spawner_C_UAID_A8A159F1B78FFCB902_1578217234"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Material/DA_Item_MultiplayReward_1",
+        "reason": "Repeatable Siren multiplayer reward (Count=25); not a one-time enemy location."
+      },
+      {
+        "package": "/Game/Quest/Siren/Battle/Battle_Mask/QST_SirenBattle_Mask_05",
+        "task": "QSTask_GainItem_1",
+        "slot": "QSNode_Slot_7",
+        "enemy_actors": [
+          "BP_00_1401DeadSentiments_M2_Siren_01_Spawner_C_UAID_A8A159F1B78F06BA02_1199284022"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Material/DA_Item_MultiplayReward_1",
+        "reason": "Repeatable Siren multiplayer reward (Count=25); not a one-time enemy location."
+      },
+      {
+        "package": "/Game/Quest/Siren/Battle/Battle_Rinne/QST_SirenBattle_Rinne_05",
+        "task": "QSTask_GainItem_1",
+        "slot": "QSNode_Slot_7",
+        "enemy_actors": [
+          "BP_00_0802RinneGonge_Siren_01_Spawner_C_UAID_A8A159F1B78F05BA02_1703768844"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Material/DA_Item_MultiplayReward_1",
+        "reason": "Repeatable Siren multiplayer reward (Count=25); not a one-time enemy location."
+      },
+      {
+        "package": "/Game/Quest/Siren/Battle/Battle_Zenon/QST_SirenBattle_Zenon_05",
+        "task": "QSTask_GainItem_1",
+        "slot": "QSNode_Slot_7",
+        "enemy_actors": [
+          "BP_00_1001Zenon_M2_Siren_01_Spawner_C_UAID_A8A159F1B78F01BA02_1634425134"
+        ],
+        "article_path": "/Game/Blueprint/Article/Item/Material/DA_Item_MultiplayReward_1",
+        "reason": "Repeatable Siren multiplayer reward (Count=25); not a one-time enemy location."
+      }
+    ],
+    "gainitem_tasks_without_concrete_article": [
+      {
+        "package": "/Game/Quest/Epilogue_AfterEnding/CharacterEpisode_AfterEnding/lise/QST_CharacterEpisode_AfterED_Lise_c22080",
+        "task": "QSTask_GainItem_1",
+        "slot": "QSNode_Slot_22",
+        "reason": "No concrete ArticleDataPath is present in the parsed GainItem reward."
+      },
+      {
+        "package": "/Game/Quest/Epilogue_AfterEnding/CharacterEpisode_AfterEnding/lou/QST_CharacterEpisode_AfterED_Lou_c31050",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_13",
+        "reason": "No concrete ArticleDataPath is present in the parsed GainItem reward."
+      },
+      {
+        "package": "/Game/Quest/Epilogue_AfterEnding/CharacterEpisode_AfterEnding/lou/QST_CharacterEpisode_AfterED_Lou_c31070",
+        "task": "QSTask_GainItem_0",
+        "slot": "QSNode_Slot_13",
+        "reason": "No concrete ArticleDataPath is present in the parsed GainItem reward."
+      }
+    ]
+  },
+  "validation": {
+    "seed": "one-time-boss-rewards-2026-01",
+    "game_version": "local-unverified-524ad82b035e8b5810344b17ff55fa4b8bd2c12b9a9f577ee03f0b37380e7685",
+    "version_validation": "local-unverified",
+    "install_after_generation": false,
+    "world_loot_assignments": 1794,
+    "direct_article_grant_assignments": 51,
+    "direct_article_grants_changed_and_reopened": 51,
+    "one_time_enemy_locations_assigned_changed_and_reopened": 15,
+    "retoc": {
+      "package_name": "CV2Randomizer_P",
+      "package_paths": 688,
+      "compression_methods": [],
+      "verify": "verified"
+    },
+    "output_files": [
+      {
+        "name": "CV2Randomizer_P.pak",
+        "size": 347,
+        "sha256": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd"
+      },
+      {
+        "name": "CV2Randomizer_P.ucas",
+        "size": 153213898,
+        "sha256": "e8ce8d0a58f44b2cef03ba60e427caea629c020ed64703f911eac41f854c9990"
+      },
+      {
+        "name": "CV2Randomizer_P.utoc",
+        "size": 106469,
+        "sha256": "bcaac173a7ccf1db0a95e9c518ac764ef1064d93b0a576bdda322c6fcd296320"
+      },
+      {
+        "name": "Spoiler.txt",
+        "size": 736323,
+        "sha256": "2aca6e1b59adf79b7c7dce2a7b689b60fc147a016974d23735afa73b70fbe07f"
+      }
+    ],
+    "spoiler_file": "packaged/Spoiler.txt",
+    "crossings": {
+      "map_source_to_one_time_destination": {
+        "GROUND_PICKUP": 11
+      },
+      "shop_source_to_one_time_destination": 4,
+      "one_time_source_to_map_destination": {
+        "GROUND_PICKUP": 11,
+        "TREASURE_BOX": 1
+      },
+      "one_time_source_to_shop": 0,
+      "one_time_source_to_other_direct_grant": 0
+    }
+  }
+}

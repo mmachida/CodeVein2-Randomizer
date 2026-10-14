@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "catalog_revision": "current",
+  "feature": "field_enemy_direct_rewards",
+  "engine_version": "VER_UE5_4",
+  "mapping_file": "CV2.usmap",
+  "counts": {
+    "eligible_locations": 24,
+    "protected_exclusions": 10,
+    "content_class": {
+      "DLC": 24
+    },
+    "categories": {
+      "DEFENSIVE_GADGET": 1,
+      "ENHANCEMENT_MATERIAL": 5,
+      "GADGET": 17,
+      "WEAPON": 1
+    },
+    "quest_groups": {
+      "UNI_C": 7,
+      "UNI_FO": 3,
+      "UNI_P": 9,
+      "UNI_VO": 5
+    }
+  },
+  "validation": {
+    "structural_cross_category": {
+      "status": "PASS",
+      "cases": [
+        "WEAPON_TO_GADGET",
+        "GADGET_TO_MATERIAL",
+        "MATERIAL_TO_WEAPON"
+      ],
+      "preserved": [
+        "structural destination identity",
+        "Count",
+        "bNotification"
+      ],
+      "serialization_reopen_validation": true
+    },
+    "runtime_base_field_enemy": {
+      "status": "PASS",
+      "quest": "/Game/Quest/FieldEnemy/QST_FieldEnemy_FoC_RiversideChurch_Key01",
+      "vanilla_reward": "/Game/Blueprint/Article/Item/DA_Dungeon_FOC_RBMedium11_Key01",
+      "test_reward": "/Game/Blueprint/Article/Item/Support/DA_Item_ChemicalLight_1",
+      "observed_result": "Chemical Light received in game"
+    }
+  },
+  "files": {
+    "field_enemy_direct_rewards.json": {
+      "sha256": "f732e86dc6d0d2604641f390ed854a3fd8f0973da2075ea1e9c1f187ac34a622",
+      "records": 24
+    },
+    "field_enemy_key_exclusions.json": {
+      "sha256": "8e6d56a0fecb6db2a0d47f3ef1683b6ed6ebfbd3a71d9c4a93278864a5622dbe",
+      "records": 10
+    }
+  },
+  "integration": {
+    "target_directory": "data/field_enemy/current",
+    "helper_commands": [
+      "inspect-world-loot-quest-articles",
+      "patch-world-loot-quest-articles"
+    ],
+    "notes": [
+      "Do not merge protected FieldEnemy keys into the randomizable WHERE pool.",
+      "The 10 exclusions should also inform the project's global important-item protection layer.",
+      "DA_DefGadget_ZenonGreatShield remains one canonical WHAT identity; this catalog adds its FieldEnemy WHERE slot only."
+    ]
+  }
+}

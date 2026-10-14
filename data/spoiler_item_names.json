@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "items": {
+    "DA_Item_JadwigaCoin_1": "Uncanny Stone",
+    "DA_Item_MatLevelUpWeaponA_01": "Tender Light Stone 1",
+    "DA_Item_MatLevelUpWeaponA_02": "Tender Crimson Stone 2",
+    "DA_Item_MatLevelUpWeaponB_04": "Tender Light Stone 4",
+    "DA_Item_Important_Recipe_ResUpAcid_1": "Recipe: Acid Vaccine",
+    "DA_Item_Important_Recipe_ResUpCapture_1": "Recipe: Snare Vaccine",
+    "DA_Item_Important_Recipe_ResUpDeadlyVenom_1": "Recipe: Toxic Venom Vaccine",
+    "DA_Item_Important_Recipe_ResUpDissonance_1": "Recipe: Dissonance Vaccine",
+    "DA_Item_Important_Recipe_ResUpEclipse_1": "Recipe: Eclipse Vaccine",
+    "DA_Item_Important_Recipe_ResUpFatalLeak_1": "Recipe: Fatal Leak Vaccine",
+    "DA_Item_Important_Recipe_ResUpSlow_1": "Recipe: Slow Vaccine",
+    "DA_Item_Important_Recipe_ResUpStall_1": "Recipe: Stall Vaccine",
+    "DA_Item_Important_Recipe_ResUpStun_1": "Recipe: Stun Vaccine",
+    "DA_Item_Important_Recipe_ResUpStone_1": "Recipe: Stone Vaccine",
+    "DA_Item_Important_Recipe_ResUpSun_1": "Recipe: Sunblight Vaccine",
+    "DA_Item_Important_Recipe_ResUpVanish_1": "Recipe: Inhibit Vaccine"
+  }
+}

@@ -1,0 +1,197 @@
+{
+  "schema": "cv2-defensive-gadgets-v1",
+  "catalog_revision": "current",
+  "catalog": "defensive_gadgets",
+  "expected_counts": {
+    "total": 17,
+    "BASE": 16,
+    "DLC": 1
+  },
+  "world_reward_payload": {
+    "count": 1,
+    "notification": true,
+    "existing_instances_inspected": 9,
+    "evidence": "All 9 existing eligible World Loot Defensive Gadget instances have Count=1 and bNotification=true."
+  },
+  "items": [
+    {
+      "object": "DA_DefGadget_BackStep_1",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_BackStep_1",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_Dullahan",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_Dullahan",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_LesserShield_1",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_LesserShield_1",
+      "content_class": "BASE",
+      "aliases": [
+        "DA_DefGadget_LesserShield"
+      ],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_LesserShield_2",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_LesserShield_2",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_OmnidirectionalShield_1",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_OmnidirectionalShield_1",
+      "content_class": "BASE",
+      "aliases": [
+        "DA_DefGadget_OmnidirectionalShield"
+      ],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_OmnidirectionalShield_2",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_OmnidirectionalShield_2",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_Parry_1",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_Parry_1",
+      "content_class": "BASE",
+      "aliases": [
+        "DA_DefGadget_Parry"
+      ],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_Parry_2",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_Parry_2",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_QuickStep_1",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_QuickStep_1",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_Shield_1",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_Shield_1",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_Shield_2",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_Shield_2",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_Shield_3",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_Shield_3",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_TwistStep_1",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_TwistStep_1",
+      "content_class": "BASE",
+      "aliases": [
+        "DA_DefGadget_TwistStep"
+      ],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_TwistStep_2",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_TwistStep_2",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_Warp_1",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_Warp_1",
+      "content_class": "BASE",
+      "aliases": [
+        "DA_DefGadget_Warp"
+      ],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_Warp_2",
+      "asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_Warp_2",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    },
+    {
+      "object": "DA_DefGadget_ZenonGreatShield",
+      "asset_path": "/Game/Blueprint/Article/Gadget/DLC/DA_DefGadget_ZenonGreatShield",
+      "content_class": "DLC",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "npc_reward_eligible": true
+    }
+  ],
+  "confirmed_npc_grants": [
+    {
+      "slot_id": "warp_lise_grant",
+      "family": "Warp",
+      "content_class": "BASE",
+      "package_path": "/Game/Quest/CharacterEpisode/CharacterEpisode_Lise/QST_CharacterEpisode_Lise_c02070",
+      "export_name": "QSTask_GainItem_0",
+      "export_index": 12,
+      "bulk_index": 0,
+      "reward_index": 0,
+      "property_path": "QSTask_GainItem_0.ArticleBulkInfo.Articles[0].ArticleDataPath",
+      "original_asset_path": "/Game/Blueprint/Article/Gadget/Defence/DA_DefGadget_Warp_2",
+      "count": 1,
+      "notification": true,
+      "source_sha256": {
+        ".uasset": "5e36cf9891a687ebf1044e61fdd5b78e2635cc1e347cc358cb580f3843cf0538",
+        ".uexp": "9e498602004c29cb3712d26068b89a1a0ebcb266b836718bc18243507c9a2a8b"
+      }
+    }
+  ],
+  "pending_npc_grants": [],
+  "world_loot_policy": {
+    "candidate_count": "Maintain the existing eligible location candidate count by displacing an equal number of safe single-reward vanilla payloads.",
+    "no_fake_locations": true,
+    "aliases_are_canonicalized_before_deduplication": true
+  },
+  "future": {
+    "starting_defensive_gadget": {
+      "implemented": false,
+      "source_asset": "DA_InitialInventory_Player",
+      "note": "Future phase only; reuse this reward pool."
+    }
+  }
+}

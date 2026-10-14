@@ -1,0 +1,273 @@
+{
+  "schema_version": 1,
+  "catalog": "jails",
+  "revision": "jails_v2",
+  "description": "Canonical player Jail metadata for Code Vein 2 Randomizer. Metadata only; contains no game assets.",
+  "expected_counts": {
+    "total": 12,
+    "BASE": 6,
+    "DLC": 6
+  },
+  "rules": {
+    "world_reward_eligible": "The 11 canonical Jail identities with movable ground/chest sources join World Loot. Starting DA_Jail_Ogre is not injected as a separate candidate; Initial Inventory exchanges it one-for-one with a real source.",
+    "buddy_assets_excluded": "DA_Buddy_Jail_* assets are companion equipment and are not part of the player Jail pool.",
+    "protected_source_behavior": "Only key/progression sources and sources with unsafe or unresolved serialized behavior remain protected. All confirmed player Jail sources, including Hounds, are movable; mirrored map copies are one logical occurrence.",
+    "deduplication": "If a canonical Jail already exists in a movable World Loot slot, do not inject an additional candidate copy. Jadwiga's Ogre product mirrors the starting Jail and is never a separate source.",
+    "starting_jail": "Starting Jail randomization is intentionally out of scope for this phase. DA_Jail_Ogre is still a valid World Loot candidate."
+  },
+  "items": [
+    {
+      "object": "DA_Jail_Bat",
+      "asset_path": "/Game/Blueprint/Article/Jail/DA_Jail_Bat",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "vanilla_source": {
+        "type": "GROUND_PICKUP",
+        "movable_world_loot": true,
+        "package_path": "/Game/Map/MainWorld/MainWorld/_Generated_/7Y4B4ABQ4QQO4ASXR5ESAZ1XP",
+        "source_file": "7Y4B4ABQ4QQO4ASXR5ESAZ1XP.umap",
+        "export_index": 7,
+        "export_name": "BP_PickupItem_C_UAID_A85E45A159BE92D501_1565504471",
+        "reward_index": 0,
+        "count": 1,
+        "notification": true,
+        "save_id": "ABFC7DE7-484C-51B4-6B9D-3C9EF1EC6186",
+        "protected": false,
+        "protection_reasons": []
+      }
+    },
+    {
+      "object": "DA_Jail_Hounds",
+      "asset_path": "/Game/Blueprint/Article/Jail/DA_Jail_Hounds",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "vanilla_source": {
+        "type": "GROUND_PICKUP",
+        "movable_world_loot": true,
+        "package_path": "/Game/Map/MainWorld/MainWorld/_Generated_/BDVI2F84SBJ124T1JMDJBRAWY",
+        "source_file": "BDVI2F84SBJ124T1JMDJBRAWY.umap",
+        "export_index": 60,
+        "export_name": "BP_it00_001_A_0_C_UAID_A8A159A4A14BED8402_1127248614_e9d8caf26e11788b",
+        "reward_index": 0,
+        "count": 1,
+        "notification": true,
+        "save_id": "7140D9A5-4535-9139-FB5F-B891094DA0C0",
+        "protected": false,
+        "protection_reasons": []
+      }
+    },
+    {
+      "object": "DA_Jail_Ivy",
+      "asset_path": "/Game/Blueprint/Article/Jail/DA_Jail_Ivy",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "vanilla_source": {
+        "type": "TREASURE_BOX",
+        "movable_world_loot": true,
+        "package_path": "/Game/Map/MainWorld/MainWorld/_Generated_/21Z2GQ8QQ4RZIC53344689H16",
+        "source_file": "21Z2GQ8QQ4RZIC53344689H16.umap",
+        "export_index": 18,
+        "export_name": "BP_it00_002_A_0_C_UAID_A8A159A4A14BE88402_1848340732_6b42fc844a0e7f95",
+        "reward_index": 0,
+        "count": 1,
+        "notification": true,
+        "save_id": "46AC23D4-491C-7DFD-F2C1-9AA0734AA719",
+        "protected": false,
+        "protection_reasons": []
+      }
+    },
+    {
+      "object": "DA_Jail_Ogre",
+      "asset_path": "/Game/Blueprint/Article/Jail/DA_Jail_Ogre",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "vanilla_source": {
+        "type": "INITIAL_INVENTORY",
+        "movable_world_loot": false,
+        "asset_path": "/Game/Blueprint/Article/DA_InitialInventory_Player",
+        "note": "Vanilla Starting Jail. Starting-item randomization is not implemented in this phase."
+      }
+    },
+    {
+      "object": "DA_Jail_Reaper",
+      "asset_path": "/Game/Blueprint/Article/Jail/DA_Jail_Reaper",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "vanilla_source": {
+        "type": "TREASURE_BOX",
+        "movable_world_loot": true,
+        "package_path": "/Game/Map/MainWorld/MainWorld/_Generated_/EB1TU8W1GKZYJGYHNDA76XYAH",
+        "source_file": "EB1TU8W1GKZYJGYHNDA76XYAH.umap",
+        "export_index": 30,
+        "export_name": "BP_it00_002_A_0_C_UAID_A8A159A4A14B9C5202_1574164589_e45bdc4c0abce7df",
+        "reward_index": 0,
+        "count": 1,
+        "notification": true,
+        "save_id": "9A50F963-42CF-917F-3B0A-568202F79CF8",
+        "protected": false,
+        "protection_reasons": []
+      }
+    },
+    {
+      "object": "DA_Jail_Stinger",
+      "asset_path": "/Game/Blueprint/Article/Jail/DA_Jail_Stinger",
+      "content_class": "BASE",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "vanilla_source": {
+        "type": "GROUND_PICKUP",
+        "movable_world_loot": true,
+        "package_path": "/Game/Map/MainWorld/MainWorld/_Generated_/61Y5LAV87NWVD213F35X2VK87",
+        "source_file": "61Y5LAV87NWVD213F35X2VK87.umap",
+        "export_index": 272,
+        "export_name": "BP_PickupItem_WithFlagChange_C_UAID_A8A159A4A14B9D8902_1822678819_3eb3acb6c4c82637",
+        "reward_index": 0,
+        "count": 1,
+        "notification": true,
+        "save_id": "5500DB0E-438B-2632-00A8-A5B994AAFAA2",
+        "protected": false,
+        "protection_reasons": [],
+        "scripted_reward_mode": "ARTICLE_ONLY_PRESERVE_FLAGS"
+      }
+    },
+    {
+      "object": "DA_Jail_Bat_Pathos",
+      "asset_path": "/Game/Blueprint/Article/Jail/DLC/DA_Jail_Bat_Pathos",
+      "content_class": "DLC",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "vanilla_source": {
+        "type": "TREASURE_BOX",
+        "movable_world_loot": true,
+        "package_path": "/Game/Map/MainWorld/MainWorld/_Generated_/91MMR3Q02OIPWTPQMKQKOUMMH",
+        "source_file": "91MMR3Q02OIPWTPQMKQKOUMMH.umap",
+        "export_index": 13,
+        "export_name": "BP_it00_002_A_0_C_UAID_3C7C3F4D4A02CA9D02_1174332854_d47bc2a89cab5467",
+        "reward_index": 0,
+        "count": 1,
+        "notification": true,
+        "save_id": "DFBF85FF-4C9E-FA3C-9398-01893B205853",
+        "protected": false,
+        "protection_reasons": []
+      }
+    },
+    {
+      "object": "DA_Jail_Hounds_Pathos",
+      "asset_path": "/Game/Blueprint/Article/Jail/DLC/DA_Jail_Hounds_Pathos",
+      "content_class": "DLC",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "vanilla_source": {
+        "type": "TREASURE_BOX",
+        "movable_world_loot": true,
+        "package_path": "/Game/Map/MainWorld/MainWorld/_Generated_/4LIH13QPEWNKP29FBE923M46C",
+        "source_file": "4LIH13QPEWNKP29FBE923M46C.umap",
+        "export_index": 50,
+        "export_name": "BP_TreasureBox_Sample_C_UAID_A8A159BFDE04D8AB02_1341213143_f06aab737f36c7b8",
+        "reward_index": 0,
+        "count": 1,
+        "notification": true,
+        "save_id": "198FE5F5-4685-97FD-1DBE-3DB56413B07F",
+        "protected": false,
+        "protection_reasons": []
+      }
+    },
+    {
+      "object": "DA_Jail_Ivy_Pathos",
+      "asset_path": "/Game/Blueprint/Article/Jail/DLC/DA_Jail_Ivy_Pathos",
+      "content_class": "DLC",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "vanilla_source": {
+        "type": "TREASURE_BOX",
+        "movable_world_loot": true,
+        "package_path": "/Game/Map/MainWorld/MainWorld/_Generated_/3VEI55A2FBYY5THS0CXPNTRJ6",
+        "source_file": "3VEI55A2FBYY5THS0CXPNTRJ6.umap",
+        "export_index": 84,
+        "export_name": "BP_TreasureBox_Sample_C_UAID_A8A159BFDE04939402_1724966752_f06aab737f36c7b8",
+        "reward_index": 0,
+        "count": 1,
+        "notification": true,
+        "save_id": "7A228FF8-49C8-D642-3604-50817A042511",
+        "protected": false,
+        "protection_reasons": []
+      }
+    },
+    {
+      "object": "DA_Jail_Ogre_Pathos",
+      "asset_path": "/Game/Blueprint/Article/Jail/DLC/DA_Jail_Ogre_Pathos",
+      "content_class": "DLC",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "vanilla_source": {
+        "type": "TREASURE_BOX",
+        "movable_world_loot": true,
+        "package_path": "/Game/Map/MainWorld/MainWorld/_Generated_/DK3DQJ28GMIQBULJK3SQFJB6B",
+        "source_file": "DK3DQJ28GMIQBULJK3SQFJB6B.umap",
+        "export_index": 153,
+        "export_name": "BP_it00_002_A_0_C_UAID_3C7C3F4D4A029F9902_1430119248_465d869261c0d01e",
+        "reward_index": 0,
+        "count": 1,
+        "notification": true,
+        "save_id": "F2903D2B-473B-FEA1-12D1-3E85E63B312F",
+        "protected": false,
+        "protection_reasons": []
+      }
+    },
+    {
+      "object": "DA_Jail_Reaper_Pathos",
+      "asset_path": "/Game/Blueprint/Article/Jail/DLC/DA_Jail_Reaper_Pathos",
+      "content_class": "DLC",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "vanilla_source": {
+        "type": "TREASURE_BOX",
+        "movable_world_loot": true,
+        "package_path": "/Game/Map/MainWorld/MainWorld/_Generated_/0L6UG0LU43PXTTPXCWX6M02F7",
+        "source_file": "0L6UG0LU43PXTTPXCWX6M02F7.umap",
+        "export_index": 15,
+        "export_name": "BP_it00_002_A_0_C_UAID_3C7C3F4D4A02A29902_1289440836_465d869261c0d01e",
+        "reward_index": 0,
+        "count": 1,
+        "notification": true,
+        "save_id": "D1A5453C-4C11-86FF-1BFB-D5A2B4306B4D",
+        "protected": false,
+        "protection_reasons": []
+      }
+    },
+    {
+      "object": "DA_Jail_Stinger_Pathos",
+      "asset_path": "/Game/Blueprint/Article/Jail/DLC/DA_Jail_Stinger_Pathos",
+      "content_class": "DLC",
+      "aliases": [],
+      "world_reward_eligible": true,
+      "vanilla_source": {
+        "type": "TREASURE_BOX",
+        "movable_world_loot": true,
+        "package_path": "/Game/Map/MainWorld/MainWorld/_Generated_/EDLTKYI406NIEEAQ7W8D6FMPJ",
+        "source_file": "EDLTKYI406NIEEAQ7W8D6FMPJ.umap",
+        "export_index": 100,
+        "export_name": "BP_it00_002_A_0_C_UAID_A8A1599AE6C1DBAB02_1102684791_f081d72c5abdf589",
+        "reward_index": 0,
+        "count": 1,
+        "notification": true,
+        "save_id": "2B84E8BA-4712-361C-D67F-D991A24C1C7F",
+        "protected": false,
+        "protection_reasons": []
+      }
+    }
+  ],
+  "future": {
+    "starting_jail_randomizer": {
+      "implemented_in_this_phase": true,
+      "vanilla_jail": "DA_Jail_Ogre",
+      "source_asset": "/Game/Blueprint/Article/DA_InitialInventory_Player",
+      "note": "The starting Jail is randomized with the Initial Inventory option. Its selected canonical Article is reserved before World Loot so normal Jail locations receive the remaining eligible Jail pool."
+    }
+  }
+}

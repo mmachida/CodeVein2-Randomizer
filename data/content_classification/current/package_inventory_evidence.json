@@ -1,0 +1,76 @@
+{
+  "schema": "cv2-package-inventory-evidence-v1",
+  "catalog_revision": "current",
+  "retoc_version": "retoc_cli 0.1.5",
+  "package_count": 216218,
+  "containers": [
+    {
+      "name": "global.utoc",
+      "package_count": 0
+    },
+    {
+      "name": "pakchunk0-Windows.utoc",
+      "package_count": 145084
+    },
+    {
+      "name": "pakchunk0optional-Windows.utoc",
+      "package_count": 0
+    },
+    {
+      "name": "pakchunk1-Windows.utoc",
+      "package_count": 19601
+    },
+    {
+      "name": "pakchunk2-Windows.utoc",
+      "package_count": 51533
+    }
+  ],
+  "dlc_marker_evidence": [
+    {
+      "package_path": "/Game/Blueprint/GameSystem/Shop/DT_ShopLineup_DLC",
+      "present": true,
+      "source_containers": [
+        "pakchunk0-Windows.utoc"
+      ]
+    },
+    {
+      "package_path": "/Game/Blueprint/GameSystem/Shop/DT_ShopLineup_Trade_DLC",
+      "present": true,
+      "source_containers": [
+        "pakchunk0-Windows.utoc"
+      ]
+    },
+    {
+      "package_path": "/Game/Blueprint/Article/DropItem/DT_DropItemData_DLC",
+      "present": true,
+      "source_containers": [
+        "pakchunk0-Windows.utoc"
+      ]
+    },
+    {
+      "package_path": "/Game/Blueprint/GameSystem/ItemSynthetic/Booster/DT_BoosterRecipe_DLC",
+      "present": true,
+      "source_containers": [
+        "pakchunk0-Windows.utoc"
+      ]
+    },
+    {
+      "package_path": "/Game/Blueprint/GameSystem/Quest/DT_QuestSpawnFieldEnemy_DLC",
+      "present": true,
+      "source_containers": [
+        "pakchunk0-Windows.utoc"
+      ]
+    },
+    {
+      "package_path": "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_C_DarkLowerArea",
+      "present": true,
+      "source_containers": [
+        "pakchunk0-Windows.utoc"
+      ]
+    }
+  ],
+  "distinct_dlc_container": false,
+  "container_classification": {},
+  "package_container_classes_inferred_from_names": false,
+  "no_dlc_control_installation_inspected": false
+}

@@ -1,0 +1,46 @@
+{
+  "schema": "cv2-canonical-article-rewards-v1",
+  "catalog_revision": "current",
+  "expected_counts": {
+    "total": 3,
+    "BOOSTER": 3
+  },
+  "items": [
+    {
+      "reward_id": "iris_chara_episode_sample",
+      "object": "DA_Booster_CharaEpisodeIrisSample_1",
+      "asset_path": "/Game/Blueprint/Article/Booster/Other/DA_Booster_CharaEpisodeIrisSample_1",
+      "reward_category": "BOOSTER",
+      "content_class": "BASE",
+      "count": 1,
+      "notification": true,
+      "world_reward_eligible": true,
+      "source_location_ids": ["iris_character_episode_initial_reward"],
+      "physical_source_occurrences": 1
+    },
+    {
+      "reward_id": "iris_chara_episode_reward_1",
+      "object": "DA_Booster_CharaEpisodeIris_1",
+      "asset_path": "/Game/Blueprint/Article/Booster/Other/DA_Booster_CharaEpisodeIris_1",
+      "reward_category": "BOOSTER",
+      "content_class": "BASE",
+      "count": 1,
+      "notification": true,
+      "world_reward_eligible": true,
+      "source_location_ids": ["iris_reward_1"],
+      "physical_source_occurrences": 2
+    },
+    {
+      "reward_id": "iris_chara_episode_reward_2",
+      "object": "DA_Booster_CharaEpisodeIris_2",
+      "asset_path": "/Game/Blueprint/Article/Booster/Other/DA_Booster_CharaEpisodeIris_2",
+      "reward_category": "BOOSTER",
+      "content_class": "BASE",
+      "count": 1,
+      "notification": true,
+      "world_reward_eligible": true,
+      "source_location_ids": ["iris_reward_2"],
+      "physical_source_occurrences": 2
+    }
+  ]
+}

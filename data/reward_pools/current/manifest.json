@@ -1,0 +1,27 @@
+{
+  "schema": "cv2-reward-pool-v1",
+  "catalog_revision": "current",
+  "files": {
+    "defensive_gadgets.json": {
+      "sha256": "acb112ffb9cef4f1d25e5ac00e3e23baa6b285abc0614e1a9b8154b7e7702086",
+      "count": 17
+    },
+    "canonical_article_rewards.json": {
+      "sha256": "8284b56fcbbeb6b1287b9426b3a64a578ce5af725c61cc40f855ecaf49eea403",
+      "count": 3
+    },
+    "important_item_exclusions.json": {
+      "sha256": "18f74d840e41c491ac8252a57efed3503b7883c884dfa91bf93af42cde01963d",
+      "count": 43,
+      "counts": {
+        "keys": 17,
+        "quest_flag_exclusions": 26
+      }
+    }
+  },
+  "source_provenance": {
+    "catalog": "data/defensive_gadgets/current/defensive_gadgets.json",
+    "additional_exclusion_source": "data/field_enemy/current/field_enemy_key_exclusions.json",
+    "note": "Runtime reward-pool metadata. Research inputs are retained unchanged; exact FieldEnemy key identities extend the global Key exclusion policy."
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "schema": "cv2-dlc-detection-v1",
+  "catalog_revision": "current",
+  "package_markers": [
+    "/Game/Blueprint/GameSystem/Shop/DT_ShopLineup_DLC",
+    "/Game/Blueprint/GameSystem/Shop/DT_ShopLineup_Trade_DLC",
+    "/Game/Blueprint/Article/DropItem/DT_DropItemData_DLC",
+    "/Game/Blueprint/GameSystem/ItemSynthetic/Booster/DT_BoosterRecipe_DLC",
+    "/Game/Blueprint/GameSystem/Quest/DT_QuestSpawnFieldEnemy_DLC",
+    "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_C_DarkLowerArea"
+  ],
+  "container_markers": [],
+  "evidence": {
+    "classification_source": "EXPLICIT_CATALOG_AND_RESEARCH",
+    "installed_inventory": {
+      "retoc_version": "retoc_cli 0.1.5",
+      "containers": {
+        "global.utoc": 0,
+        "pakchunk0-Windows.utoc": 145084,
+        "pakchunk0optional-Windows.utoc": 0,
+        "pakchunk1-Windows.utoc": 19601,
+        "pakchunk2-Windows.utoc": 51533
+      },
+      "marker_container": "pakchunk0-Windows.utoc",
+      "distinct_dlc_container": false
+    },
+    "markers": {
+      "/Game/Blueprint/GameSystem/Shop/DT_ShopLineup_DLC": "DLC Shop table family in shop_packages.py; exact package listed by Retoc",
+      "/Game/Blueprint/GameSystem/Shop/DT_ShopLineup_Trade_DLC": "DLC Trade table family in shop_packages.py; exact package listed by Retoc",
+      "/Game/Blueprint/Article/DropItem/DT_DropItemData_DLC": "DLC table mapping in enemy_drop_generation.py; exact package listed by Retoc",
+      "/Game/Blueprint/GameSystem/ItemSynthetic/Booster/DT_BoosterRecipe_DLC": "DLC recipe table in extractor_catalog.py; exact package listed by Retoc",
+      "/Game/Blueprint/GameSystem/Quest/DT_QuestSpawnFieldEnemy_DLC": "Exact package observed in installed Retoc inventory and named in the reviewed DLC detection request",
+      "/Game/Quest/FieldEnemy/QST_FieldEnemy_Uni_C_DarkLowerArea": "Explicit DLC WHERE in field_enemy/current catalog; exact package listed by Retoc"
+    },
+    "validation_limitations": [
+      "Only an installation containing these packages was inspected; a no-DLC control installation was unavailable.",
+      "Because all markers are in pakchunk0-Windows.utoc, package presence detects installed DLC content assets but does not independently prove Steam entitlement."
+    ]
+  }
+}

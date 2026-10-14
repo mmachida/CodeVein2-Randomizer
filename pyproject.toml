@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "code-vein-2-randomizer"
+version = "0.9.1"
+description = "Deterministic randomizer mod generator for Code Vein 2"
+requires-python = ">=3.12"
+dependencies = [
+    "PySide6>=6.8",
+    "platformdirs>=4.3",
+    "psutil>=6.1,<8",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.3"]
+app = ["pyinstaller>=6.12"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

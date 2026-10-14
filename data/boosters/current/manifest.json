@@ -1,0 +1,20 @@
+{
+  "catalog_revision": "current",
+  "content_class_counts": {
+    "AFTER_ENDING": 27,
+    "BASE": 57,
+    "DLC": 18
+  },
+  "files": {
+    "mastery_boosters.json": {
+      "count": 102,
+      "sha256": "a9e1c79b185de833ee237e152452613f0667be36336a1ea5d7deb6c5084c64e7"
+    }
+  },
+  "schema": "cv2-booster-catalog-v1",
+  "source_package": "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/Tool/DT_GainBoosterSmallScenario",
+  "source_package_sha256": {
+    ".uasset": "860de41824334b4cdaee2ac7f98636ca67b528aabc69bbaa4e82677d6898ab61",
+    ".uexp": "b2dc18a13b57131a783ea322f2f104593695c4545a2daa0141ad751bb2485632"
+  }
+}
