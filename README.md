@@ -54,7 +54,7 @@ To run tests or build the Windows app, install the optional packages:
 .\.venv\Scripts\python.exe -m pip install -e ".[dev,app]"
 ```
 
-`run.bat` starts the app once the environment is ready. Choose your Code Vein II folder and click **Extract Game Data** if the app asks. The first extraction can take a few minutes. Later runs reuse the cache while the game's archives stay the same. Pick a seed and settings, then click **Randomize**.
+Once the environment is ready, start the app with the command above. Choose your Code Vein II folder and click **Extract Game Data** if the app asks. The first extraction can take a few minutes. Later runs reuse the cache while the game's archives stay the same. Pick a seed and settings, then click **Randomize**.
 
 ## Remove the mod
 
