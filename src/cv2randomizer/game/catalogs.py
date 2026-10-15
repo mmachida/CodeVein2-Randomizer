@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 from dataclasses import dataclass
@@ -10,6 +9,7 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 
 from cv2randomizer.core.resources import application_data_path
+from cv2randomizer.game.catalog_integrity import canonical_text_sha256
 from .fname_identity import FNameIdentity, SoftObjectPathIdentity
 from .important_items import (
     ImportantItemExclusionError,
@@ -1960,7 +1960,7 @@ class CatalogStore:
                 raise CatalogError(f"Could not read catalog file {path.name}: {error}") from error
             metadata = _object(file_metadata.get(filename), f"manifest entry {filename}")
             expected_hash = _string(metadata.get("sha256"), f"{filename} sha256").casefold()
-            actual_hash = hashlib.sha256(raw_bytes).hexdigest()
+            actual_hash = canonical_text_sha256(raw_bytes)
             if actual_hash != expected_hash:
                 raise CatalogError(f"Catalog signature mismatch: {filename}.")
             try:

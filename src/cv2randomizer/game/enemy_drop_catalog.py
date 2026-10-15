@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import csv
-import hashlib
 import json
 from collections import Counter
 from dataclasses import dataclass
@@ -11,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from cv2randomizer.core.resources import application_data_path
+from cv2randomizer.game.catalog_integrity import canonical_text_sha256
 
 TABLE_ORDER = ("BASE", "AFTER_ENDING", "DLC")
 CLASSIFICATIONS = frozenset({"NORMAL_ONLY", "SHARED_BOSS_NORMAL", "UNRESOLVED"})
@@ -74,7 +74,7 @@ class EnemyDropCatalogStore:
         if not isinstance(metadata, dict):
             raise EnemyDropCatalogError("Enemy Drop manifest does not describe its classification CSV.")
         expected_hash = metadata.get("sha256")
-        if not isinstance(expected_hash, str) or hashlib.sha256(payload).hexdigest() != expected_hash.casefold():
+        if not isinstance(expected_hash, str) or canonical_text_sha256(payload) != expected_hash.casefold():
             raise EnemyDropCatalogError("Enemy Drop classification CSV hash does not match its manifest.")
         try:
             text = payload.decode("utf-8-sig")

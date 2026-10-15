@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from cv2randomizer.core.resources import application_data_path
+from cv2randomizer.game.catalog_integrity import canonical_text_sha256
 from cv2randomizer.game.catalogs import RewardPayload
 
 
@@ -93,7 +93,7 @@ class CanonicalArticleRewardCatalogStore:
         metadata = manifest.get("files", {}).get(catalog_path.name)
         if not isinstance(metadata, dict) or metadata.get("count") != len(_IRIS_REWARDS):
             raise CanonicalArticleRewardCatalogError("Canonical Article reward manifest must declare exactly three Iris rewards.")
-        if metadata.get("sha256") != hashlib.sha256(payload).hexdigest():
+        if metadata.get("sha256") != canonical_text_sha256(payload):
             raise CanonicalArticleRewardCatalogError("Canonical Article reward catalog hash does not match its manifest.")
         try:
             document: Any = json.loads(payload)

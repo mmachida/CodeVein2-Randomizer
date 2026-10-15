@@ -31,6 +31,21 @@ class ImportantItemPolicyTests(unittest.TestCase):
             _ROOT / "data" / "reward_pools" / "current",
         ).load("current")
 
+    # Check archive line endings validate
+    def test_exclusion_store_accepts_lf_and_crlf_catalog_files(self) -> None:
+        source_dir = _ROOT / "data" / "reward_pools" / "current"
+        source_catalog = (source_dir / "important_item_exclusions.json").read_bytes()
+        lf_catalog = source_catalog.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+        with tempfile.TemporaryDirectory() as temporary:
+            target_dir = Path(temporary)
+            (target_dir / "manifest.json").write_bytes((source_dir / "manifest.json").read_bytes())
+            catalog_path = target_dir / "important_item_exclusions.json"
+            for payload in (lf_catalog, lf_catalog.replace(b"\n", b"\r\n")):
+                catalog_path.write_bytes(payload)
+                loaded = ImportantItemExclusionStore(target_dir).load("current")
+                self.assertEqual(len(loaded.keys), 17)
+                self.assertEqual(len(loaded.quest_flag_exclusions), 26)
+
     # Check authoritative JSON retains keys exact
     def test_authoritative_json_retains_keys_and_exact_quest_flag_list(self) -> None:
         self.assertEqual(len(self.exclusions.keys), 17)

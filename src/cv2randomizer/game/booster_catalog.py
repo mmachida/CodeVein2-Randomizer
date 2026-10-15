@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 from collections import Counter
@@ -11,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from cv2randomizer.core.resources import application_data_path
+from cv2randomizer.game.catalog_integrity import canonical_text_sha256
 
 
 BOOSTER_TABLE_PACKAGE = "/Game/Cinematics/CinematicScene/Scenario/SmallScenario/Blueprint/Tool/DT_GainBoosterSmallScenario"
@@ -92,7 +92,7 @@ class BoosterCatalogStore:
         metadata = manifest.get("files", {}).get(catalog_path.name)
         if not isinstance(metadata, dict) or metadata.get("count") != 102:
             raise BoosterCatalogError("Booster catalog manifest does not declare 102 rows.")
-        if not isinstance(metadata.get("sha256"), str) or hashlib.sha256(payload).hexdigest() != metadata["sha256"].casefold():
+        if not isinstance(metadata.get("sha256"), str) or canonical_text_sha256(payload) != metadata["sha256"].casefold():
             raise BoosterCatalogError("Booster row JSON hash does not match its manifest.")
         try:
             document: Any = json.loads(payload)

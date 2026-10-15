@@ -48,11 +48,11 @@
   },
   "files": {
     "field_enemy_direct_rewards.json": {
-      "sha256": "f732e86dc6d0d2604641f390ed854a3fd8f0973da2075ea1e9c1f187ac34a622",
+      "sha256": "c91d2f0ea6effc1c335d47c273e503cc09e6cd717fd12e8199a56312d0ef8af1",
       "records": 24
     },
     "field_enemy_key_exclusions.json": {
-      "sha256": "8e6d56a0fecb6db2a0d47f3ef1683b6ed6ebfbd3a71d9c4a93278864a5622dbe",
+      "sha256": "9acbe3f51bf8dcaa6edc2b58de96c0124ccec3ed6449713d3c80733100acbb95",
       "records": 10
     }
   },

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 from collections import Counter
@@ -11,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from cv2randomizer.core.resources import application_data_path
+from cv2randomizer.game.catalog_integrity import canonical_text_sha256
 
 
 CONTENT_CLASS_COUNTS = {"BASE": 56, "AFTER_ENDING": 13, "DLC": 10}
@@ -205,7 +205,7 @@ class BloodCodeCatalogStore:
             raise BloodCodeCatalogError(
                 f"Blood Code manifest does not declare the expected {TOTAL_BLOOD_CODE_LOCATIONS}-location catalog."
             )
-        if not isinstance(metadata.get("sha256"), str) or hashlib.sha256(payload).hexdigest() != metadata["sha256"].casefold():
+        if not isinstance(metadata.get("sha256"), str) or canonical_text_sha256(payload) != metadata["sha256"].casefold():
             raise BloodCodeCatalogError("Blood Code grant JSON hash does not match its manifest.")
         try:
             document: Any = json.loads(payload)

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 from collections import Counter
@@ -11,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from cv2randomizer.core.resources import application_data_path
+from cv2randomizer.game.catalog_integrity import canonical_text_sha256
 from .catalogs import QuestArticleGrantLayout, RewardPayload, WorldLootLocation
 from .content_availability import PackageInventory
 from .fname_identity import FNameIdentity, SoftObjectPathIdentity
@@ -201,7 +201,7 @@ class FieldEnemyCatalogStore:
         metadata = manifest_files.get(filename)
         if (
             not isinstance(metadata, dict)
-            or metadata.get("sha256") != hashlib.sha256(payload).hexdigest()
+            or metadata.get("sha256") != canonical_text_sha256(payload)
             or metadata.get("records") != expected_records
         ):
             raise FieldEnemyCatalogError(f"FieldEnemy catalog signature or record count mismatch: {filename}.")

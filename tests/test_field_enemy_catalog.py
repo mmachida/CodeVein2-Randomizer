@@ -40,6 +40,21 @@ class FieldEnemyCatalogTests(unittest.TestCase):
             "current", important_item_exclusions=self.runtime.important_item_exclusions,
         )
 
+    # Check archive line endings validate
+    def test_field_enemy_store_accepts_lf_catalog_files(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            copied_root = Path(temporary) / "field_enemy"
+            shutil.copytree(_FIELD_ROOT, copied_root)
+            current_dir = copied_root / "current"
+            for filename in ("field_enemy_direct_rewards.json", "field_enemy_key_exclusions.json"):
+                path = current_dir / filename
+                path.write_bytes(path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n"))
+            loaded = FieldEnemyCatalogStore(copied_root).load(
+                "current", important_item_exclusions=self.runtime.important_item_exclusions,
+            )
+            self.assertEqual(len(loaded.locations), 24)
+            self.assertEqual(len(loaded.protected_exclusions), 10)
+
     # Check catalog keep all 24 where
     def test_catalog_keeps_all_24_where_slots_and_duplicate_rewards(self) -> None:
         self.assertEqual(len(self.catalog.locations), 24)

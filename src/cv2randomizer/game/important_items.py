@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from cv2randomizer.core.resources import application_data_path
+from cv2randomizer.game.catalog_integrity import canonical_text_sha256
 
 class ImportantItemExclusionError(ValueError):
     """Raised when canonical Important Item exclusion metadata is unsafe."""
@@ -57,7 +57,7 @@ class ImportantItemExclusionStore:
             raise ImportantItemExclusionError("Important Item exclusion manifest schema or revision is invalid.")
         files = manifest.get("files")
         metadata = files.get(catalog_path.name) if isinstance(files, dict) else None
-        if not isinstance(metadata, dict) or metadata.get("sha256") != hashlib.sha256(payload).hexdigest():
+        if not isinstance(metadata, dict) or metadata.get("sha256") != canonical_text_sha256(payload):
             raise ImportantItemExclusionError("Important Item exclusion file hash does not match its manifest.")
         try:
             document: Any = json.loads(payload.decode("utf-8"))

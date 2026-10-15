@@ -26,6 +26,17 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class BloodCodeAndBoosterCatalogTests(unittest.TestCase):
+    # Check archive line endings validate
+    def test_blood_code_store_accepts_lf_catalog_file(self) -> None:
+        source_dir = ROOT / "data" / "blood_codes" / "current"
+        with tempfile.TemporaryDirectory() as temporary:
+            target_dir = Path(temporary)
+            shutil.copytree(source_dir, target_dir, dirs_exist_ok=True)
+            path = target_dir / "blood_code_grants.json"
+            path.write_bytes(path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n"))
+            loaded = BloodCodeCatalogStore(target_dir).load("current")
+            self.assertEqual(len(loaded.slots), 79)
+
     # Check initial inventory lou reference is
     def test_initial_inventory_lou_reference_is_not_a_blood_code_reward_slot(self) -> None:
         catalog = BloodCodeCatalogStore(ROOT / "data" / "blood_codes" / "current").load("current")

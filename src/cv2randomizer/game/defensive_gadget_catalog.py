@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 from collections import Counter
@@ -11,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from cv2randomizer.core.resources import application_data_path
+from cv2randomizer.game.catalog_integrity import canonical_text_sha256
 from cv2randomizer.game.catalogs import RewardPayload
 
 _SHA256 = re.compile(r"[0-9a-f]{64}\Z")
@@ -121,7 +121,7 @@ class DefensiveGadgetCatalogStore:
         if not isinstance(metadata, dict) or metadata.get("count") != 17:
             raise DefensiveGadgetCatalogError("Reward pool manifest must declare 17 canonical gadgets.")
         expected_hash = metadata.get("sha256")
-        if not isinstance(expected_hash, str) or hashlib.sha256(payload).hexdigest() != expected_hash.casefold():
+        if not isinstance(expected_hash, str) or canonical_text_sha256(payload) != expected_hash.casefold():
             raise DefensiveGadgetCatalogError("Defensive Gadget catalog hash does not match its manifest.")
         try:
             document: Any = json.loads(payload)

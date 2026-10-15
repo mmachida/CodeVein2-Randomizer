@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 from dataclasses import dataclass
@@ -10,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from cv2randomizer.core.resources import application_data_path
+from cv2randomizer.game.catalog_integrity import canonical_text_sha256
 
 _SHA256 = re.compile(r"[0-9a-f]{64}\Z")
 _TABLES = {
@@ -82,7 +82,7 @@ class ExtractorCatalogStore:
         metadata = manifest.get("files", {}).get("booster_recipes.json")
         if not isinstance(metadata, dict) or metadata.get("table_count") != 2 or metadata.get("row_count") != 43:
             raise ExtractorCatalogError("Extractor manifest must declare the two recipe tables and 43 rows.")
-        if metadata.get("sha256") != hashlib.sha256(payload).hexdigest():
+        if metadata.get("sha256") != canonical_text_sha256(payload):
             raise ExtractorCatalogError("Extractor recipe metadata checksum does not match its manifest.")
         try:
             document: Any = json.loads(payload)
