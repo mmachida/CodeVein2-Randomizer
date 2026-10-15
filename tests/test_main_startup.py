@@ -30,6 +30,7 @@ class MainStartupTests(unittest.TestCase):
         application.return_value.setWindowIcon.assert_called_once_with(icon.return_value)
         icon.assert_called_once_with(str(Path("icon.ico")))
         resource.assert_any_call("ico", "icon.png")
+        resource.assert_any_call("licenses", "THIRD-PARTY-NOTICES.txt")
         window.assert_not_called()
         configure_logging.assert_not_called()
 

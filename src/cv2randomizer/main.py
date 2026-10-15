@@ -29,6 +29,7 @@ def main() -> int:
             resolve_retoc_executable(),
             resolve_uassetapi_helper(),
             application_resource("tools", "oo2core_9_win64.dll"),
+            application_resource("licenses", "THIRD-PARTY-NOTICES.txt"),
             application_resource("ico", "icon.png"),
             application_data_path("bFormae", "current", "bequeathed_formae.json"),
             application_data_path("blood_codes", "current", "manifest.json"),

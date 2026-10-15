@@ -29,6 +29,7 @@ $WorkRoot = Join-Path $ScratchRoot "pyinstaller-work"
 $SpecRoot = Join-Path $ScratchRoot "spec"
 $StageRoot = Join-Path $ScratchRoot "release-stage"
 $ZipValidationRoot = Join-Path $ScratchRoot "zip-validation"
+$NoticesPath = Join-Path $ScratchRoot "THIRD-PARTY-NOTICES.txt"
 $ZipName = "CodeVein2Randomizer-$DisplayVersion-win-x64.zip"
 $ExecutableName = "CodeVein2Randomizer-$DisplayVersion.exe"
 $ZipPath = Join-Path $ReleaseRoot $ZipName
@@ -81,6 +82,32 @@ if (Test-Path -LiteralPath $PythonLicense -PathType Leaf) {
     Copy-Item -LiteralPath $PythonLicense -Destination (Join-Path $PythonLicenseRoot "Python-LICENSE.txt")
 }
 
+$Notices = [System.Text.StringBuilder]::new()
+[void]$Notices.AppendLine("Third-party notices for Code Vein 2 Randomizer $DisplayVersion")
+[void]$Notices.AppendLine()
+foreach ($LicenseSpec in @(
+    @{ Name = "Retoc CLI 0.1.5"; Path = $RetocLicense },
+    @{ Name = "UAssetAPI 1.1.0"; Path = $UAssetLicense },
+    @{ Name = "Newtonsoft.Json 13.0.3"; Path = $NewtonsoftLicense }
+)) {
+    [void]$Notices.AppendLine(("=" * 72))
+    [void]$Notices.AppendLine($LicenseSpec.Name)
+    [void]$Notices.AppendLine(("=" * 72))
+    [void]$Notices.AppendLine((Get-Content -LiteralPath $LicenseSpec.Path -Raw))
+    [void]$Notices.AppendLine()
+}
+foreach ($LicenseFile in Get-ChildItem -LiteralPath $PythonLicenseRoot -File -Recurse | Sort-Object FullName) {
+    $RelativeLicense = $LicenseFile.FullName.Substring($PythonLicenseRoot.Length).TrimStart('\')
+    [void]$Notices.AppendLine(("=" * 72))
+    [void]$Notices.AppendLine(("Python dependency: " + $RelativeLicense))
+    [void]$Notices.AppendLine(("=" * 72))
+    [void]$Notices.AppendLine((Get-Content -LiteralPath $LicenseFile.FullName -Raw))
+    [void]$Notices.AppendLine()
+}
+[void]$Notices.AppendLine("The app bundles oo2core_9_win64.dll for the local Retoc compression fallback.")
+[void]$Notices.AppendLine("This runtime file is supplied locally and is not distributed through source control.")
+Set-Content -LiteralPath $NoticesPath -Value $Notices.ToString() -Encoding UTF8
+
 Push-Location $ProjectRoot
 try {
     $PyInstallerVersion = (& $PythonPath -c "import PyInstaller; print(PyInstaller.__version__)").Trim()
@@ -118,6 +145,7 @@ try {
         "--add-data", "$IconPath;ico",
         "--add-data", "$IconPngPath;ico",
         "--add-data", "$MappingPath;workspace/research_assets",
+        "--add-data", "$NoticesPath;licenses",
         "--add-binary", "$RetocPath;tools",
         "--add-binary", "$HelperExe;tools",
         "--add-binary", "$OodlePath;tools",
@@ -171,43 +199,16 @@ try {
         "4. Use Extract Game Data if the app requests it, then choose a seed and options.",
         "5. Click Randomize.",
         "",
-        "The executable includes Python, Qt, Retoc, the UAssetAPI helper, CV2.usmap,",
-        "the app data catalogs, the icon, and the local Oodle runtime. No extra",
-        "runtime folders or dependency downloads are needed.",
-        "",
         "The game must already be installed. Original game assets are read from",
         "the selected game installation. Generated cache and output are stored",
         "under your Windows user data folders.",
         "",
-        "Some game versions and rewards may not have gameplay validation."
+        "Some game versions and rewards may not have gameplay validation.",
+        "",
+        "Repo: https://github.com/mmachida/CodeVein2-Randomizer"
     )
+    $ExpectedReadmeText = ($ReadmeLines -join [Environment]::NewLine) + [Environment]::NewLine
     Set-Content -LiteralPath (Join-Path $StageRoot "README.txt") -Value $ReadmeLines -Encoding UTF8
-
-    $Notices = [System.Text.StringBuilder]::new()
-    [void]$Notices.AppendLine("Third-party notices for Code Vein 2 Randomizer $DisplayVersion")
-    [void]$Notices.AppendLine()
-    foreach ($LicenseSpec in @(
-        @{ Name = "Retoc CLI 0.1.5"; Path = $RetocLicense },
-        @{ Name = "UAssetAPI 1.1.0"; Path = $UAssetLicense },
-        @{ Name = "Newtonsoft.Json 13.0.3"; Path = $NewtonsoftLicense }
-    )) {
-        [void]$Notices.AppendLine(("=" * 72))
-        [void]$Notices.AppendLine($LicenseSpec.Name)
-        [void]$Notices.AppendLine(("=" * 72))
-        [void]$Notices.AppendLine((Get-Content -LiteralPath $LicenseSpec.Path -Raw))
-        [void]$Notices.AppendLine()
-    }
-    foreach ($LicenseFile in Get-ChildItem -LiteralPath $PythonLicenseRoot -File -Recurse | Sort-Object FullName) {
-        $RelativeLicense = $LicenseFile.FullName.Substring($PythonLicenseRoot.Length).TrimStart('\')
-        [void]$Notices.AppendLine(("=" * 72))
-        [void]$Notices.AppendLine(("Python dependency: " + $RelativeLicense))
-        [void]$Notices.AppendLine(("=" * 72))
-        [void]$Notices.AppendLine((Get-Content -LiteralPath $LicenseFile.FullName -Raw))
-        [void]$Notices.AppendLine()
-    }
-    [void]$Notices.AppendLine("The app bundles oo2core_9_win64.dll for the local Retoc compression fallback.")
-    [void]$Notices.AppendLine("This runtime file is supplied locally and is not distributed through source control.")
-    Set-Content -LiteralPath (Join-Path $StageRoot "THIRD-PARTY-NOTICES.txt") -Value $Notices.ToString() -Encoding UTF8
 
     $SmokeArguments = @{
         FilePath = $StageExecutable
@@ -235,7 +236,7 @@ try {
     $Archive = [System.IO.Compression.ZipFile]::OpenRead($ZipPath)
     try {
         $Entries = @($Archive.Entries | ForEach-Object { $_.FullName } | Sort-Object)
-        $ExpectedEntries = @($ExecutableName, "README.txt", "THIRD-PARTY-NOTICES.txt")
+        $ExpectedEntries = @($ExecutableName, "README.txt")
         if (($Entries -join "|") -ne ($ExpectedEntries -join "|")) {
             throw "Release ZIP has unexpected contents: $($Entries -join ', ')"
         }
@@ -259,6 +260,10 @@ try {
     $ZippedHash = (Get-FileHash -LiteralPath (Join-Path $ZipValidationRoot $ExecutableName) -Algorithm SHA256).Hash.ToLowerInvariant()
     if ($BuiltHash -ne $ZippedHash) {
         throw "The executable extracted from the ZIP does not match the built executable."
+    }
+    $ZippedReadme = Get-Content -LiteralPath (Join-Path $ZipValidationRoot "README.txt") -Raw
+    if ($ZippedReadme -ne $ExpectedReadmeText) {
+        throw "README.txt in the ZIP does not match the requested release text."
     }
 
     $ZipSmokeArguments = @{
