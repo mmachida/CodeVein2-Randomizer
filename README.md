@@ -31,11 +31,11 @@ To run the project from source, you also need:
 
 - Python 3.12 or newer.
 - The .NET 10 SDK. The source app uses it to run its asset helper when extracting and building a mod.
-- The Oodle library from the installed game. Retoc uses it to read the game's compressed archives; the app looks in the selected game folder.
+- The checkout includes `tools/oo2core_9_win64.dll`, which Retoc uses to read Oodle-compressed game archives. You do not need to copy this DLL from the game installation.
 
 The checkout already includes the Retoc command-line tool and the `CV2.usmap` mapping file. Python installs the app's runtime packages—PySide6, platformdirs, and psutil—from `pyproject.toml`.
 
-For tests and release packaging, install the optional `dev` and `app` packages too. They add pytest and PyInstaller. Building a release also needs the .NET 10 SDK and the local Retoc/Oodle inputs described in the build section below.
+For tests and release packaging, install the optional `dev` and `app` packages too. They add pytest and PyInstaller. Building a release also needs the .NET 10 SDK and the local Retoc input described in the build section below.
 
 Only game versions listed in `data/versions/` are marked as officially supported. The app may let you inspect another installation, but that does not mean its generated mod has been validated for that version.
 
@@ -78,13 +78,13 @@ For the full Python test suite, use:
 
 These checks do not replace testing Extract and Randomize with a real game installation. Real-game and gameplay checks still need to be done manually.
 
-To build a Windows release, set up the optional Python packages, install the .NET 10 SDK, and make sure the pinned Retoc CLI and its license are in `workspace/tools/retoc-v0.1.5/`. The build script expects an Oodle DLL at `tools/oo2core_9_win64.dll` and NuGet license files after restore. Then run:
+To build a Windows release, set up the optional Python packages, install the .NET 10 SDK, and make sure the pinned Retoc CLI and its license are in `workspace/tools/retoc-v0.1.5/`. The build script uses the included Oodle DLL at `tools/oo2core_9_win64.dll` and needs NuGet license files after restore. Then run:
 
 ```powershell
 .\scripts\build_release.ps1
 ```
 
-The script builds under `release/<version>/` and runs startup and resource checks. Oodle is not part of the source repository. Check its redistribution terms before sharing a release that bundles it; include Retoc's license and the generated third-party notices with distributed builds.
+The script builds under `release/<version>/` and runs startup and resource checks. Include Retoc's license and the generated third-party notices with distributed builds.
 
 ## License
 
