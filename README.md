@@ -90,4 +90,6 @@ The script builds under `release/<version>/` and runs startup and resource check
 
 ## License
 
-The project does not have a license yet, so publishing this repository does not grant permission to reuse or redistribute its source. Check the rights for third-party tools and game-related files before sharing a build.
+The original source code and documentation are licensed under the MIT License; see the root `LICENSE` file.
+
+The project MIT license does not cover third-party software or Code Vein II files and data. Retoc has its own MIT license in `workspace/tools/retoc-v0.1.5/LICENSE`; the Oodle DLL, `CV2.usmap`, and game-derived catalog data remain subject to their respective owners' terms. Check those terms before reusing or redistributing those files.
