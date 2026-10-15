@@ -3,8 +3,10 @@
 [![Version](https://img.shields.io/github/v/release/mmachida/CodeVein2-Randomizer?label=version)](https://github.com/mmachida/CodeVein2-Randomizer/releases/latest) ![Platform](https://img.shields.io/badge/platform-Windows%20x64-0078D4)
 
 Code Vein 2 Randomizer is a tool that creates mods to shuffle items in Code Vein II and supported DLC. Choose a seed and the options you want, then click **Randomize**. The original game archives stay untouched.
-
 Using the same seed, settings, and supported game version gives you the same result.
+
+<img width="994" height="495" alt="image" src="https://github.com/user-attachments/assets/f0579c8e-5849-44f0-85dd-40dcb578c82e" />
+<img width="750" height="415" alt="image" src="https://github.com/user-attachments/assets/1afb859e-951a-475c-bdfb-4679f3a4b2e8" />
 
 ## What it can randomize
 
