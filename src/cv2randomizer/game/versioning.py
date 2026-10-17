@@ -14,6 +14,7 @@ _SHA256_PATTERN = re.compile(r"[0-9a-fA-F]{64}\Z")
 _VERSION_ID_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*\Z")
 _DEFAULT_EXECUTABLE_PATH = Path("CodeVein2/Binaries/Win64/CodeVein2-Win64-Shipping.exe")
 _LOCAL_CATALOG_REVISION = "current"
+_WORLD_LOOT_COMPATIBILITY_PROFILES = {"1.0.9.0": "1.0.9"}
 
 # These MD5 values provide a friendly UI label only. They do not grant official
 # support or change the local-unverified cache/generation path.
@@ -159,6 +160,22 @@ class VersionDetection:
     def usable_for_local_validation(self) -> bool:
         """Whether extraction/local generation may use this detection result."""
         return self.supported or self.local_unverified
+
+    # Select build-specific loot rules
+    @property
+    def world_loot_compatibility_profile(self) -> str | None:
+        """Return a narrowly scoped profile for a recognized executable build."""
+        candidates = (self.version_id, self.display_version)
+        for candidate in candidates:
+            if isinstance(candidate, str):
+                normalized = candidate.strip()
+                if normalized in _WORLD_LOOT_COMPATIBILITY_PROFILES:
+                    return _WORLD_LOOT_COMPATIBILITY_PROFILES[normalized]
+                if normalized and not normalized.startswith("local-unverified-"):
+                    normalized_four_part = normalized if normalized.count(".") == 3 else normalized + ".0"
+                    if normalized_four_part in _WORLD_LOOT_COMPATIBILITY_PROFILES:
+                        return _WORLD_LOOT_COMPATIBILITY_PROFILES[normalized_four_part]
+        return None
 
 
 class GameVersionDetector:

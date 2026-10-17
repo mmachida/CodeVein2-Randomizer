@@ -13,6 +13,7 @@ from cv2randomizer.game.defensive_gadget_catalog import DefensiveGadgetCatalogSt
 from cv2randomizer.game.jail_catalog import JailCatalogStore
 from cv2randomizer.game.catalogs import is_valid_scripted_reward_only_location
 from cv2randomizer.game.content_availability import PackageInventory
+from cv2randomizer.game.world_loot_compatibility import apply_world_loot_export_rebindings
 from cv2randomizer.randomizer.defensive_gadgets import defensive_gadget_world_candidates
 from cv2randomizer.randomizer.jails import jail_world_candidates
 from cv2randomizer.randomizer.world_loot import build_world_loot_randomization_plan, world_loot_slot
@@ -67,6 +68,62 @@ class JailCatalogRandomizerTests(unittest.TestCase):
         ))
         initial = [item for item in self.catalog.items if item.vanilla_source.source_type == "INITIAL_INVENTORY"]
         self.assertEqual([item.object for item in initial], ["DA_Jail_Ogre"])
+
+    # Accept validated version-specific export indices
+    def test_vanilla_jail_sources_follow_profile_export_rebindings(self) -> None:
+        bat = next(item for item in self.catalog.items if item.object == "DA_Jail_Bat")
+        source = bat.vanilla_source
+        assert source.package_path is not None
+        assert source.export_index is not None
+        assert source.export_name is not None
+        rebound_index = source.export_index + 50_000
+        hounds = next(item for item in self.catalog.items if item.object == "DA_Jail_Hounds")
+        hounds_source = hounds.vanilla_source
+        assert hounds_source.package_path is not None
+        assert hounds_source.export_index is not None
+        assert hounds_source.export_name is not None
+        hounds_rebound_index = hounds_source.export_index + 50_000
+
+        rebound_world = apply_world_loot_export_rebindings(
+            self.world_catalogs.world_loot,
+            {
+                "world_loot_export_rebindings": [
+                    {
+                        "package_path": source.package_path,
+                        "catalog_export_index": source.export_index,
+                        "resolved_export_index": rebound_index,
+                        "export_name": source.export_name,
+                    },
+                    {
+                        "package_path": hounds_source.package_path,
+                        "catalog_export_index": hounds_source.export_index,
+                        "resolved_export_index": hounds_rebound_index,
+                        "export_name": hounds_source.export_name,
+                    },
+                ],
+            },
+        )
+
+        rebound_source = next(
+            location for location in rebound_world
+            if location.package_path.casefold() == source.package_path.casefold()
+            and location.export_index == rebound_index
+        )
+        self.assertEqual(rebound_source.export_name, source.export_name)
+        self.catalog.validate_world_sources(rebound_world)
+        bat_candidate = next(
+            candidate for candidate in jail_world_candidates(self.catalog, world_loot=rebound_world)
+            if candidate.canonical_identity.casefold() == bat.asset_path.casefold()
+        )
+        assert bat_candidate.source_location is not None
+        self.assertEqual(bat_candidate.source_location.export_index, rebound_index)
+        hounds_mirror = next(
+            location for location in rebound_world
+            if location.mirror_of_package_path is not None
+            and location.mirror_of_package_path.casefold() == hounds_source.package_path.casefold()
+            and location.mirror_of_export_index == hounds_rebound_index
+        )
+        self.assertEqual(hounds_mirror.mirror_of_export_index, hounds_rebound_index)
 
     # Check available items skip identity source
     def test_available_items_skip_identity_when_its_source_package_is_missing(self) -> None:

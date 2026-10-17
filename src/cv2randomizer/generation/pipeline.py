@@ -133,6 +133,7 @@ from cv2randomizer.game.motorcycle_unlock_generation import (
     apply_motorcycle_unlock,
     inventory_for_motorcycle_unlock_packages,
 )
+from cv2randomizer.game.version_compatibility import is_game_data_layout_mismatch
 from cv2randomizer.game.booster_reward_pool import build_extractor_booster_pool
 from cv2randomizer.game.booster_generation import (
     BoosterGenerationError,
@@ -203,8 +204,9 @@ from cv2randomizer.game.shop_generation import (
     apply_shop_plan,
     prepare_shop_tables,
 )
-from cv2randomizer.game.versioning import GameVersionDetector
+from cv2randomizer.game.versioning import GameVersionDetector, VersionDetection
 from cv2randomizer.game.world_loot_dependencies import WorldLootDependencyResolver
+from cv2randomizer.game.world_loot_compatibility import apply_world_loot_export_rebindings
 from cv2randomizer.game.world_loot_generation import (
     WorldLootGenerationResult,
     apply_world_loot_plan,
@@ -215,6 +217,8 @@ from cv2randomizer.game.raw_article_grant_generation import (
     RawArticleGrantSerializer,
     WorldLootDirectGrantResult,
     apply_world_loot_direct_grants,
+    filter_compatible_raw_article_grants,
+    filter_compatible_world_loot_quest_grants,
 )
 from cv2randomizer.game.shop_packages import SHOP_TABLE_NAMES
 from cv2randomizer.game.fname_identity import FNameIdentity
@@ -249,7 +253,7 @@ from cv2randomizer.randomizer.linked_jail_rewards import (
     OGRE_SHOP_FAMILY,
     STINGER_ARTICLE,
     STINGER_SHOP_FAMILY,
-    STINGER_WORLD_EXPORT,
+    STINGER_WORLD_EXPORT_NAME,
     STINGER_WORLD_PACKAGE,
     stinger_route_unavailable_reason,
     build_ogre_shop_mirror_assignment,
@@ -277,6 +281,7 @@ from cv2randomizer.randomizer.world_loot import (
     WorldLootRandomizationPlan,
     build_world_loot_randomization_plan,
     filter_enemy_reward_world_locations,
+    world_loot_slot,
 )
 
 
@@ -906,6 +911,8 @@ class GenerationEngine:
                 prepared_cache_root=entry / "prepared-assets",
                 game_version=detection.version_id,
                 data_revision=detection.catalog_revision,
+                display_version=detection.display_version,
+                compatibility_profile=detection.world_loot_compatibility_profile,
                 extractor=staged_extractor,
                 material_locations=renewable_material_locations(catalogs.world_loot),
                 progress=progress,
@@ -1059,6 +1066,8 @@ class GenerationEngine:
         prepared_cache_root: Path | None = None,
         game_version: str,
         data_revision: str,
+        compatibility_profile: str | None,
+        display_version: str | None = None,
         extractor: IoStoreAssetExtractor,
         material_locations,
         progress: Progress | None,
@@ -1120,6 +1129,7 @@ class GenerationEngine:
                 mappings_path=mappings_path,
                 game_version=game_version,
                 data_revision=data_revision,
+                display_version=display_version,
                 extractor=extractor,
                 prepared_cache_root=prepared_cache_root,
                 progress=progress,
@@ -1134,6 +1144,14 @@ class GenerationEngine:
                 parameter.kind is inspect.Parameter.VAR_KEYWORD for parameter in stage_parameters.values()
             ):
                 world_stage_kwargs["candidate_name_values"] = candidate_name_values
+            if "compatibility_profile" in stage_parameters or any(
+                parameter.kind is inspect.Parameter.VAR_KEYWORD for parameter in stage_parameters.values()
+            ):
+                world_stage_kwargs["compatibility_profile"] = compatibility_profile
+            if "display_version" in stage_parameters or any(
+                parameter.kind is inspect.Parameter.VAR_KEYWORD for parameter in stage_parameters.values()
+            ):
+                world_stage_kwargs["display_version"] = display_version
             if "memory_scheduler" in stage_parameters or any(
                 parameter.kind is inspect.Parameter.VAR_KEYWORD for parameter in stage_parameters.values()
             ):
@@ -1152,6 +1170,13 @@ class GenerationEngine:
                 world_stage_kwargs["helper_metrics_callback"] = memory_diagnostics.observe_helper
             staged_world = self.world_loot_resolver.stage_for_locations(**world_stage_kwargs)
             dependency_index = staged_world.dependency_index
+            if dependency_index is not None:
+                catalogs = replace(
+                    catalogs,
+                    world_loot=apply_world_loot_export_rebindings(catalogs.world_loot, dependency_index),
+                )
+                eligible = apply_world_loot_export_rebindings(eligible, dependency_index)
+                material_locations = renewable_material_locations(catalogs.world_loot)
         if cdo_locations:
             if dependency_index is None:
                 dependency_index = {
@@ -1257,15 +1282,24 @@ class GenerationEngine:
                 "blueprint_packages": [],
                 "blueprint_cdo_defaults": {},
             }
+        dependency_index["compatibility_profile"] = compatibility_profile
+        dependency_index.setdefault("world_loot_export_rebindings", [])
         map_exports = {
             (str(package).casefold(), str(export_index)): class_info
             for package, exports in dependency_index.get("maps", {}).items()
             if isinstance(exports, dict)
             for export_index, class_info in exports.items()
         }
+        incompatible_map_packages = _incompatible_world_loot_map_packages(dependency_index)
+        incompatible_locations = _incompatible_world_loot_location_keys(dependency_index)
         cdo_descriptors = dependency_index.get("blueprint_cdo_defaults", {})
         location_descriptors: dict[str, dict[str, Any]] = {}
         for location in catalogs.world_loot:
+            if (
+                location.package_path.casefold() in incompatible_map_packages
+                or _world_loot_location_key(location.package_path, location.export_index) in incompatible_locations
+            ):
+                continue
             descriptor_key = _world_loot_location_key(location.package_path, location.export_index)
             if descriptor_key in location_descriptors:
                 raise GenerationError(f"Duplicate prepared World Loot location identity: {descriptor_key}.")
@@ -1423,6 +1457,11 @@ class GenerationEngine:
                 for profile in validation.profiles
             }
         audited_reset_by_class: dict[str, bool | None] = {}
+        incompatible_material_location_rows = dependency_index.setdefault(
+            "incompatible_world_loot_locations", [],
+        )
+        if not isinstance(incompatible_material_location_rows, list):
+            raise GenerationError("Extracted World Loot compatibility records are invalid.")
         for location in catalogs.world_loot:
             if location.location_type not in {
                 "RENEWABLE_INGREDIENT", "HEALING_UPGRADE_GOLDEN_SEED", "HEALING_UPGRADE_GOLDEN_BLOOD_BEAD",
@@ -1449,15 +1488,35 @@ class GenerationEngine:
             if class_package.casefold() not in validated_material_classes:
                 continue
             profile = validated_profiles.get(class_package.casefold()) if class_package else None
+            expected_class_name = f"{class_package.rsplit('/', 1)[-1]}_C" if class_package else None
             if (
                 not isinstance(profile, dict)
                 or profile.get("material_hierarchy") is not True
+                or profile.get("class_name") != expected_class_name
                 or (location.location_type.startswith("HEALING_UPGRADE_") and profile.get("effective_reset_on_yadorigi_rest") is True)
                 or (location.location_type == "RENEWABLE_INGREDIENT" and profile.get("effective_reset_on_yadorigi_rest") is False)
             ):
-                raise GenerationError(
-                    f"Structural pickup classification did not validate for {location.package_path}#{location.export_index}."
-                )
+                reason = (
+                    profile.get("reason") if isinstance(profile, dict) else None
+                ) or "structural pickup class is incompatible with the audited catalog layout"
+                record = next((
+                    row for row in incompatible_material_location_rows
+                    if isinstance(row, dict)
+                    and str(row.get("package_path", "")).casefold() == location.package_path.casefold()
+                    and row.get("export_index") == location.export_index
+                ), None)
+                if record is None:
+                    record = {
+                        "package_path": location.package_path,
+                        "export_index": location.export_index,
+                        "reasons": [],
+                    }
+                    incompatible_material_location_rows.append(record)
+                reasons = record.get("reasons")
+                if not isinstance(reasons, list):
+                    raise GenerationError("Extracted World Loot compatibility reasons are invalid.")
+                reasons.append(f"structural pickup class is incompatible: {reason}")
+                continue
             profile["catalogued_effective_reset_on_yadorigi_rest"] = audited_reset_by_class.get(class_package.casefold())
             profile["reset_validation_source"] = (
                 "runtime_serialized_profile"
@@ -1524,8 +1583,54 @@ class GenerationEngine:
                 "The supported installation is missing required core source packages: "
                 + ", ".join(missing_core)
             )
+        incompatible_world_map_packages: frozenset[str] = frozenset()
+        incompatible_world_location_count = 0
+        incompatible_raw_grant_count = 0
+        incompatible_quest_grant_count = 0
+        version_skip_counts: dict[str, int] = {}
+        catalog_world_loot: tuple[WorldLootLocation, ...] = ()
+        dependency_index = None
         try:
             catalogs = self.catalog_store.load(detection.catalog_revision)
+            if cache_snapshot is not None and cache_snapshot.metadata is not None:
+                dependency_index = cache_snapshot.metadata.get("world_loot_dependency_index")
+            compatibility_profile = detection.world_loot_compatibility_profile
+            cached_profile = (
+                dependency_index.get("compatibility_profile")
+                if isinstance(dependency_index, dict) else None
+            )
+            if compatibility_profile is not None and cached_profile != compatibility_profile:
+                raise GenerationError(
+                    f"The {compatibility_profile} World Loot profile is missing from extracted game data. "
+                    "Run Extract Game Data again before generating."
+                )
+            if compatibility_profile is None and cached_profile is not None:
+                raise GenerationError(
+                    "Extracted World Loot data belongs to a different game-version profile. "
+                    "Run Extract Game Data again before generating."
+                )
+            if dependency_index is not None:
+                catalogs = replace(
+                    catalogs,
+                    world_loot=apply_world_loot_export_rebindings(catalogs.world_loot, dependency_index),
+                )
+            catalog_world_loot = catalogs.world_loot
+            incompatible_world_map_packages = _incompatible_world_loot_map_packages(dependency_index)
+            incompatible_world_location_keys = _incompatible_world_loot_location_keys(dependency_index)
+            if incompatible_world_map_packages or incompatible_world_location_keys:
+                for location in catalogs.world_loot:
+                    if (
+                        location.package_path.casefold() not in incompatible_world_map_packages
+                        and _world_loot_location_key(location.package_path, location.export_index)
+                        not in incompatible_world_location_keys
+                    ):
+                        continue
+                    category = _version_skip_category(location, request.options)
+                    if category is not None:
+                        _add_version_skip_count(version_skip_counts, category, 1)
+                runtime_world_loot = _compatible_world_loot_locations(catalogs.world_loot, dependency_index)
+                incompatible_world_location_count = len(catalogs.world_loot) - len(runtime_world_loot)
+                catalogs = replace(catalogs, world_loot=runtime_world_loot)
             renewable_locations = renewable_material_locations(catalogs.world_loot)
             catalogs = replace(
                 catalogs,
@@ -1535,24 +1640,25 @@ class GenerationEngine:
             )
             catalogs_for_manifest = catalogs
             catalogs.require_features(
-                world_loot=request.options.randomize_world_loot,
-                materials=request.options.randomize_materials,
+                world_loot=request.options.randomize_world_loot and bool(catalogs.world_loot),
+                materials=request.options.randomize_materials and bool(renewable_locations),
                 shops=(
-                    request.options.randomize_shops
-                    or request.options.randomize_npc_traders
-                    or request.options.unlock_npc_trader_shops
+                    bool(catalogs.shops)
+                    and (
+                        request.options.randomize_shops
+                        or request.options.randomize_npc_traders
+                        or request.options.unlock_npc_trader_shops
+                    )
                 ),
             )
             prepared_material_profiles = None
-            if cache_snapshot is not None and cache_snapshot.metadata is not None:
-                dependency_index = cache_snapshot.metadata.get("world_loot_dependency_index")
-                if dependency_index is not None:
-                    _validate_world_loot_prepared_descriptors(
-                        catalogs.world_loot, dependency_index, inventory,
-                    )
-                    profiles = dependency_index.get("renewable_class_profiles")
-                    if isinstance(profiles, dict):
-                        prepared_material_profiles = profiles
+            if dependency_index is not None:
+                _validate_world_loot_prepared_descriptors(
+                    catalogs.world_loot, dependency_index, inventory,
+                )
+                profiles = dependency_index.get("renewable_class_profiles")
+                if isinstance(profiles, dict):
+                    prepared_material_profiles = profiles
         except (CatalogError, OSError, ValueError) as error:
             raise GenerationError(f"Catalog validation failed: {error}") from error
         enemy_drop_catalog: EnemyDropCatalog | None = None
@@ -1594,7 +1700,7 @@ class GenerationEngine:
         if request.options.randomize_world_loot or request.options.randomize_initial_inventory:
             try:
                 jail_catalog = self.jail_catalog_store.load()
-                jail_catalog.validate_world_sources(catalogs.world_loot)
+                jail_catalog.validate_world_sources(catalog_world_loot)
             except (JailCatalogError, OSError, ValueError) as error:
                 raise GenerationError(f"Jail catalog validation failed: {error}") from error
         field_enemy_catalog: FieldEnemyCatalog | None = None
@@ -1623,7 +1729,7 @@ class GenerationEngine:
         ):
             try:
                 bequeathed_formae_catalog = self.bequeathed_formae_catalog_store.load()
-                bequeathed_formae_catalog.validate_sources(catalogs.world_loot, catalogs.shops)
+                bequeathed_formae_catalog.validate_sources(catalog_world_loot, catalogs.shops)
             except (BequeathedFormaCatalogError, OSError, ValueError) as error:
                 raise GenerationError(f"Bequeathed Forma catalog validation failed: {error}") from error
 
@@ -1647,16 +1753,63 @@ class GenerationEngine:
             inventory,
         )
         availability_warnings: list[str] = []
+        if incompatible_world_map_packages or incompatible_world_location_keys:
+            availability_warnings.append(
+                f"World Loot left {incompatible_world_location_count} locations unchanged because their exports "
+                "could not be matched safely to this game version."
+            )
+            if request.options.randomize_materials and not catalogs.materials:
+                availability_warnings.append(
+                    "Ingredients skipped because no compatible renewable material locations remain."
+                )
 
         # Runtime eligibility follows actual source availability. BASE/DLC/
         # AFTER_ENDING/UNKNOWN labels remain descriptive catalog metadata only.
+        world_locations_before_inventory = catalogs.world_loot
+        world_locations_with_packages = _available_world_locations(world_locations_before_inventory, inventory)
+        available_world_keys = {
+            _world_loot_location_key(location.package_path, location.export_index)
+            for location in world_locations_with_packages
+        }
+        if request.options.randomize_world_loot:
+            for location in world_locations_before_inventory:
+                if _world_loot_location_key(location.package_path, location.export_index) in available_world_keys:
+                    continue
+                category = _version_skip_category(location, request.options)
+                if category is not None and category != "Ingredients":
+                    _add_version_skip_count(version_skip_counts, category, 1)
         available_world = filter_enemy_reward_world_locations(
-            _available_world_locations(catalogs.world_loot, inventory),
+            world_locations_with_packages,
             enabled=request.options.randomize_enemy_drops,
         )
+        if request.options.randomize_world_loot:
+            available_world, incompatible_raw_grants = filter_compatible_raw_article_grants(
+                available_world,
+                game_root=game_root,
+                game_version=detection.version_id,
+                data_revision=detection.catalog_revision,
+                extractor=asset_extractor,
+                compatibility_profile=detection.world_loot_compatibility_profile,
+                mappings_path=request.mappings_path,
+                serializer=self.raw_article_grant_serializer,
+                progress=progress,
+            )
+            if incompatible_raw_grants:
+                incompatible_raw_grant_count = len(incompatible_raw_grants)
+                _add_version_skip_count(
+                    version_skip_counts, "World Loot", incompatible_raw_grant_count,
+                )
+                skipped_names = ", ".join(
+                    item.display_name or str(item.destination_id)
+                    for item in incompatible_raw_grants
+                )
+                availability_warnings.append(
+                    "Direct World Loot rewards left vanilla because their source data could not be "
+                    f"verified against the validated layout: {skipped_names}."
+                )
         stinger_world_active = request.options.randomize_world_loot and any(
             location.package_path.casefold() == STINGER_WORLD_PACKAGE.casefold()
-            and location.export_index == STINGER_WORLD_EXPORT
+            and location.export_name.casefold() == STINGER_WORLD_EXPORT_NAME.casefold()
             for location in available_world
         )
         available_materials = (
@@ -1664,6 +1817,16 @@ class GenerationEngine:
             if request.options.randomize_materials
             else ()
         )
+        if request.options.randomize_materials:
+            available_material_keys = {
+                _world_loot_location_key(item.package_path, item.export_index)
+                for item in available_materials
+            }
+            missing_materials = sum(
+                _world_loot_location_key(item.package_path, item.export_index) not in available_material_keys
+                for item in catalogs.materials
+            )
+            _add_version_skip_count(version_skip_counts, "Ingredients", missing_materials)
         shop_package_by_family = {
             family: f"/Game/Blueprint/GameSystem/Shop/{table}"
             for family, table in SHOP_TABLE_NAMES.items()
@@ -1696,7 +1859,7 @@ class GenerationEngine:
                 location for location in available_world
                 if not (
                     location.package_path.casefold() == STINGER_WORLD_PACKAGE.casefold()
-                    and location.export_index == STINGER_WORLD_EXPORT
+                    and location.export_name.casefold() == STINGER_WORLD_EXPORT_NAME.casefold()
                 )
             )
             availability_warnings.append(
@@ -1736,6 +1899,14 @@ class GenerationEngine:
             family for family in requested_trader_families
             if family not in available_shop_families and not inventory.contains(shop_package_by_family[family])
         )
+        missing_version_shop_families = set(missing_shop_families) | set(missing_trader_families)
+        if missing_version_shop_families:
+            skipped_missing_shop_offers = sum(
+                _is_finite_shop_catalog_offer(product)
+                for product in catalogs.shops
+                if product.family.upper() in missing_version_shop_families
+            )
+            _add_version_skip_count(version_skip_counts, "Shops", skipped_missing_shop_offers)
         if missing_trader_families:
             if "TRADE_DLC" in missing_trader_families:
                 availability_warnings.append("NPC Trader Liv skipped because the optional TRADE_DLC table is absent.")
@@ -1766,6 +1937,11 @@ class GenerationEngine:
         if request.options.randomize_world_loot and field_enemy_catalog is not None:
             available_field_rows = field_enemy_catalog.eligible_locations(inventory)
             if len(available_field_rows) != len(field_enemy_catalog.locations):
+                _add_version_skip_count(
+                    version_skip_counts,
+                    "Enemy Drops",
+                    len(field_enemy_catalog.locations) - len(available_field_rows),
+                )
                 availability_warnings.append(
                     f"{len(field_enemy_catalog.locations) - len(available_field_rows)} FieldEnemy locations skipped: "
                     "their source packages are absent; available locations remain randomized."
@@ -1780,6 +1956,12 @@ class GenerationEngine:
                 if all(inventory.contains(package) for package in slot.physical_source_packages)
                 and inventory.contains(slot.original_blood_code_package)
             )
+            if request.options.randomize_blood_codes:
+                _add_version_skip_count(
+                    version_skip_counts,
+                    "Blood Codes",
+                    len(blood_code_catalog.slots) - len(blood_slots),
+                )
             active_packages = {
                 package
                 for slot in blood_slots
@@ -1843,6 +2025,16 @@ class GenerationEngine:
                 if not inventory.contains(table.virtual_package)
             )
             if missing_tables:
+                if request.options.randomize_extractor_recipes or request.options.cheaper_booster_extractor:
+                    _add_version_skip_count(
+                        version_skip_counts,
+                        "Booster Extractor",
+                        sum(
+                            len(table.rows)
+                            for table in extractor_catalog.tables
+                            if table.table_name in missing_tables
+                        ),
+                    )
                 availability_warnings.append(
                     "Extractor tables skipped because their source packages are absent: "
                     + ", ".join(missing_tables)
@@ -1858,6 +2050,17 @@ class GenerationEngine:
                 name for name, package in ENEMY_DROP_TABLES if not inventory.contains(package)
             )
             if missing_enemy_tables:
+                if request.options.randomize_enemy_drops and enemy_drop_catalog is not None:
+                    _add_version_skip_count(
+                        version_skip_counts,
+                        "Enemy Drops",
+                        sum(
+                            row.expected_slots
+                            for row in enemy_drop_catalog.rows
+                            if row.table in missing_enemy_tables
+                            and row.classification != "UNRESOLVED"
+                        ),
+                    )
                 availability_warnings.append(
                     "Enemy Drop tables skipped because their source packages are absent: "
                     + ", ".join(missing_enemy_tables)
@@ -1866,6 +2069,7 @@ class GenerationEngine:
 
         if booster_catalog is not None:
             if request.options.randomize_boosters and not inventory.contains(BOOSTER_TABLE_PACKAGE):
+                _add_version_skip_count(version_skip_counts, "Boosters", len(booster_catalog.slots))
                 availability_warnings.append("Boosters skipped: the mastery DataTable source package is missing.")
             elif request.options.randomize_boosters:
                 missing_rows = sum(
@@ -1873,6 +2077,7 @@ class GenerationEngine:
                     for slot in booster_catalog.slots
                 )
                 if missing_rows:
+                    _add_version_skip_count(version_skip_counts, "Boosters", missing_rows)
                     availability_warnings.append(
                         f"{missing_rows} Booster mastery rows skipped: their Article source package is absent."
                     )
@@ -1977,6 +2182,9 @@ class GenerationEngine:
         world_result: WorldLootGenerationResult | None = None
         world_direct_grant_results: tuple[WorldLootDirectGrantResult, ...] = ()
         shop_result: ShopGenerationResult | None = None
+        unavailable_shop_stage_families: tuple[str, ...] = ()
+        unavailable_installed_shop_families: tuple[str, ...] = ()
+        incompatible_shop_product_count = 0
         linked_stinger_shop_product: ShopTableProduct | None = None
         linked_ogre_shop_product: ShopTableProduct | None = None
         material_result: MaterialGenerationResult | None = None
@@ -2014,35 +2222,101 @@ class GenerationEngine:
             # Extractor then borrows selected Booster occurrences from this
             # plan and returns one unused vanilla recipe output to each source.
             # This keeps the combined inventory a strict one-for-one exchange.
-            world_plan = build_world_loot_randomization_plan(
-                (*catalogs.world_loot, *(field_enemy_catalog.locations if field_enemy_catalog else ())),
-                seed,
-                enabled=request.options.randomize_world_loot,
-                include_healing=request.options.randomize_healing,
-                unsafe_packages=catalogs.unsafe_packages,
-                available_reward_packages=source_availability.available_packages,
-                supported_quest_grant_destinations=(
+            if request.options.randomize_world_loot:
+                quest_sources = (
+                    *catalogs.world_loot,
+                    *(field_enemy_catalog.locations if field_enemy_catalog is not None else ()),
+                )
+                compatible_quest_sources, incompatible_quest_grants = filter_compatible_world_loot_quest_grants(
+                    quest_sources,
+                    game_root=game_root,
+                    work_root=workspace.root,
+                    mappings_path=mappings,
+                    game_version=detection.version_id,
+                    data_revision=detection.catalog_revision,
+                    extractor=asset_extractor,
+                    serializer=self.world_quest_article_serializer,
+                    compatibility_profile=detection.world_loot_compatibility_profile,
+                    progress=progress,
+                )
+                compatible_quest_by_id = {
+                    (item.package_path.casefold(), str(item.destination_id).casefold()): item
+                    for item in compatible_quest_sources
+                    if item.destination_kind == "QUEST_ARTICLE_GRANT"
+                }
+                catalogs = replace(
+                    catalogs,
+                    world_loot=tuple(
+                        compatible_quest_by_id.get(
+                            (item.package_path.casefold(), str(item.destination_id).casefold()), item,
+                        )
+                        for item in catalogs.world_loot
+                        if item.destination_kind != "QUEST_ARTICLE_GRANT"
+                        or (item.package_path.casefold(), str(item.destination_id).casefold()) in compatible_quest_by_id
+                    ),
+                )
+                if field_enemy_catalog is not None:
+                    field_enemy_catalog = replace(
+                        field_enemy_catalog,
+                        locations=tuple(
+                            compatible_quest_by_id.get(
+                                (item.package_path.casefold(), str(item.destination_id).casefold()), item,
+                            )
+                            for item in field_enemy_catalog.locations
+                            if item.destination_kind != "QUEST_ARTICLE_GRANT"
+                            or (item.package_path.casefold(), str(item.destination_id).casefold()) in compatible_quest_by_id
+                        ),
+                    )
+                if incompatible_quest_grants:
+                    incompatible_quest_grant_count = len(incompatible_quest_grants)
+                    _add_version_skip_count(
+                        version_skip_counts, "Quest Rewards", incompatible_quest_grant_count,
+                    )
+                    skipped_names = ", ".join(
+                        item.display_name or str(item.destination_id)
+                        for item in incompatible_quest_grants
+                    )
+                    availability_warnings.append(
+                        "Structured World Loot quest rewards left vanilla because their installed task data "
+                        f"does not match the validated layout: {skipped_names}."
+                    )
+            world_plan_locations = (
+                *catalogs.world_loot,
+                *(field_enemy_catalog.locations if field_enemy_catalog else ()),
+            )
+            world_plan_candidates = (
+                (
+                    *(
+                        defensive_gadget_world_candidates(
+                            _without_reserved_rewards(defensive_gadget_catalog, reward_reservations, "defensive_gadget"),
+                        )
+                        if defensive_gadget_catalog is not None else ()
+                    ),
+                    *(jail_world_candidates(
+                        _without_reserved_rewards(jail_catalog, reward_reservations, "jail"),
+                        world_loot=catalogs.world_loot,
+                    )
+                      if jail_catalog is not None else ()),
+                    *(canonical_article_world_candidates(canonical_article_reward_catalog, include_boosters=False)
+                      if canonical_article_reward_catalog is not None else ()),
+                )
+                if request.options.randomize_world_loot else ()
+            )
+            world_plan_options = {
+                "enabled": request.options.randomize_world_loot,
+                "include_healing": request.options.randomize_healing,
+                "unsafe_packages": catalogs.unsafe_packages,
+                "available_reward_packages": source_availability.available_packages,
+                "supported_quest_grant_destinations": (
                     field_enemy_catalog.destination_ids if field_enemy_catalog is not None else ()
                 ),
-                reserved_reward_identities=reward_reservations.asset_paths,
-                catalog_candidates=(
-                    (
-                        *(
-                            defensive_gadget_world_candidates(
-                                _without_reserved_rewards(defensive_gadget_catalog, reward_reservations, "defensive_gadget"),
-                            )
-                            if defensive_gadget_catalog is not None else ()
-                        ),
-                        *(jail_world_candidates(
-                            _without_reserved_rewards(jail_catalog, reward_reservations, "jail"),
-                            world_loot=catalogs.world_loot,
-                        )
-                          if jail_catalog is not None else ()),
-                        *(canonical_article_world_candidates(canonical_article_reward_catalog, include_boosters=False)
-                          if canonical_article_reward_catalog is not None else ()),
-                    )
-                    if request.options.randomize_world_loot else ()
-                ),
+                "reserved_reward_identities": reward_reservations.asset_paths,
+                "catalog_candidates": world_plan_candidates,
+            }
+            world_plan = build_world_loot_randomization_plan(
+                world_plan_locations,
+                seed,
+                **world_plan_options,
             )
             if (request.options.randomize_extractor_recipes or request.options.cheaper_booster_extractor) \
                     and extractor_catalog is not None and extractor_catalog.tables:
@@ -2073,11 +2347,28 @@ class GenerationEngine:
                         available_reward_packages=source_availability.available_packages,
                         progress=progress,
                     )
+                    incompatible_tables = tuple(
+                        getattr(extractor_preparation, "incompatible_tables", ())
+                    )
+                    if incompatible_tables:
+                        skipped_rows = sum(
+                            len(table.rows)
+                            for table in extractor_catalog.tables
+                            if table.table_name in incompatible_tables
+                        )
+                        _add_version_skip_count(
+                            version_skip_counts, "Booster Extractor", skipped_rows,
+                        )
+                        availability_warnings.append(
+                            "Booster Extractor files left unchanged because their layout is incompatible with "
+                            "this game version: " + ", ".join(incompatible_tables) + "."
+                        )
                 except ExtractorGenerationError as error:
-                    if request.options.cheaper_booster_extractor:
-                        raise GenerationError(
-                            f"Could not prepare Booster recipes for the cheaper Extractor option: {error}"
-                        ) from error
+                    _add_version_skip_count(
+                        version_skip_counts,
+                        "Booster Extractor",
+                        sum(len(table.rows) for table in extractor_catalog.tables),
+                    )
                     source_availability = _mark_invalid_sources(
                         source_availability,
                         "extractor",
@@ -2118,21 +2409,47 @@ class GenerationEngine:
                         extractor=asset_extractor,
                         progress=progress,
                     )
+                    unavailable_shop_stage_families = tuple(getattr(
+                        shop_stage,
+                        "unavailable_families",
+                        getattr(shop_stage, "unavailable_optional_families", ()),
+                    ))
                     unexpected = tuple(
-                        family for family in shop_stage.unavailable_optional_families
+                        family for family in unavailable_shop_stage_families
                         if inventory.contains(shop_package_by_family[family])
                     )
                     if unexpected:
-                        source_availability = _mark_invalid_sources(
-                            source_availability,
-                            "shops",
-                            (shop_package_by_family[family] for family in unexpected),
-                            "installed package inventory listed this optional table, but extraction omitted it",
-                        )
+                        unavailable_installed_shop_families = unexpected
                         availability_warnings.append(
-                            "Optional Shop tables marked invalid after extraction omitted installed packages: "
+                            "Shop tables marked unavailable after extraction or validation failed for installed packages: "
                             + ", ".join(unexpected)
                             + "."
+                        )
+                    incompatible_shop_families = tuple(getattr(shop_stage, "incompatible_families", ()))
+                    if incompatible_shop_families:
+                        availability_warnings.append(
+                            "Shop tables skipped because their layout does not match this game's version: "
+                            + ", ".join(incompatible_shop_families)
+                            + "."
+                        )
+                        skipped_incompatible_shop_offers = sum(
+                            _is_finite_shop_catalog_offer(product)
+                            for product in catalogs.shops
+                            if product.family.upper() in set(incompatible_shop_families)
+                        )
+                        _add_version_skip_count(
+                            version_skip_counts, "Shops", skipped_incompatible_shop_offers,
+                        )
+                    skipped_catalog_product_count = int(getattr(
+                        shop_stage, "skipped_catalog_product_count", 0,
+                    ))
+                    incompatible_shop_product_count = skipped_catalog_product_count
+                    _add_version_skip_count(
+                        version_skip_counts, "Shops", skipped_catalog_product_count,
+                    )
+                    if skipped_catalog_product_count:
+                        availability_warnings.append(
+                            f"Skipped {skipped_catalog_product_count} shop offers absent from this game's version."
                         )
                     parsed_shop_products = tuple(
                         product for table in shop_stage.tables for product in table.parsed.products
@@ -2162,6 +2479,13 @@ class GenerationEngine:
                         product for product in parsed_shop_products
                         if not inventory.contains(product.article_package_path)
                     )
+                    unavailable_finite_shop_products = sum(
+                        shop_slot_lock_reason(product) is None
+                        for product in unavailable_shop_products
+                    )
+                    _add_version_skip_count(
+                        version_skip_counts, "Shops", unavailable_finite_shop_products,
+                    )
                     # Use the same decoded identity in availability diagnostics
                     # as in eligibility; do not report ambiguous literal aliases.
                     shop_sources = resolve_content_availability({"shops": (
@@ -2172,6 +2496,16 @@ class GenerationEngine:
                         *(source for source in source_availability.sources if source.subsystem != "shops"),
                         *shop_sources.sources,
                     ))
+                    if unavailable_installed_shop_families:
+                        source_availability = _mark_invalid_sources(
+                            source_availability,
+                            "shops",
+                            (
+                                shop_package_by_family[family]
+                                for family in unavailable_installed_shop_families
+                            ),
+                            "installed package inventory listed this table, but its installed-version layout could not be validated",
+                        )
                     shop_products = exclude_linked_jail_shop_routes(
                         product for product in available_products
                         if product.family.upper() in requested_shop_families
@@ -2189,17 +2523,55 @@ class GenerationEngine:
                     )
                 except (ShopGenerationError, OSError, ValueError) as error:
                     if linked_stinger_shop_required:
-                        raise GenerationError(
-                            f"Could not validate Josee's linked Stinger shop route; refusing to create a duplicate Jail reward: {error}"
-                        ) from error
+                        if isinstance(error, OSError):
+                            raise GenerationError(
+                                f"Could not read Josee's linked Stinger shop route safely: {error}"
+                            ) from error
+                        stinger_sources = tuple(
+                            location for location in world_plan_locations
+                            if location.package_path.casefold() == STINGER_WORLD_PACKAGE.casefold()
+                            and location.export_name.casefold() == STINGER_WORLD_EXPORT_NAME.casefold()
+                        )
+                        if len(stinger_sources) != 1:
+                            raise GenerationError(
+                                "Could not identify one canonical Josee Stinger World Loot source to leave vanilla."
+                            ) from error
+                        try:
+                            world_plan = build_world_loot_randomization_plan(
+                                world_plan_locations,
+                                seed,
+                                excluded_slots=(world_loot_slot(stinger_sources[0]),),
+                                **world_plan_options,
+                            )
+                            if extractor_plan is not None:
+                                world_plan = exchange_extractor_world_sources(world_plan, extractor_plan)
+                        except (ValueError, RuntimeError) as replan_error:
+                            raise GenerationError(
+                                f"Could not safely keep Josee's Stinger source vanilla: {replan_error}"
+                            ) from replan_error
+                        _add_version_skip_count(version_skip_counts, "World Loot", 1)
+                        availability_warnings.append(
+                            "Josee's Stinger pickup left vanilla because its linked Shop row could not be "
+                            f"validated for this game version: {error}."
+                        )
+                        stinger_world_active = False
+                        linked_stinger_shop_required = False
                     source_availability = _mark_invalid_sources(
                         source_availability,
                         "shops",
                         (shop_package_by_family[family] for family in available_table_families),
                         str(error),
                     )
+                    skipped_shop_offers = sum(
+                        _is_finite_shop_catalog_offer(product)
+                        for product in catalogs.shops
+                        if product.family.upper() in set(available_table_families)
+                    )
+                    _add_version_skip_count(version_skip_counts, "Shops", skipped_shop_offers)
                     availability_warnings.append(f"Shops skipped: source table validation failed: {error}")
                     shop_stage = None
+                    unavailable_shop_stage_families = ()
+                    unavailable_installed_shop_families = ()
                     parsed_shop_products = ()
                     shop_products = ()
                     trader_products = ()
@@ -2235,7 +2607,7 @@ class GenerationEngine:
                     enabled_families=global_families,
                     mix_postgame_dlc_with_base=request.options.mix_postgame_dlc_with_base,
                     unavailable_families=(
-                        shop_stage.unavailable_optional_families if shop_stage is not None else ()
+                        unavailable_shop_stage_families
                     ),
                     reserved_reward_identities=reward_reservations.asset_paths,
                 )
@@ -2247,7 +2619,7 @@ class GenerationEngine:
                     enabled_families=ordinary_families,
                     mix_postgame_dlc_with_base=request.options.mix_postgame_dlc_with_base,
                     unavailable_families=(
-                        shop_stage.unavailable_optional_families if shop_stage is not None else ()
+                        unavailable_shop_stage_families
                     ),
                     reserved_reward_identities=reward_reservations.asset_paths,
                 ))
@@ -2260,7 +2632,7 @@ class GenerationEngine:
                         if family in requested_trader_families
                         and (
                             family not in available_table_families
-                            or (shop_stage is not None and family in shop_stage.unavailable_optional_families)
+                            or family in unavailable_shop_stage_families
                         )
                     ),
                     reserved_reward_identities=reward_reservations.asset_paths,
@@ -2280,24 +2652,16 @@ class GenerationEngine:
                         requested_families=requested_trader_families,
                         unavailable_families=tuple(dict.fromkeys((
                             *missing_trader_families,
-                            *(shop_stage.unavailable_optional_families if shop_stage is not None else ()),
+                            *unavailable_shop_stage_families,
                         ))),
                     ),
                 )
             if request.options.randomize_initial_inventory:
                 if not inventory.contains(INITIAL_INVENTORY_PACKAGE):
-                    if request.options.motorcycle_unlocked:
-                        raise GenerationError(
-                            "Motorcycle unlock is enabled, but DA_InitialInventory_Player is absent from the installed package inventory."
-                        )
                     availability_warnings.append(
                         "Initial Inventory skipped: DA_InitialInventory_Player is absent from the installed package inventory."
                     )
                 elif defensive_gadget_catalog is None or jail_catalog is None or mappings is None:
-                    if request.options.motorcycle_unlocked:
-                        raise GenerationError(
-                            "Motorcycle unlock could not be staged with Initial Inventory because its source catalogs or CV2.usmap mapping are unavailable."
-                        )
                     availability_warnings.append(
                         "Initial Inventory skipped: its source catalogs or CV2.usmap mapping are unavailable."
                     )
@@ -2347,7 +2711,6 @@ class GenerationEngine:
                         initial_inventory_preparation = None
                         _handle_initial_inventory_preparation_failure(
                             error,
-                            motorcycle_unlocked=request.options.motorcycle_unlocked,
                             availability_warnings=availability_warnings,
                         )
                     else:
@@ -2355,38 +2718,45 @@ class GenerationEngine:
             elif request.options.motorcycle_unlocked:
                 motorcycle_forma = MOTORCYCLE_FORMA_ARTICLE_PACKAGE
                 if not inventory.contains(INITIAL_INVENTORY_PACKAGE):
-                    raise GenerationError(
-                        "Motorcycle unlock is enabled, but DA_InitialInventory_Player is absent from the installed package inventory."
+                    availability_warnings.append(
+                        "Motorcycle at Start skipped: DA_InitialInventory_Player is absent from this game version."
                     )
-                motorcycle_inventory = inventory
-                if not motorcycle_inventory.contains(motorcycle_forma):
-                    try:
-                        motorcycle_inventory = asset_extractor.inspect_package_inventory(game_root)
-                    except (AssetExtractionError, OSError, RuntimeError, ValueError) as error:
-                        raise GenerationError(
-                            f"Could not verify the installed Motorcycle Forma Article: {error}"
-                        ) from error
-                if not motorcycle_inventory.contains(motorcycle_forma):
-                    raise GenerationError(
-                        "Motorcycle unlock is enabled, but the audited Motorcycle Forma Article is absent from the installed game."
-                    )
-                if mappings is None:
-                    raise GenerationError("Motorcycle unlock is enabled, but CV2.usmap is unavailable.")
-                try:
-                    initial_inventory_preparation = prepare_initial_inventory(
-                        None,
-                        game_root=game_root,
-                        work_root=workspace.root,
-                        mappings_path=mappings,
-                        game_version=detection.version_id,
-                        data_revision=detection.catalog_revision,
-                        extractor=asset_extractor,
-                        serializer=self.initial_inventory_serializer,
-                        motorcycle_unlocked=True,
-                        progress=progress,
-                    )
-                except (InitialInventoryGenerationError, ValueError, OSError) as error:
-                    raise GenerationError(f"Could not grant Motorcycle Forma to new games: {error}") from error
+                else:
+                    motorcycle_inventory = inventory
+                    if not motorcycle_inventory.contains(motorcycle_forma):
+                        try:
+                            motorcycle_inventory = asset_extractor.inspect_package_inventory(game_root)
+                        except (AssetExtractionError, OSError, RuntimeError, ValueError) as error:
+                            raise GenerationError(
+                                f"Could not verify the installed Motorcycle Forma Article: {error}"
+                            ) from error
+                    if not motorcycle_inventory.contains(motorcycle_forma):
+                        availability_warnings.append(
+                            "Motorcycle at Start skipped: its Forma Article is absent from this game version."
+                        )
+                    elif mappings is None:
+                        availability_warnings.append(
+                            "Motorcycle at Start skipped: CV2.usmap is unavailable."
+                        )
+                    else:
+                        try:
+                            initial_inventory_preparation = prepare_initial_inventory(
+                                None,
+                                game_root=game_root,
+                                work_root=workspace.root,
+                                mappings_path=mappings,
+                                game_version=detection.version_id,
+                                data_revision=detection.catalog_revision,
+                                extractor=asset_extractor,
+                                serializer=self.initial_inventory_serializer,
+                                motorcycle_unlocked=True,
+                                progress=progress,
+                            )
+                        except (InitialInventoryGenerationError, ValueError, OSError) as error:
+                            _handle_initial_inventory_preparation_failure(
+                                error,
+                                availability_warnings=availability_warnings,
+                            )
             if request.options.motorcycle_unlocked:
                 phase_started = time.perf_counter()
                 try:
@@ -2400,24 +2770,36 @@ class GenerationEngine:
                         if not motorcycle_package_inventory.contains(package)
                     ]
                     if missing_motorcycle_packages:
-                        raise MotorcycleUnlockError(
-                            "Motorcycle unlock is enabled, but required installed packages are absent: "
+                        availability_warnings.append(
+                            "Motorcycle at Start skipped: required StoryFlag/player package(s) are absent: "
                             + ", ".join(missing_motorcycle_packages)
+                            + "."
                         )
-                    motorcycle_unlock_result = apply_motorcycle_unlock(
-                        game_root=game_root,
-                        work_root=workspace.root,
-                        output_content_root=output_root,
-                        mappings_path=mappings,
-                        game_version=detection.version_id,
-                        data_revision=detection.catalog_revision,
-                        extractor=asset_extractor,
-                        package_inventory=motorcycle_package_inventory,
-                        serializer=self.motorcycle_unlock_serializer,
-                        progress=progress,
-                    )
+                    elif mappings is None:
+                        availability_warnings.append(
+                            "Motorcycle at Start skipped: CV2.usmap is unavailable."
+                        )
+                    else:
+                        motorcycle_unlock_result = apply_motorcycle_unlock(
+                            game_root=game_root,
+                            work_root=workspace.root,
+                            output_content_root=output_root,
+                            mappings_path=mappings,
+                            game_version=detection.version_id,
+                            data_revision=detection.catalog_revision,
+                            extractor=asset_extractor,
+                            package_inventory=motorcycle_package_inventory,
+                            serializer=self.motorcycle_unlock_serializer,
+                            progress=progress,
+                        )
                 except MotorcycleUnlockError as error:
-                    raise GenerationError(f"Could not unlock the motorcycle for new games: {error}") from error
+                    if is_game_data_layout_mismatch(error):
+                        availability_warnings.append(
+                            "Motorcycle at Start skipped: its StoryFlag/player data layout is incompatible "
+                            f"with this game version ({error})."
+                        )
+                    else:
+                        raise GenerationError(f"Could not unlock the motorcycle for new games: {error}") from error
                 except GenerationError:
                     raise
                 except (AssetExtractionError, OSError, RuntimeError, ValueError) as error:
@@ -2455,7 +2837,18 @@ class GenerationEngine:
                             ),
                             str(error),
                         )
+                        _add_version_skip_count(
+                            version_skip_counts,
+                            "Ingredients",
+                            len(material_locations),
+                        )
                         availability_warnings.append(f"Materials skipped: source validation failed: {error}")
+                if material_preparation is not None:
+                    skipped_materials = sum(
+                        not item.location.protected and item.reason != "unsafe package"
+                        for item in material_preparation.plan.locked_locations
+                    )
+                    _add_version_skip_count(version_skip_counts, "Ingredients", skipped_materials)
             material_plan = material_preparation.plan if material_preparation else empty_materials
             if request.options.randomize_materials and material_preparation is None:
                 # A missing source package leaves that optional location vanilla.
@@ -2485,7 +2878,34 @@ class GenerationEngine:
                             active_tables=present_enemy_tables,
                             progress=progress,
                         )
+                        incompatible_tables = tuple(
+                            getattr(enemy_drop_preparation, "incompatible_tables", ())
+                        )
+                        if incompatible_tables:
+                            skipped_drop_slots = sum(
+                                row.expected_slots
+                                for row in enemy_drop_catalog.rows
+                                if row.table in incompatible_tables
+                                and row.classification != "UNRESOLVED"
+                            )
+                            _add_version_skip_count(
+                                version_skip_counts, "Enemy Drops", skipped_drop_slots,
+                            )
+                            availability_warnings.append(
+                                "Enemy Drop files left unchanged because their layout is incompatible with this "
+                                "game version: " + ", ".join(incompatible_tables) + "."
+                            )
                     except EnemyDropGenerationError as error:
+                        _add_version_skip_count(
+                            version_skip_counts,
+                            "Enemy Drops",
+                            sum(
+                                row.expected_slots
+                                for row in enemy_drop_catalog.rows
+                                if row.table in present_enemy_tables
+                                and row.classification != "UNRESOLVED"
+                            ),
+                        )
                         source_availability = _mark_invalid_sources(
                             source_availability,
                             "enemy_drops",
@@ -2498,28 +2918,93 @@ class GenerationEngine:
                 if mappings is None:
                     availability_warnings.append("Blood Codes skipped: CV2.usmap mapping is unavailable.")
                 else:
-                  try:
-                    blood_code_preparation = prepare_blood_code_plan(
-                        blood_code_catalog,
-                        seed,
-                        game_root=game_root,
-                        work_root=workspace.root,
-                        mappings_path=mappings,
-                        game_version=detection.version_id,
-                        data_revision=detection.catalog_revision,
-                        extractor=asset_extractor,
-                        serializer=self.blood_code_serializer,
-                        mix_postgame_dlc_with_base=request.options.mix_postgame_dlc_with_base,
-                            progress=progress,
-                    )
-                  except BloodCodeGenerationError as error:
-                    source_availability = _mark_invalid_sources(
-                    source_availability, "blood_codes",
-                        required_blood_code_package_paths(blood_code_catalog), str(error),
-                    )
-                    availability_warnings.append(f"Blood Codes skipped: source validation failed: {error}")
-                  else:
-                    blood_code_plan = blood_code_preparation.plan
+                    active_blood_catalog = blood_code_catalog
+                    skipped_blood_slots = 0
+                    skipped_blood_packages: list[str] = []
+                    while active_blood_catalog.slots:
+                        try:
+                            blood_code_preparation = prepare_blood_code_plan(
+                                active_blood_catalog,
+                                seed,
+                                game_root=game_root,
+                                work_root=workspace.root,
+                                mappings_path=mappings,
+                                game_version=detection.version_id,
+                                data_revision=detection.catalog_revision,
+                                extractor=asset_extractor,
+                                serializer=self.blood_code_serializer,
+                                mix_postgame_dlc_with_base=request.options.mix_postgame_dlc_with_base,
+                                progress=progress,
+                            )
+                        except BloodCodeGenerationError as error:
+                            message = str(error).casefold()
+                            bad_packages = tuple(
+                                package for package in required_blood_code_package_paths(active_blood_catalog)
+                                if package.casefold() in message
+                            )
+                            if not is_game_data_layout_mismatch(error) or not bad_packages:
+                                _add_version_skip_count(
+                                    version_skip_counts, "Blood Codes", len(active_blood_catalog.slots),
+                                )
+                                source_availability = _mark_invalid_sources(
+                                    source_availability,
+                                    "blood_codes",
+                                    required_blood_code_package_paths(active_blood_catalog),
+                                    str(error),
+                                )
+                                availability_warnings.append(
+                                    f"Blood Codes skipped: source validation failed: {error}"
+                                )
+                                blood_code_preparation = None
+                                break
+                            bad_keys = {package.casefold() for package in bad_packages}
+                            failed_schema = bad_keys.intersection(
+                                package.casefold() for package in SCENARIO_SCHEMA_PACKAGES
+                            )
+                            retained_slots = tuple(
+                                slot for slot in active_blood_catalog.slots
+                                if not (
+                                    any(package.casefold() in bad_keys for package in slot.physical_source_packages)
+                                    or (failed_schema and slot.location_kind == "scenario_reward")
+                                )
+                            )
+                            removed_count = len(active_blood_catalog.slots) - len(retained_slots)
+                            if removed_count <= 0:
+                                _add_version_skip_count(
+                                    version_skip_counts, "Blood Codes", len(active_blood_catalog.slots),
+                                )
+                                availability_warnings.append(
+                                    "Blood Codes skipped: an incompatible source file could not be assigned to "
+                                    f"specific locations ({', '.join(bad_packages)})."
+                                )
+                                blood_code_preparation = None
+                                break
+                            skipped_blood_slots += removed_count
+                            skipped_blood_packages.extend(bad_packages)
+                            active_packages = {
+                                package for slot in retained_slots for package in slot.physical_source_packages
+                            }
+                            if any(slot.location_kind == "scenario_reward" for slot in retained_slots):
+                                active_packages.update(SCENARIO_SCHEMA_PACKAGES)
+                            active_keys = {package.casefold() for package in active_packages}
+                            active_blood_catalog = replace(
+                                active_blood_catalog,
+                                slots=retained_slots,
+                                source_package_sha256={
+                                    package: hashes
+                                    for package, hashes in active_blood_catalog.source_package_sha256.items()
+                                    if package.casefold() in active_keys
+                                },
+                            )
+                            continue
+                        blood_code_plan = blood_code_preparation.plan
+                        break
+                    if skipped_blood_slots:
+                        _add_version_skip_count(version_skip_counts, "Blood Codes", skipped_blood_slots)
+                        availability_warnings.append(
+                            "Blood Code quest files left unchanged because their layout is incompatible with this "
+                            "game version: " + ", ".join(sorted(set(skipped_blood_packages), key=str.casefold)) + "."
+                        )
             if request.options.randomize_blood_codes and blood_code_catalog is not None and not blood_code_catalog.slots:
                 availability_warnings.append("Blood Codes skipped: no grant Quest and Blood Code Article pair is available.")
             if request.options.randomize_boosters and booster_catalog is not None and booster_catalog.slots and inventory.contains(BOOSTER_TABLE_PACKAGE):
@@ -2542,6 +3027,11 @@ class GenerationEngine:
                         progress=progress,
                     )
                   except BoosterGenerationError as error:
+                    _add_version_skip_count(
+                        version_skip_counts,
+                        "Boosters",
+                        sum(inventory.contains(slot.booster_article_path) for slot in booster_catalog.slots),
+                    )
                     source_availability = _mark_invalid_sources(
                         source_availability, "boosters", (BOOSTER_TABLE_PACKAGE,), str(error),
                     )
@@ -2554,52 +3044,96 @@ class GenerationEngine:
                 if mappings is None:
                     availability_warnings.append("Defensive Gadget grants skipped: CV2.usmap mapping is unavailable.")
                 else:
-                  original_world_plan, original_shop_plan = world_plan, shop_plan
-                  try:
-                    defensive_gadget_preparation = prepare_defensive_gadget_npc_plan(
-                        defensive_gadget_catalog,
-                        seed,
-                        game_root=game_root,
-                        work_root=workspace.root,
-                        mappings_path=mappings,
-                        game_version=detection.version_id,
-                        data_revision=detection.catalog_revision,
-                        extractor=asset_extractor,
-                    serializer=self.defensive_gadget_serializer,
-                    mix_postgame_dlc_with_base=request.options.mix_postgame_dlc_with_base,
-                    reserved_reward_identities=reward_reservations.paths_for("defensive_gadget"),
-                    source_occurrences=planned_reward_source_occurrences(world_plan, shop_plan),
-                    progress=progress,
-                )
-                    for assignment in defensive_gadget_preparation.plan.assignments:
-                        if not assignment.source_occurrence_id:
-                            raise DefensiveGadgetGenerationError(
-                                f"Defensive Gadget grant {assignment.destination.slot_id} has no owned source occurrence."
+                    active_gadget_catalog = defensive_gadget_catalog
+                    skipped_gadget_grants = 0
+                    skipped_gadget_packages: list[str] = []
+                    while active_gadget_catalog.grants:
+                        try:
+                            defensive_gadget_preparation = prepare_defensive_gadget_npc_plan(
+                                active_gadget_catalog,
+                                seed,
+                                game_root=game_root,
+                                work_root=workspace.root,
+                                mappings_path=mappings,
+                                game_version=detection.version_id,
+                                data_revision=detection.catalog_revision,
+                                extractor=asset_extractor,
+                                serializer=self.defensive_gadget_serializer,
+                                mix_postgame_dlc_with_base=request.options.mix_postgame_dlc_with_base,
+                                reserved_reward_identities=reward_reservations.paths_for("defensive_gadget"),
+                                source_occurrences=planned_reward_source_occurrences(world_plan, shop_plan),
+                                progress=progress,
                             )
-                        world_plan, shop_plan = exchange_planned_reward_occurrence(
-                            world_plan,
-                            shop_plan,
-                            source_occurrence_id=assignment.source_occurrence_id,
-                            replacement_article_path=assignment.original.asset_path,
-                            replacement_occurrence_id=(
-                                f"defensive-gadget-npc:{assignment.destination.slot_id}"
-                            ),
-                            replacement_content_class=assignment.destination.content_class,
+                            break
+                        except DefensiveGadgetGenerationError as error:
+                            message = str(error).casefold()
+                            bad_packages = tuple(dict.fromkeys(
+                                slot.package_path
+                                for slot in active_gadget_catalog.grants
+                                if slot.package_path.casefold() in message
+                            ))
+                            if not is_game_data_layout_mismatch(error) or not bad_packages:
+                                skipped_gadget_grants += len(active_gadget_catalog.grants)
+                                source_availability = _mark_invalid_sources(
+                                    source_availability,
+                                    "defensive_gadget_grants",
+                                    (slot.package_path for slot in active_gadget_catalog.grants),
+                                    str(error),
+                                )
+                                availability_warnings.append(
+                                    f"Defensive Gadget grants skipped: source validation failed: {error}"
+                                )
+                                defensive_gadget_preparation = None
+                                break
+                            bad_keys = {package.casefold() for package in bad_packages}
+                            remaining_grants = tuple(
+                                slot for slot in active_gadget_catalog.grants
+                                if slot.package_path.casefold() not in bad_keys
+                            )
+                            removed = len(active_gadget_catalog.grants) - len(remaining_grants)
+                            if removed <= 0:
+                                skipped_gadget_grants += len(active_gadget_catalog.grants)
+                                defensive_gadget_preparation = None
+                                break
+                            skipped_gadget_grants += removed
+                            skipped_gadget_packages.extend(bad_packages)
+                            active_gadget_catalog = replace(active_gadget_catalog, grants=remaining_grants)
+                    if skipped_gadget_grants:
+                        _add_version_skip_count(
+                            version_skip_counts, "Defensive Gadget Grants", skipped_gadget_grants,
                         )
-                  except DefensiveGadgetGenerationError as error:
-                    world_plan, shop_plan = original_world_plan, original_shop_plan
-                    defensive_gadget_preparation = None
-                    source_availability = _mark_invalid_sources(
-                        source_availability, "defensive_gadget_grants",
-                        (slot.package_path for slot in defensive_gadget_catalog.grants), str(error),
-                    )
-                    availability_warnings.append(f"Defensive Gadget grants skipped: source validation failed: {error}")
-                  except (OSError, ValueError) as error:
-                    world_plan, shop_plan = original_world_plan, original_shop_plan
-                    defensive_gadget_preparation = None
-                    availability_warnings.append(f"Defensive Gadget grants skipped: source occurrence transfer failed: {error}")
-                  else:
-                    defensive_gadget_plan = defensive_gadget_preparation.plan
+                        if skipped_gadget_packages:
+                            availability_warnings.append(
+                                "Defensive Gadget quest files left unchanged because their layout is incompatible "
+                                "with this game version: "
+                                + ", ".join(sorted(set(skipped_gadget_packages), key=str.casefold)) + "."
+                            )
+                    if defensive_gadget_preparation is not None:
+                        original_world_plan, original_shop_plan = world_plan, shop_plan
+                        try:
+                            for assignment in defensive_gadget_preparation.plan.assignments:
+                                if not assignment.source_occurrence_id:
+                                    raise DefensiveGadgetGenerationError(
+                                        f"Defensive Gadget grant {assignment.destination.slot_id} has no owned source occurrence."
+                                    )
+                                world_plan, shop_plan = exchange_planned_reward_occurrence(
+                                    world_plan,
+                                    shop_plan,
+                                    source_occurrence_id=assignment.source_occurrence_id,
+                                    replacement_article_path=assignment.original.asset_path,
+                                    replacement_occurrence_id=(
+                                        f"defensive-gadget-npc:{assignment.destination.slot_id}"
+                                    ),
+                                    replacement_content_class=assignment.destination.content_class,
+                                )
+                        except (DefensiveGadgetGenerationError, OSError, ValueError) as error:
+                            world_plan, shop_plan = original_world_plan, original_shop_plan
+                            defensive_gadget_preparation = None
+                            availability_warnings.append(
+                                f"Defensive Gadget grants skipped: source occurrence transfer failed: {error}"
+                            )
+                        else:
+                            defensive_gadget_plan = defensive_gadget_preparation.plan
             elif request.options.randomize_defensive_gadget_npc_rewards:
                 availability_warnings.append("Defensive Gadget grants skipped: no grant source packages are available.")
             world_forma_destination_ids = {
@@ -2737,10 +3271,16 @@ class GenerationEngine:
                     workspace.spoiler_text,
                     simple_entries,
                     seed=canonical_seed_text(seed),
-                    metadata=_spoiler_metadata(detection.version_id),
+                    metadata=_spoiler_metadata(detection),
                     randomizer_settings=_spoiler_settings(request.options),
                     created_date=datetime.now().astimezone().date().isoformat(),
-                    summary_lines=spoiler_assignment_summary(simple_entries),
+                    summary_lines=spoiler_assignment_summary(
+                        simple_entries,
+                        skipped_for_game_version=(
+                            sum(version_skip_counts.values())
+                        ),
+                        skipped_by_category=version_skip_counts,
+                    ),
                 )
                 _write_manifest(
                     workspace,
@@ -2825,25 +3365,40 @@ class GenerationEngine:
                             installed_extractor=self.extractor,
                         )
                     mastery_packages = blood_code_mastery_packages(mastery_inventory)
-                    mastery_extractor = (
-                        asset_extractor
-                        if all(inventory.contains(package) for package in mastery_packages)
-                        else self.extractor
-                    )
-                    blood_code_mastery_result = apply_blood_code_mastery(
-                        game_root=game_root,
-                        work_root=workspace.root,
-                        output_content_root=output_root,
-                        mappings_path=mappings,
-                        game_version=detection.version_id,
-                        data_revision=detection.catalog_revision,
-                        extractor=mastery_extractor,
-                        package_inventory=mastery_inventory,
-                        serializer=self.blood_code_mastery_serializer,
-                        progress=progress,
-                    )
+                    if not mastery_packages:
+                        availability_warnings.append(
+                            "Unrestricted Blood Code Mastery skipped: no installed Blood Code Articles were found."
+                        )
+                    elif mappings is None:
+                        availability_warnings.append(
+                            "Unrestricted Blood Code Mastery skipped: CV2.usmap is unavailable."
+                        )
+                    else:
+                        mastery_extractor = (
+                            asset_extractor
+                            if all(inventory.contains(package) for package in mastery_packages)
+                            else self.extractor
+                        )
+                        blood_code_mastery_result = apply_blood_code_mastery(
+                            game_root=game_root,
+                            work_root=workspace.root,
+                            output_content_root=output_root,
+                            mappings_path=mappings,
+                            game_version=detection.version_id,
+                            data_revision=detection.catalog_revision,
+                            extractor=mastery_extractor,
+                            package_inventory=mastery_inventory,
+                            serializer=self.blood_code_mastery_serializer,
+                            progress=progress,
+                        )
                 except BloodCodeMasteryError as error:
-                    raise GenerationError(f"Could not set Blood Code mastery EXP: {error}") from error
+                    if is_game_data_layout_mismatch(error):
+                        availability_warnings.append(
+                            "Unrestricted Blood Code Mastery skipped: the installed Article data layout is "
+                            f"incompatible ({error})."
+                        )
+                    else:
+                        raise GenerationError(f"Could not set Blood Code mastery EXP: {error}") from error
                 except (OSError, RuntimeError, ValueError) as error:
                     raise GenerationError(f"Could not inspect installed Blood Code Articles: {error}") from error
                 performance["blood_code_mastery_patch_seconds"] = time.perf_counter() - phase_started
@@ -2855,27 +3410,42 @@ class GenerationEngine:
                         cached_inventory=inventory,
                         installed_extractor=self.extractor,
                     )
-                    flag_table_extractor = (
-                        asset_extractor
-                        if inventory.contains(BOOSTER_SLOT_FLAGS_PACKAGE)
-                        else self.extractor
-                    )
-                    booster_slot_unlock_result = apply_booster_slot_unlocks(
-                        game_root=game_root,
-                        work_root=workspace.root,
-                        output_content_root=output_root,
-                        mappings_path=mappings,
-                        game_version=detection.version_id,
-                        data_revision=detection.catalog_revision,
-                        extractor=flag_table_extractor,
-                        package_inventory=booster_slot_inventory,
-                        serializer=self.booster_slot_unlock_serializer,
-                        unlock_all_booster_slots=request.options.unlock_all_booster_slots,
-                        unlock_second_weapon=request.options.second_weapon_unlocked,
-                        progress=progress,
-                    )
+                    if not booster_slot_inventory.contains(BOOSTER_SLOT_FLAGS_PACKAGE):
+                        availability_warnings.append(
+                            "Equipment-slot unlocks skipped: the StoryFlag table is absent from this game version."
+                        )
+                    elif mappings is None:
+                        availability_warnings.append(
+                            "Equipment-slot unlocks skipped: CV2.usmap is unavailable."
+                        )
+                    else:
+                        flag_table_extractor = (
+                            asset_extractor
+                            if inventory.contains(BOOSTER_SLOT_FLAGS_PACKAGE)
+                            else self.extractor
+                        )
+                        booster_slot_unlock_result = apply_booster_slot_unlocks(
+                            game_root=game_root,
+                            work_root=workspace.root,
+                            output_content_root=output_root,
+                            mappings_path=mappings,
+                            game_version=detection.version_id,
+                            data_revision=detection.catalog_revision,
+                            extractor=flag_table_extractor,
+                            package_inventory=booster_slot_inventory,
+                            serializer=self.booster_slot_unlock_serializer,
+                            unlock_all_booster_slots=request.options.unlock_all_booster_slots,
+                            unlock_second_weapon=request.options.second_weapon_unlocked,
+                            progress=progress,
+                        )
                 except BoosterSlotUnlockError as error:
-                    raise GenerationError(f"Could not apply equipment-slot unlocks: {error}") from error
+                    if is_game_data_layout_mismatch(error):
+                        availability_warnings.append(
+                            "Equipment-slot unlocks skipped: the installed StoryFlag table has an "
+                            f"incompatible layout ({error})."
+                        )
+                    else:
+                        raise GenerationError(f"Could not apply equipment-slot unlocks: {error}") from error
                 except (OSError, RuntimeError, ValueError) as error:
                     raise GenerationError(
                         f"Could not inspect installed packages for equipment-slot flags: {error}"
@@ -2894,29 +3464,40 @@ class GenerationEngine:
                         if tutorial_inventory.contains(package)
                     )
                     if BASE_TUTORIAL_FLAG_TABLE not in available_tutorial_tables:
-                        raise TutorialDisableError(
-                            "The base-game tutorial StoryFlag table is missing from this installation."
+                        availability_warnings.append(
+                            "Tutorial pop-ups left unchanged: the base StoryFlag table is absent from this game version."
                         )
-                    tutorial_extractor = (
-                        asset_extractor
-                        if all(inventory.contains(package) for package in available_tutorial_tables)
-                        else self.extractor
-                    )
-                    tutorial_disable_result = apply_tutorial_disable(
-                        game_root=game_root,
-                        work_root=workspace.root,
-                        output_content_root=output_root,
-                        mappings_path=mappings,
-                        game_version=detection.version_id,
-                        data_revision=detection.catalog_revision,
-                        extractor=tutorial_extractor,
-                        package_inventory=tutorial_inventory,
-                        serializer=self.tutorial_disable_serializer,
-                        table_packages=available_tutorial_tables,
-                        progress=progress,
-                    )
+                    elif mappings is None:
+                        availability_warnings.append(
+                            "Tutorial pop-ups left unchanged: CV2.usmap is unavailable."
+                        )
+                    else:
+                        tutorial_extractor = (
+                            asset_extractor
+                            if all(inventory.contains(package) for package in available_tutorial_tables)
+                            else self.extractor
+                        )
+                        tutorial_disable_result = apply_tutorial_disable(
+                            game_root=game_root,
+                            work_root=workspace.root,
+                            output_content_root=output_root,
+                            mappings_path=mappings,
+                            game_version=detection.version_id,
+                            data_revision=detection.catalog_revision,
+                            extractor=tutorial_extractor,
+                            package_inventory=tutorial_inventory,
+                            serializer=self.tutorial_disable_serializer,
+                            table_packages=available_tutorial_tables,
+                            progress=progress,
+                        )
                 except TutorialDisableError as error:
-                    raise GenerationError(f"Could not disable tutorial pop-ups: {error}") from error
+                    if is_game_data_layout_mismatch(error):
+                        availability_warnings.append(
+                            "Tutorial pop-ups left unchanged: the installed StoryFlag table has an "
+                            f"incompatible layout ({error})."
+                        )
+                    else:
+                        raise GenerationError(f"Could not disable tutorial pop-ups: {error}") from error
                 except (OSError, RuntimeError, ValueError) as error:
                     raise GenerationError(f"Could not inspect tutorial StoryFlag tables: {error}") from error
                 performance["tutorial_disable_patch_seconds"] = time.perf_counter() - phase_started
@@ -3072,6 +3653,7 @@ class GenerationEngine:
                         validated_quest_destination_ids=(
                             field_enemy_catalog.destination_ids if field_enemy_catalog is not None else ()
                         ),
+                        compatibility_profile=detection.world_loot_compatibility_profile,
                         progress=progress,
                     )
                 except RawArticleGrantGenerationError as error:
@@ -3174,10 +3756,16 @@ class GenerationEngine:
                 workspace.spoiler_text,
                 simple_entries,
                 seed=canonical_seed_text(seed),
-                metadata=_spoiler_metadata(detection.version_id),
+                metadata=_spoiler_metadata(detection),
                 randomizer_settings=_spoiler_settings(request.options),
                 created_date=datetime.now().astimezone().date().isoformat(),
-                summary_lines=spoiler_assignment_summary(simple_entries),
+                summary_lines=spoiler_assignment_summary(
+                    simple_entries,
+                    skipped_for_game_version=(
+                        sum(version_skip_counts.values())
+                    ),
+                    skipped_by_category=version_skip_counts,
+                ),
             )
             performance["spoiler_generation_seconds"] = time.perf_counter() - phase_started
             phase_started = time.perf_counter()
@@ -3654,6 +4242,103 @@ def _world_reward_fname_identity(location, reward_index: int) -> dict[str, Any] 
             },
         }
     return None
+
+
+# Validate world loot prepared descriptors
+def _incompatible_world_loot_map_packages(dependency_index: object) -> frozenset[str]:
+    """Read map packages with structurally inconsistent export data."""
+    if dependency_index is None:
+        return frozenset()
+    if not isinstance(dependency_index, dict):
+        raise GenerationError("Extracted World Loot dependency index is invalid.")
+    rows = dependency_index.get("incompatible_world_loot_maps", [])
+    if not isinstance(rows, list):
+        raise GenerationError("Extracted World Loot compatibility records are invalid.")
+    packages: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            raise GenerationError("Extracted World Loot compatibility record is invalid.")
+        package = row.get("package_path")
+        if not isinstance(package, str) or not is_world_map_package(package):
+            raise GenerationError("Extracted World Loot compatibility record has an invalid map package.")
+        packages.add(package.casefold())
+    return frozenset(packages)
+
+
+# Read mismatched World Loot exports
+def _incompatible_world_loot_location_keys(dependency_index: object) -> frozenset[str]:
+    """Read individual World Loot exports that failed catalog checks."""
+    if dependency_index is None:
+        return frozenset()
+    if not isinstance(dependency_index, dict):
+        raise GenerationError("Extracted World Loot dependency index is invalid.")
+    rows = dependency_index.get("incompatible_world_loot_locations", [])
+    if not isinstance(rows, list):
+        raise GenerationError("Extracted World Loot location compatibility records are invalid.")
+    keys: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            raise GenerationError("Extracted World Loot location compatibility record is invalid.")
+        package = row.get("package_path")
+        export_index = row.get("export_index")
+        if (
+            not isinstance(package, str) or not is_world_map_package(package)
+            or not isinstance(export_index, int) or isinstance(export_index, bool) or export_index < 1
+        ):
+            raise GenerationError("Extracted World Loot location compatibility record is invalid.")
+        keys.add(_world_loot_location_key(package, export_index))
+    return frozenset(keys)
+
+
+# Filter incompatible map locations
+def _compatible_world_loot_locations(
+    locations: Iterable[WorldLootLocation], dependency_index: object,
+) -> tuple[WorldLootLocation, ...]:
+    """Keep only World Loot exports verified against this game build."""
+    unsupported = _incompatible_world_loot_map_packages(dependency_index)
+    unsupported_exports = _incompatible_world_loot_location_keys(dependency_index)
+    return tuple(
+        location for location in locations
+        if (
+            location.package_path.casefold() not in unsupported
+            and _world_loot_location_key(location.package_path, location.export_index) not in unsupported_exports
+        )
+    )
+
+
+# Classify a skipped destination
+def _version_skip_category(location: WorldLootLocation, options: GenerationOptions) -> str | None:
+    if location.mirror_of_package_path is not None or location.protected or location.protection_reasons:
+        return None
+    if location.location_type == "RENEWABLE_INGREDIENT":
+        return "Ingredients" if options.randomize_materials else None
+    if location.location_type in {
+        "HEALING_UPGRADE_GOLDEN_SEED", "HEALING_UPGRADE_GOLDEN_BLOOD_BEAD",
+    }:
+        return "Healing Items" if options.randomize_world_loot and options.randomize_healing else None
+    if not options.randomize_world_loot:
+        return None
+    if location.destination_kind == "QUEST_ARTICLE_GRANT":
+        return "Quest Rewards"
+    return "World Loot"
+
+
+# Add a compatibility skip count
+def _add_version_skip_count(counts: dict[str, int], category: str, count: int) -> None:
+    if not isinstance(category, str) or not category.strip():
+        raise ValueError("Game-version skip category must be a non-empty string.")
+    if type(count) is not int or count < 0:
+        raise ValueError("Game-version skip counts must be non-negative integers.")
+    if count:
+        counts[category] = counts.get(category, 0) + count
+
+
+# Check finite shop catalog offer
+def _is_finite_shop_catalog_offer(product: object) -> bool:
+    protected = getattr(product, "protected", False)
+    uses_stock = getattr(product, "uses_stock", True)
+    stock = getattr(product, "stock", 1)
+    return protected is False and uses_stock is True and type(stock) is int and stock > 0
 
 
 # Validate world loot prepared descriptors
@@ -4921,12 +5606,20 @@ def _content_availability_summary(catalogs: RuntimeCatalogs) -> dict[str, object
 
 
 # Build spoiler metadata
-def _spoiler_metadata(game_version: str) -> dict[str, str]:
-    """Return application and detected game version for the spoiler header."""
-    return {
+def _spoiler_metadata(detection: VersionDetection) -> dict[str, str]:
+    """Return readable game version and validation status for the spoiler."""
+    metadata = {
         "App Version": f"v{__version__}",
-        "Game Version": game_version,
+        "Game Version": (
+            detection.display_version
+            or ("Local Validation (unverified)" if detection.local_unverified else None)
+            or detection.version_id
+            or "Unknown"
+        ),
     }
+    if detection.local_unverified:
+        metadata["Version Validation"] = "Local, unverified"
+    return metadata
 
 
 # Find spoiler settings
@@ -5020,14 +5713,15 @@ def _write_spoiler(
         destination = assignment.destination
         source = assignment.source
         destination_is_trader = is_npc_trader_row(destination.family, destination.shop_row)
+        stock_note = "stock set to 1" if assignment.stock_override is not None else "destination stock preserved"
         if assignment.article_only:
             assigned_path = source.canonical_path
-            source_note = f"origin={source.origin_kind}:{source.origin_label}; Article identity only; destination price/stock/unlock preserved"
+            source_note = f"origin={source.origin_kind}:{source.origin_label}; Article identity only; destination price/unlock preserved; {stock_note}"
         else:
             assigned_path = source.article_path
-            source_note = f"origin=SHOP:{source.shop_row}:{source.product_index}; Article identity only; destination metadata preserved"
+            source_note = f"origin=SHOP:{source.shop_row}:{source.product_index}; Article identity only; destination price/unlock preserved; {stock_note}"
         stock_behavior = destination.uses_stock
-        stock_count = destination.stock
+        stock_count = assignment.stock_override if assignment.stock_override is not None else destination.stock
         rows.append((
             "NPC_TRADER" if destination_is_trader else "SHOP",
             f"{destination.shop_row.rsplit('.', 1)[-1]} [{destination.product_index}]"
@@ -5691,11 +6385,8 @@ def _initial_inventory_manifest(
 def _handle_initial_inventory_preparation_failure(
     error: Exception,
     *,
-    motorcycle_unlocked: bool,
     availability_warnings: list[str],
 ) -> None:
-    if motorcycle_unlocked:
-        raise GenerationError(f"Could not grant Motorcycle Forma to new games: {error}") from error
     availability_warnings.append(f"Initial Inventory skipped: source occurrence transfer failed: {error}")
 
 

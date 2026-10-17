@@ -253,7 +253,11 @@ class SpoilerTextTests(unittest.TestCase):
                 seed="same-seed",
                 created_date="2026-10-07",
                 summary_lines=summary,
-                metadata={"App Version": "v0.9.1", "Game Version": "fixture-build"},
+                metadata={
+                    "App Version": "v0.9.1",
+                    "Game Version": "1.0.2.0",
+                    "Version Validation": "Local, unverified",
+                },
                 randomizer_settings=("Enabled Initial Inventory", "Disabled Blood Codes"),
             )
             lines = path.read_text(encoding="utf-8").splitlines()
@@ -263,11 +267,13 @@ class SpoilerTextTests(unittest.TestCase):
             lines[1],
             "Total Randomized: 3 / Unchanged: 2 (same item after randomized)",
         )
-        self.assertEqual(lines[2], "App Version: v0.9.1")
-        self.assertEqual(lines[3], "Game Version: fixture-build")
-        self.assertEqual(lines[4], "Randomizer Settings:")
-        self.assertEqual(lines[5], "Seed: same-seed")
-        self.assertEqual(lines[6:8], ["Enabled Initial Inventory", "Disabled Blood Codes"])
+        self.assertEqual(lines[2], "Skipped for this game version: 0")
+        self.assertEqual(lines[3], "App Version: v0.9.1")
+        self.assertEqual(lines[4], "Game Version: 1.0.2.0")
+        self.assertEqual(lines[5], "Version Validation: Local, unverified")
+        self.assertEqual(lines[6], "Randomizer Settings:")
+        self.assertEqual(lines[7], "Seed: same-seed")
+        self.assertEqual(lines[8:10], ["Enabled Initial Inventory", "Disabled Blood Codes"])
         self.assertLess(lines.index("Randomizer Settings:"), lines.index("=== World Loot ==="))
 
     # Check summary count support one line
@@ -279,8 +285,41 @@ class SpoilerTextTests(unittest.TestCase):
 
         self.assertEqual(
             spoiler_assignment_summary(entries),
-            ("Total Randomized: 121 / Unchanged: 1 (same item after randomized)",),
+            (
+                "Total Randomized: 121 / Unchanged: 1 (same item after randomized)",
+                "Skipped for this game version: 0",
+            ),
         )
+
+    # Summarize game-version skips
+    def test_summary_reports_game_version_skips(self) -> None:
+        self.assertEqual(
+            spoiler_assignment_summary((), skipped_for_game_version=12),
+            (
+                "Total Randomized: 0 / Unchanged: 0 (same item after randomized)",
+                "Skipped for this game version: 12",
+            ),
+        )
+
+    # Group skips by category
+    def test_summary_lists_version_skips_by_category(self) -> None:
+        self.assertEqual(
+            spoiler_assignment_summary(
+                (),
+                skipped_by_category={"World Loot": 500, "Ingredients": 500},
+            ),
+            (
+                "Total Randomized: 0 / Unchanged: 0 (same item after randomized)",
+                "Skipped for this game version: 1,000 (500x Ingredients, 500x World Loot)",
+            ),
+        )
+
+    # Reject inconsistent skip totals
+    def test_category_skip_total_must_match(self) -> None:
+        with self.assertRaisesRegex(ValueError, "must match"):
+            spoiler_assignment_summary(
+                (), skipped_for_game_version=4, skipped_by_category={"Shops": 3},
+            )
 
     # Check shop spoiler resolve FName numbers
     def test_shop_spoiler_resolves_fname_numbers_and_reports_source_slot(self) -> None:

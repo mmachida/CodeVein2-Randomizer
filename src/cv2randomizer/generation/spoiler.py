@@ -34,8 +34,30 @@ class SpoilerEntry:
 
 
 # Summarize spoiler assignment summary
-def spoiler_assignment_summary(entries: Iterable[SpoilerEntry]) -> tuple[str, ...]:
+def spoiler_assignment_summary(
+    entries: Iterable[SpoilerEntry],
+    *,
+    skipped_for_game_version: int = 0,
+    skipped_by_category: Mapping[str, int] | None = None,
+) -> tuple[str, ...]:
     """Summarize all planned slots, including unchanged assignments omitted below."""
+    if type(skipped_for_game_version) is not int or skipped_for_game_version < 0:
+        raise ValueError("Game-version skip count must be a non-negative integer.")
+    category_counts: dict[str, int] = {}
+    if skipped_by_category is not None:
+        for category, count in skipped_by_category.items():
+            if not isinstance(category, str) or not category.strip() or any(
+                character in category for character in "\r\n(),"
+            ):
+                raise ValueError("Game-version skip categories must be safe single-line labels.")
+            if type(count) is not int or count < 0:
+                raise ValueError("Game-version skip category counts must be non-negative integers.")
+            if count:
+                category_counts[category.strip()] = count
+    category_total = sum(category_counts.values())
+    if category_counts and skipped_for_game_version not in (0, category_total):
+        raise ValueError("Game-version skip total must match its category counts.")
+    skipped_total = category_total if category_counts else skipped_for_game_version
     counts: Counter[str] = Counter()
     unchanged: Counter[str] = Counter()
     for entry in entries:
@@ -43,9 +65,25 @@ def spoiler_assignment_summary(entries: Iterable[SpoilerEntry]) -> tuple[str, ..
         if entry.vanilla.casefold() == entry.randomized.casefold():
             unchanged[entry.system] += entry.summary_count
 
+    skipped_line = f"Skipped for this game version: {skipped_total:,}"
+    if category_counts:
+        preferred_order = (
+            "Ingredients", "Healing Items", "World Loot", "Quest Rewards", "Shops",
+            "Enemy Drops", "Blood Codes", "Boosters", "Booster Extractor", "Initial Inventory",
+        )
+        category_order = {name.casefold(): index for index, name in enumerate(preferred_order)}
+        details = ", ".join(
+            f"{count:,}x {category}"
+            for category, count in sorted(
+                category_counts.items(),
+                key=lambda item: (category_order.get(item[0].casefold(), len(preferred_order)), item[0].casefold()),
+            )
+        )
+        skipped_line += f" ({details})"
     return (
         f"Total Randomized: {sum(counts.values()):,} / "
         f"Unchanged: {sum(unchanged.values()):,} (same item after randomized)",
+        skipped_line,
     )
 
 
@@ -100,7 +138,7 @@ def write_spoiler(
         if not key.strip() or any(character in key + value for character in "\r\n"):
             raise ValueError("Spoiler metadata keys and values must be non-empty single-line text.")
     ordered_metadata_keys = [
-        key for key in ("App Version", "Game Version") if key in metadata_values
+        key for key in ("App Version", "Game Version", "Version Validation") if key in metadata_values
     ]
     remaining_metadata_keys = sorted(
         set(metadata_values) - set(ordered_metadata_keys),

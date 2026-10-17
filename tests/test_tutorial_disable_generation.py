@@ -145,6 +145,51 @@ class TutorialDisableGenerationTests(unittest.TestCase):
         self.assertEqual(result.patched_flag_count, 100)
         self.assertEqual(len(result.output_files), 6)
 
+    # Check partial tutorial outputs are rolled back
+    def test_partial_tutorial_outputs_are_removed_when_layout_validation_fails(self) -> None:
+        class Extractor:
+            # Extract requested game assets
+            def extract_assets(self, _game_root, packages, **_kwargs):
+                assets = []
+                for package in packages:
+                    source = root / "cache" / f"{package.rsplit('/', 1)[-1]}.uasset"
+                    source.parent.mkdir(parents=True, exist_ok=True)
+                    source.write_bytes(b"source")
+                    sidecar = source.with_suffix(".uexp")
+                    sidecar.write_bytes(b"source data")
+                    assets.append(ExtractedAsset(package, (source, sidecar)))
+                return tuple(assets)
+
+        class FailingSerializer:
+            # Partially patch and reject layout
+            def patch(self, *, tables, **_kwargs):
+                for table in tables:
+                    table.output_file.parent.mkdir(parents=True, exist_ok=True)
+                    table.output_file.write_bytes(b"partial header")
+                    table.output_file.with_suffix(".uexp").write_bytes(b"partial data")
+                raise RuntimeError("InvalidDataException: tutorial table layout changed")
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            generation = root / "generation"
+            generation.mkdir()
+            output_root = generation / "staging" / "Content"
+            with self.assertRaisesRegex(RuntimeError, "InvalidDataException"):
+                apply_tutorial_disable(
+                    game_root=root / "game",
+                    work_root=generation,
+                    output_content_root=output_root,
+                    mappings_path=root / "CV2.usmap",
+                    game_version="fixture",
+                    data_revision="revision",
+                    extractor=Extractor(),
+                    package_inventory=PackageInventory.create((BASE_TUTORIAL_FLAG_TABLE,)),
+                    serializer=FailingSerializer(),
+                    table_packages=(BASE_TUTORIAL_FLAG_TABLE,),
+                )
+            self.assertEqual(tuple(output_root.rglob("*.uasset")), ())
+            self.assertEqual(tuple(output_root.rglob("*.uexp")), ())
+
     # Check serializer validate helper outputs cleans
     def test_serializer_validates_helper_outputs_and_cleans_request_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

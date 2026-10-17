@@ -310,7 +310,8 @@ internal static class BloodCodePatcher
         ValidateVirtualPackage(request.VirtualPackage);
         var asset = LoadPackage(inputPath, engineVersion, mappings);
         var grants = ReadPackageGrants(asset, inputPath, request.VirtualPackage, rewardPrefix);
-        return new PackageInspection(request.VirtualPackage, inputPath, grants.Count, grants.ToArray());
+        var exportNames = asset.Exports.Select(export => export.ObjectName.ToString()).ToArray();
+        return new PackageInspection(request.VirtualPackage, inputPath, grants.Count, grants.ToArray(), exportNames);
     }
 
 
@@ -1801,7 +1802,12 @@ internal static class BloodCodePatcher
     // Describe package inspection request
     private sealed record PackageInspectionRequest(string VirtualPackage, string InputFile);
     // Describe package inspection
-    private sealed record PackageInspection(string VirtualPackage, string InputFile, int GrantCount, IReadOnlyList<GrantHit> Grants);
+    private sealed record PackageInspection(
+        string VirtualPackage,
+        string InputFile,
+        int GrantCount,
+        IReadOnlyList<GrantHit> Grants,
+        IReadOnlyList<string> ExportNames);
     // Describe reference inspection manifest
     private sealed record ReferenceInspectManifest(IReadOnlyList<ReferencePackageInspectRequest> Packages);
     // Describe package inspection request

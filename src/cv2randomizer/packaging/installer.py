@@ -81,11 +81,12 @@ class InstallManager:
         spoiler_source, spoiler_hash = _validate_spoiler(spoiler_path)
         root, pak_directory = _validated_game_root(game_root)
         self.state_root.mkdir(parents=True, exist_ok=True)
-        state_path = self._safe_state_path()
+        state_path = self._state_path_for(root)
+        self.state_path = state_path
         previous = self._read_state(state_path)
         if previous is not None:
             if _path_key(Path(previous["game_root"])) != _path_key(root):
-                raise InstallationError("A randomizer package is already registered for a different game installation.")
+                raise InstallationError("The selected game's Randomizer ownership record points to another installation.")
             if previous["package_name"] != package_name:
                 raise InstallationError("The registered package name does not match the package being installed.")
 
@@ -314,7 +315,8 @@ class InstallManager:
     # Remove Randomizer-owned mod files
     def remove(self, *, game_root: Path | None = None) -> RemovalResult:
         """Remove only unchanged files whose ownership hashes are in app state."""
-        state_path = self._safe_state_path()
+        state_path = self._state_path_for(game_root.expanduser().resolve()) if game_root is not None else self._single_state_path()
+        self.state_path = state_path
         state = self._read_state(state_path)
         if state is None:
             return RemovalResult(None, None, ())
@@ -377,13 +379,62 @@ class InstallManager:
             raise InstallationError(f"Could not remove the randomizer containers: {error}") from error
         return RemovalResult(state["package_name"], root, tuple(removed))
 
+    # Resolve installation ownership path
+    def _state_path_for(self, game_root: Path) -> Path:
+        registered_path = self._safe_state_path(game_root)
+        if registered_path.exists():
+            return registered_path
+
+        legacy_path = self._safe_state_path()
+        legacy_state = self._read_state(legacy_path)
+        if legacy_state is not None and _path_key(Path(legacy_state["game_root"])) == _path_key(game_root):
+            return legacy_path
+        return registered_path
+
+    # Keep legacy state lookup safe
+    def _single_state_path(self) -> Path:
+        legacy_path = self._safe_state_path()
+        registered_paths: list[Path] = []
+        if legacy_path.exists():
+            self._read_state(legacy_path)
+            registered_paths.append(legacy_path)
+
+        state_root = self.state_root.resolve(strict=True)
+        registrations = state_root / "installations"
+        if registrations.is_symlink():
+            raise InstallationError("Installation state directory must not be a symlink.")
+        if registrations.exists():
+            registrations = registrations.resolve(strict=True)
+            if not _is_within(registrations, state_root):
+                raise InstallationError("Installation state directory escaped application data.")
+            for path in registrations.glob("*.json"):
+                if path.is_symlink():
+                    raise InstallationError("Installation state file must not be a symlink.")
+                if self._read_state(path) is not None:
+                    registered_paths.append(path)
+
+        if len(registered_paths) > 1:
+            raise InstallationError("Multiple game installations have Randomizer files. Select a game path before uninstalling.")
+        return registered_paths[0] if registered_paths else legacy_path
+
     # Resolve a safe state file path
-    def _safe_state_path(self) -> Path:
+    def _safe_state_path(self, game_root: Path | None = None) -> Path:
         self.state_root.mkdir(parents=True, exist_ok=True)
         if self.state_root.is_symlink():
             raise InstallationError("Installation state directory must not be a symlink.")
-        root = self.state_root.resolve(strict=True)
-        path = root / "installed_mod.json"
+        state_root = self.state_root.resolve(strict=True)
+        if game_root is None:
+            path = state_root / "installed_mod.json"
+        else:
+            registrations = state_root / "installations"
+            if registrations.is_symlink():
+                raise InstallationError("Installation state directory must not be a symlink.")
+            registrations.mkdir(exist_ok=True)
+            registrations = registrations.resolve(strict=True)
+            if not _is_within(registrations, state_root):
+                raise InstallationError("Installation state directory escaped application data.")
+            key = hashlib.sha256(_path_key(game_root).encode("utf-8")).hexdigest()
+            path = registrations / f"{key}.json"
         if path.is_symlink():
             raise InstallationError("Installation state file must not be a symlink.")
         return path

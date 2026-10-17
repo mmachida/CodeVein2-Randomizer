@@ -13,6 +13,7 @@ from cv2randomizer.game.catalogs import CatalogStore
 from cv2randomizer.game.enemy_drop_catalog import EnemyDropCatalogStore
 from cv2randomizer.game.enemy_drop_generation import (
     ENEMY_DROP_TABLES,
+    EnemyDropGenerationError,
     apply_enemy_drop_plan,
     prepare_enemy_drop_plan,
 )
@@ -140,6 +141,16 @@ class _FakeSerializer:
         return results
 
 
+class _OneTableLayoutMismatchSerializer(_FakeSerializer):
+    # Reject one version-specific table
+    def inspect_tables(self, *, table_files, **kwargs):
+        if "AFTER_ENDING" in table_files:
+            raise EnemyDropGenerationError(
+                "UAssetAPI rejected AFTER_ENDING: System.IO.InvalidDataException: row layout changed"
+            )
+        return super().inspect_tables(table_files=table_files, **kwargs)
+
+
 class _FakeVersionDetector:
     # Detect the installed game version
     def detect(self, game_root: Path) -> VersionDetection:
@@ -190,6 +201,33 @@ class EnemyDropGenerationTests(unittest.TestCase):
             self.assertEqual(extractor.requested, tuple(path for _table, path in ENEMY_DROP_TABLES[:2]))
             self.assertEqual(len(preparation.source_tables), 2)
             self.assertEqual({table.table for table in preparation.original_snapshots}, {"BASE", "AFTER_ENDING"})
+
+    # Skip only the incompatible table file
+    def test_incompatible_drop_table_is_skipped_before_shuffling(self) -> None:
+        catalog = EnemyDropCatalogStore(ROOT / "data" / "enemy_drops").load("current")
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            work_root = root / "generation"
+            work_root.mkdir()
+            mappings = root / "CV2.usmap"
+            mappings.write_bytes(b"fixture mapping")
+            preparation = prepare_enemy_drop_plan(
+                catalog,
+                "enemy-drop-skip-one-file",
+                game_root=root / "game",
+                work_root=work_root,
+                mappings_path=mappings,
+                game_version="1.0.2",
+                data_revision="current",
+                extractor=_FakeExtractor(root / "cache"),
+                serializer=_OneTableLayoutMismatchSerializer(catalog),
+                active_tables=("BASE", "AFTER_ENDING"),
+            )
+
+        self.assertEqual(preparation.incompatible_tables, ("AFTER_ENDING",))
+        self.assertEqual(preparation.plan.active_tables, ("BASE",))
+        self.assertEqual(tuple(table.table for table in preparation.original_snapshots), ("BASE",))
+        self.assertEqual(tuple(asset.virtual_path for asset in preparation.source_tables), (ENEMY_DROP_TABLES[0][1],))
 
     # Check extracts plans stages changed validated
     def test_extracts_plans_and_stages_only_changed_validated_tables(self) -> None:

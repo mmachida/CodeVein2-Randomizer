@@ -292,12 +292,18 @@ def apply_blood_code_mastery(
             patch_requests.append((package, asset.primary_file, output))
         if progress:
             progress("patching-blood-code-mastery", 0, len(patch_requests))
-        result = serializer.patch(
-            work_root=root,
-            mappings_path=mappings_path,
-            packages=tuple(patch_requests),
-            target_appropriate_level=LOW_BLOOD_CODE_MASTERY_APPROPRIATE_LEVEL,
-        )
+        try:
+            result = serializer.patch(
+                work_root=root,
+                mappings_path=mappings_path,
+                packages=tuple(patch_requests),
+                target_appropriate_level=LOW_BLOOD_CODE_MASTERY_APPROPRIATE_LEVEL,
+            )
+        except Exception:
+            for _package, _source, output in patch_requests:
+                for path in _package_sidecars(output):
+                    path.unlink(missing_ok=True)
+            raise
         if progress:
             progress("patching-blood-code-mastery", len(patch_requests), len(patch_requests))
         return result

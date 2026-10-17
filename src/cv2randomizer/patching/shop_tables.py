@@ -105,6 +105,7 @@ def patch_shop_table(
         raise ShopPatchError("Parsed table contains duplicate product slots.")
     destinations: list[ShopSlot] = []
     sources: list[object] = []
+    stock_override_bytes: dict[ShopSlot, bytes] = {}
     for assignment in planned:
         destination = assignment.destination
         source = assignment.source
@@ -119,6 +120,17 @@ def patch_shop_table(
         destination_reason = shop_slot_lock_reason(destination)
         if destination_reason is not None:
             raise ShopPatchError(f"Shop destination {destination_key!r} is locked: {destination_reason}.")
+        if assignment.stock_override is not None:
+            if type(assignment.stock_override) is not int or assignment.stock_override < 1:
+                raise ShopPatchError("Shop stock overrides must be positive integers.")
+            try:
+                replacement_stock = struct.pack("<i", assignment.stock_override)
+            except struct.error as error:
+                raise ShopPatchError("Shop stock override does not fit the serialized integer field.") from error
+            if destination.stock_offset is None or destination.stock_bytes is None or len(destination.stock_bytes) != 4:
+                raise ShopPatchError("Destination Stock is absent or does not match the verified four-byte layout.")
+            _verify_bytes(data, destination.stock_offset, destination.stock_bytes, "Destination Stock")
+            stock_override_bytes[destination_key] = replacement_stock
         if assignment.article_only:
             if not isinstance(source, ArticleRewardIdentity):
                 raise ShopPatchError("Article-only Shop assignments require a canonical Article identity.")
@@ -187,6 +199,10 @@ def patch_shop_table(
             _slot(destination), source.article_path_bytes if isinstance(source, ShopTableProduct) else b"",
         )
         output[path_start : path_start + 20] = path_bytes
+        replacement_stock = stock_override_bytes.get(_slot(destination))
+        if replacement_stock is not None:
+            assert destination.stock_offset is not None
+            output[destination.stock_offset : destination.stock_offset + 4] = replacement_stock
 
     if unlock_npc_trader_shops and parsed.family in {"TRADE", "TRADE_DLC"}:
         for row in parsed.rows:
@@ -215,11 +231,21 @@ def patch_shop_table(
     for key, before in original_by_slot.items():
         after = after_by_slot[key]
         assignment = assignment_by_destination.get(key)
+        expected_stock = (
+            assignment.stock_override
+            if assignment is not None and assignment.stock_override is not None
+            else before.stock
+        )
+        expected_stock_bytes = (
+            struct.pack("<i", expected_stock)
+            if assignment is not None and assignment.stock_override is not None
+            else before.stock_bytes
+        )
         stock_matches = (
             after.uses_stock == before.uses_stock
             and after.uses_stock_bytes == before.uses_stock_bytes
-            and after.stock == before.stock
-            and after.stock_bytes == before.stock_bytes
+            and after.stock == expected_stock
+            and after.stock_bytes == expected_stock_bytes
             and after.evaluation_raw == before.evaluation_raw
         )
         if assignment is None:
@@ -271,6 +297,7 @@ def patch_shop_table(
             sorted({
                 key for key, item in assignment_by_destination.items()
                 if item.article_only or item.destination != item.source
+                or item.stock_override is not None and item.stock_override != item.destination.stock
             })
         ),
     )

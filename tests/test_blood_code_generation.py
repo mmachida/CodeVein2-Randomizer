@@ -119,7 +119,7 @@ def test_buddy_blood_code_assignment_patches_owner_and_linked_proficiency_packag
         sidecar = header.with_suffix(".uexp")
         header.write_bytes(b"header")
         sidecar.write_bytes(b"export")
-        assets.append(MaterializedAsset(virtual, (header, sidecar)))
+        assets.append(MaterializedAsset(virtual.swapcase(), (header, sidecar)))
     root.mkdir(parents=True, exist_ok=True)
     mappings = root / "CV2.usmap"
     mappings.write_bytes(b"test mappings")

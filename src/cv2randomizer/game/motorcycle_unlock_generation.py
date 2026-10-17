@@ -231,7 +231,7 @@ def apply_motorcycle_unlock(
         )
         materialized_by_virtual = {asset.virtual_path.casefold(): asset for asset in materialized}
         results: list[MotorcycleUnlockResult] = []
-        owned_outputs: list[Path] = []
+        attempted_outputs: list[Path] = []
         try:
             for index, virtual_package in enumerate(MOTORCYCLE_UNLOCK_PACKAGES, start=1):
                 source_asset = materialized_by_virtual.get(virtual_package.casefold())
@@ -241,6 +241,7 @@ def apply_motorcycle_unlock(
                 output_file = output_root / relative.with_suffix(".uasset")
                 if output_file.exists() or any(path.exists() for path in _package_sidecars(output_file)):
                     raise MotorcycleUnlockError(f"Refusing to overwrite staged motorcycle package {virtual_package}.")
+                attempted_outputs.extend(_package_sidecars(output_file))
                 if progress:
                     progress(f"patching-motorcycle-unlock-package-{index}", index - 1, len(MOTORCYCLE_UNLOCK_PACKAGES))
                 result = serializer.patch(
@@ -250,12 +251,11 @@ def apply_motorcycle_unlock(
                     output_file=output_file,
                     virtual_package=virtual_package,
                 )
-                owned_outputs.extend(result.output_files)
                 results.append(result)
                 if progress:
                     progress(f"patching-motorcycle-unlock-package-{index}", index, len(MOTORCYCLE_UNLOCK_PACKAGES))
         except Exception:
-            for path in owned_outputs:
+            for path in attempted_outputs:
                 path.unlink(missing_ok=True)
             raise
         return MotorcycleUnlockResult(

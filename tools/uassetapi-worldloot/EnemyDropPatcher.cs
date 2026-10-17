@@ -66,7 +66,7 @@ internal static class EnemyDropPatcher
                 .Select(table => new SourceTableRequest(table.Table, table.InputFile)).ToList();
             if (sourceRequests.Any(table => table is null))
                 throw new InvalidDataException("Enemy Drop sourceTables contains a null request.");
-            ValidateAvailableTables(sourceRequests.Select(table => table.Table), "source", requireBase: true);
+            ValidateAvailableTables(sourceRequests.Select(table => table.Table), "source", requireBase: false);
             var sourceTables = new Dictionary<string, SourceTableData>(StringComparer.OrdinalIgnoreCase);
             foreach (var sourceRequest in sourceRequests)
             {
@@ -651,7 +651,7 @@ internal static class EnemyDropPatcher
 
     private static void ValidateManifestTables(IEnumerable<string> tables)
     {
-        ValidateAvailableTables(tables, "inspection", requireBase: true);
+        ValidateAvailableTables(tables, "inspection", requireBase: false);
     }
 
 

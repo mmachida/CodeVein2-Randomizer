@@ -701,6 +701,50 @@ class WorldLootSerializationTests(unittest.TestCase):
             self.assertFalse(list(staging.glob(".cv2-world-loot-patch-*.json")))
             self.assertTrue(all(result.output_path.is_file() for result in results))
 
+    # Check shared Blueprint schemas serialize
+    def test_blueprint_schema_batches_run_serially_to_avoid_shared_file_locks(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            staging, source, _, mappings, _, _ = self._setup(root)
+            runner = ConcurrentFakeBatchRunner()
+            serializer = WorldLootSerializer(helper_project=root / "helper.csproj", runner=runner)
+            original = self._reward("DA_Item_ChemicalLight_1")
+            assigned = self._reward("DA_Item_ExpA_12")
+            packages = []
+            for index in range(33):
+                package_source = source.with_name(f"material-{index:03}.uasset")
+                package_source.write_bytes(f"source {index}".encode())
+                class_name = f"BP_Material_{index:03}_C"
+                packages.append(WorldLootPackagePatch(
+                    package_source,
+                    package_source.with_name(package_source.stem + ".cv2-patched.uasset"),
+                    (WorldLootTuplePatch(
+                        0, 0, f"Default__{class_name}", original, assigned, False,
+                    ),),
+                    f"/Game/Environment/Material/BP_Material_{index:03}",
+                ))
+
+            with (
+                patch(
+                    "cv2randomizer.game.world_loot_serialization.MemoryBudgetScheduler.recommended_worker_count",
+                    return_value=2,
+                ),
+                patch(
+                    "cv2randomizer.game.world_loot_serialization.MemoryBudgetScheduler.job",
+                    side_effect=lambda *_args, **_kwargs: nullcontext(),
+                ),
+            ):
+                results = serializer.patch_packages(
+                    work_root=staging,
+                    mappings_path=mappings,
+                    packages=packages,
+                )
+
+            self.assertEqual(len(results), 33)
+            self.assertEqual(runner.maximum_active_calls, 1)
+            self.assertEqual(runner.package_counts, [32, 1])
+            self.assertTrue(all(result.output_path.is_file() for result in results))
+
     # Check parallel batch failure removes outputs
     def test_parallel_batch_failure_removes_outputs_from_successful_batches(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

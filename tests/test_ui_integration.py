@@ -247,7 +247,10 @@ class MainWindowIntegrationTests(unittest.TestCase):
 
             with (
                 patch("cv2randomizer.ui.main_window.user_data_dir", return_value=str(app_data)),
-                patch("cv2randomizer.ui.main_window.user_log_dir", return_value=str(root / "logs")),
+                patch(
+                    "cv2randomizer.ui.main_window.activity_log_path",
+                    return_value=root / "logs" / "log.txt",
+                ),
             ):
                 window = MainWindow(
                     generation_engine=_FakeEngine(root / "generation"),
@@ -285,8 +288,8 @@ class MainWindowIntegrationTests(unittest.TestCase):
             diagnostic_labels = {
                 label.text() for label in window.tabs.widget(2).findChildren(QLabel)
             }
-            self.assertEqual(window.windowTitle(), "Code Vein 2 Randomizer v0.9.1")
-            self.assertIn("v0.9.1", diagnostic_labels)
+            self.assertEqual(window.windowTitle(), "Code Vein 2 Randomizer v0.9.3")
+            self.assertIn("v0.9.3", diagnostic_labels)
             self.assertFalse(any("CV2.usmap" in text for text in diagnostic_labels))
             self.assertTrue(window.clear_cache_button.isEnabled())
             self.assertTrue(window.clear_output_button.isEnabled())
@@ -1402,7 +1405,7 @@ class MainWindowIntegrationTests(unittest.TestCase):
             }
             self.assertFalse(any(label.casefold() == "logs" for label in diagnostic_labels))
             self.assertTrue(any(label.casefold() == "settings" for label in diagnostic_labels))
-            self.assertIn("v0.9.1", diagnostic_labels)
+            self.assertIn("v0.9.3", diagnostic_labels)
             self.assertFalse(any("algorithm" in text.casefold() for text in diagnostic_labels))
             self.assertFalse(any("latest generate" in text.casefold() for text in diagnostic_labels))
             self.assertFalse(any("CV2.usmap" in text for text in diagnostic_labels))
@@ -1445,6 +1448,10 @@ class MainWindowIntegrationTests(unittest.TestCase):
                 "leaves the original game files untouched",
                 "Uninstall Randomizer",
                 "~mods folder",
+                "Compatibility",
+                "fully compatible with Code Vein 2 v2.0.3",
+                "Other versions may have missing or different files",
+                "left unchanged and counted by category in Spoiler.txt",
             ):
                 self.assertIn(phrase, text)
             self.assertLess(
@@ -1480,7 +1487,7 @@ class MainWindowIntegrationTests(unittest.TestCase):
                 about_labels["aboutApplicationName"].text(),
                 "Code Vein 2 Randomizer",
             )
-            self.assertEqual(about_labels["aboutApplicationVersion"].text(), "Version v0.9.1")
+            self.assertEqual(about_labels["aboutApplicationVersion"].text(), "Version v0.9.3")
             self.assertEqual(
                 about_labels["aboutApplicationDescription"].text(),
                 "Item randomizer for Code Vein 2.",

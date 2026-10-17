@@ -139,6 +139,7 @@ class ShopRandomizerTests(unittest.TestCase):
         shop_assignment = next(item for item in shops.assignments if item.destination == shop)
 
         self.assertEqual(shop_assignment.source.canonical_path, blood_bead.rewards[0].article_path)
+        self.assertEqual(shop_assignment.stock_override, 1)
         self.assertEqual(physical_assignment.assigned_rewards[0].article_path, shop.article_path)
         self.assertNotEqual(
             physical_assignment.assigned_rewards[0].article_path,
@@ -237,6 +238,40 @@ class ShopRandomizerTests(unittest.TestCase):
         self.assertIn(("DLC", "Dlc", 1), participating)
         self.assertIn(("TRADE_DLC", "DlcTrade", 0), participating)
         self.assertIn(("NORMAL", "Unknown", 0), participating)
+
+    # Check Booster shop stock becomes one
+    def test_booster_moved_into_shop_gets_single_stock(self) -> None:
+        booster = replace(
+            _product("NORMAL", "BoosterStock", 0),
+            article_path="/Game/Blueprint/Article/Booster/Basic/DA_Booster_Dex",
+            item_object="DA_Booster_Dex",
+        )
+        healing = replace(
+            _product("NORMAL", "BoosterStock", 1),
+            article_path="/Game/Blueprint/Article/Item/Material/DA_Item_MatBasicRecoveryCountUp",
+            item_object="DA_Item_MatBasicRecoveryCountUp",
+            article_path_number=2,
+            item_object_number=2,
+        )
+        ordinary = _product("NORMAL", "BoosterStock", 2)
+
+        plan = build_shop_randomization_plan((booster, healing, ordinary), "single-booster-stock")
+
+        moved_booster = next(
+            assignment for assignment in plan.assignments
+            if assignment.source.article_path == booster.article_path
+        )
+        moved_healing = next(
+            assignment for assignment in plan.assignments
+            if assignment.source.article_package_path == healing.article_package_path
+        )
+        moved_ordinary = next(
+            assignment for assignment in plan.assignments
+            if assignment.source.article_path == ordinary.article_path
+        )
+        self.assertEqual(moved_booster.stock_override, 1)
+        self.assertEqual(moved_healing.stock_override, 1)
+        self.assertIsNone(moved_ordinary.stock_override)
 
     # Check global mix combines semantic base
     def test_global_mix_combines_only_semantic_base_dlc_shop_pairs(self) -> None:

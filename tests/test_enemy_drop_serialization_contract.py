@@ -79,9 +79,9 @@ class EnemyDropSerializationContractTests(unittest.TestCase):
                 )
                 self.assertEqual(tuple(snapshot.table for snapshot in snapshots), names)
 
-    # Check inspection reject missing base noncanonical
-    def test_inspection_rejects_missing_base_and_noncanonical_tables_before_helper(self) -> None:
-        for names in (("DLC",), ("AFTER_ENDING", "BASE"), ("BASE", "DLC", "AFTER_ENDING")):
+    # Check inspection rejects noncanonical subsets
+    def test_inspection_rejects_noncanonical_tables_before_helper(self) -> None:
+        for names in (("AFTER_ENDING", "BASE"), ("BASE", "DLC", "AFTER_ENDING")):
             with self.subTest(names=names):
                 runner = _HelperRunner()
                 with self.assertRaises(EnemyDropGenerationError):

@@ -64,13 +64,25 @@ internal static class RawArticleGrantPatcher
     // Inspect
 
     public static int Inspect(string[] args) => Run(args, patch: false);
+
+    // Inspect recognized profile source
+
+    public static int InspectCompatibilityProfile(string[] args) => Run(args, patch: false, profileInspection: true);
+
     // Patch
     public static int Patch(string[] args) => Run(args, patch: true);
+
+    // Patch recognized profile source
+    public static int PatchCompatibilityProfile(string[] args) => Run(args, patch: true, profilePatch: true);
 
 
     // Run
 
-    private static int Run(string[] args, bool patch)
+    private static int Run(
+        string[] args,
+        bool patch,
+        bool profileInspection = false,
+        bool profilePatch = false)
     {
         try
         {
@@ -81,7 +93,10 @@ internal static class RawArticleGrantPatcher
             if (!File.Exists(mappingsPath)) throw new FileNotFoundException("CV2.usmap mapping was not found.", mappingsPath);
             var request = JsonSerializer.Deserialize<RawArticleGrantRequest>(File.ReadAllText(args[4]), JsonOptions)
                 ?? throw new InvalidDataException("Raw Article grant request is empty.");
-            ValidateSlot(request.VirtualPackage, request.Slot);
+            if (profileInspection || profilePatch)
+                ValidateCompatibilityProfileSlot(request.VirtualPackage, request.Slot);
+            else
+                ValidateSlot(request.VirtualPackage, request.Slot);
             var input = ResolveOwnedPath(workRoot, request.InputFile, mustExist: true);
             var mappings = new Usmap(mappingsPath);
             RawArticleInspection inspection;
@@ -97,7 +112,9 @@ internal static class RawArticleGrantPatcher
             }
             else
             {
-                inspection = InspectOne(input, request, engineVersion, mappings);
+                inspection = profileInspection
+                    ? InspectCompatibilityProfileOne(input, request, engineVersion, mappings)
+                    : InspectOne(input, request, engineVersion, mappings);
             }
             Console.WriteLine(JsonSerializer.Serialize(inspection, JsonOptions));
             return 0;
@@ -175,6 +192,29 @@ internal static class RawArticleGrantPatcher
         ValidateVanillaTarget(asset, target.Export, request.Slot);
         return MakeInspection(request.VirtualPackage, input, target.Index + 1, target.Export, asset,
             ReadIdentity((RawExport)target.Export, asset, request.Slot));
+    }
+
+
+    // Inspect profile-compatible source
+
+    private static RawArticleInspection InspectCompatibilityProfileOne(
+        string input,
+        RawArticleGrantRequest request,
+        EngineVersion engineVersion,
+        Usmap mappings)
+    {
+        var asset = LoadPackage(input, engineVersion, mappings);
+        var target = FindTarget(asset, request.Slot, allowMovedExportIndex: true);
+        if (target.Export is not RawExport raw || raw.SerialSize != request.Slot.SerialSize || raw.Data.Length != request.Slot.SerialSize)
+            throw new InvalidDataException("direct reward CDO does not match the confirmed RawExport/SerialSize layout.");
+        var identity = ReadIdentity(raw, asset, request.Slot);
+        if (identity.PathNameMapValue != request.Slot.ExpectedPathNameMapValue ||
+            identity.ObjectNameMapValue != request.Slot.ExpectedObjectNameMapValue ||
+            identity.PathNumber != request.Slot.ExpectedVanillaNumber ||
+            identity.ObjectNumber != request.Slot.ExpectedVanillaNumber ||
+            identity.ArticlePath != request.Slot.ExpectedVanillaArticlePath)
+            throw new InvalidDataException("Direct reward source Article identity differs from the recognized profile layout.");
+        return MakeInspection(request.VirtualPackage, input, target.Index + 1, target.Export, asset, identity);
     }
 
 
@@ -295,14 +335,17 @@ internal static class RawArticleGrantPatcher
             throw new InvalidDataException("direct reward source reward identity or NameMap references differ from the confirmed vanilla layout.");
     }
 
-    private static (int Index, Export Export) FindTarget(UAsset asset, RawArticleGrantSlot slot)
+    private static (int Index, Export Export) FindTarget(
+        UAsset asset,
+        RawArticleGrantSlot slot,
+        bool allowMovedExportIndex = false)
     {
         var matches = asset.Exports.Select((export, index) => (export, index))
             .Where(item => String.Equals(item.export.ObjectName.ToString(), slot.ExportName, StringComparison.Ordinal))
             .ToArray();
         if (matches.Length != 1)
             throw new InvalidDataException($"Expected exactly one {slot.ExportName} CDO, found {matches.Length}.");
-        if (matches[0].index + 1 != slot.ExportIndex)
+        if (!allowMovedExportIndex && matches[0].index + 1 != slot.ExportIndex)
             throw new InvalidDataException($"direct reward CDO export index differs from metadata (actual {matches[0].index + 1}, expected {slot.ExportIndex}).");
         return (matches[0].index, matches[0].export);
     }
@@ -491,6 +534,24 @@ internal static class RawArticleGrantPatcher
         if (!KnownSlots.TryGetValue(slot.DestinationId, out var expected) || slot != expected ||
             !String.Equals(virtualPackage, expected.PackagePath, StringComparison.Ordinal))
             throw new InvalidDataException("Raw Article grant metadata does not match an explicitly researched, fingerprint-bound slot.");
+    }
+
+
+    // Validate profile slot identity
+
+    private static void ValidateCompatibilityProfileSlot(string virtualPackage, RawArticleGrantSlot slot)
+    {
+        if (!KnownSlots.TryGetValue(slot.DestinationId, out var expected) ||
+            !String.Equals(virtualPackage, expected.PackagePath, StringComparison.Ordinal) ||
+            slot with
+            {
+                ExportIndex = expected.ExportIndex,
+                ExpectedPathNameIndex = expected.ExpectedPathNameIndex,
+                ExpectedObjectNameIndex = expected.ExpectedObjectNameIndex,
+                SourceUassetSha256 = expected.SourceUassetSha256,
+                SourceUexpSha256 = expected.SourceUexpSha256,
+            } != expected)
+            throw new InvalidDataException("Raw Article profile metadata does not match an explicitly researched slot.");
     }
 
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -71,6 +72,54 @@ class InstallManagerTests(unittest.TestCase):
             self.assertEqual(unrelated.read_bytes(), b"other mod")
             self.assertEqual((paks / "pakchunk0-Windows.utoc").read_bytes(), vanilla_bytes)
             self.assertTrue((paks / "~mods").is_dir())
+
+    # Keep multiple game installs separate
+    def test_installs_and_uninstalls_multiple_game_roots_independently(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            first_game, first_paks, _ = self._game(root / "first")
+            second_game, second_paks, _ = self._game(root / "second")
+            manager = InstallManager(root / "app-state")
+
+            first_package = self._package(root, "first")
+            second_package = self._package(root, "second")
+            first_mods = first_paks / "~mods"
+            first_mods.mkdir()
+            for source in first_package.files:
+                shutil.copyfile(source, first_mods / source.name)
+            legacy_state = {
+                "schema": "cv2-randomizer-installed-mod-v1",
+                "package_name": first_package.package_name,
+                "game_root": str(first_game.resolve()),
+                "files": {
+                    source.name: hashlib.sha256(source.read_bytes()).hexdigest()
+                    for source in first_package.files
+                },
+            }
+            legacy_state_path = root / "app-state" / "installed_mod.json"
+            legacy_state_path.parent.mkdir(parents=True)
+            legacy_state_path.write_text(json.dumps(legacy_state), encoding="utf-8")
+
+            second_install = manager.install(second_package, game_root=second_game)
+
+            self.assertTrue(all((first_mods / source.name).is_file() for source in first_package.files))
+            self.assertTrue(all(path.is_file() for path in second_install.files))
+            self.assertNotEqual(manager.state_path, legacy_state_path)
+            self.assertEqual(
+                json.loads(legacy_state_path.read_text(encoding="utf-8"))["game_root"],
+                str(first_game.resolve()),
+            )
+            with self.assertRaisesRegex(InstallationError, "Select a game path before uninstalling"):
+                manager.remove()
+
+            first_removal = manager.remove(game_root=first_game)
+            self.assertEqual(first_removal.game_root, first_game.resolve())
+            self.assertFalse(any((first_mods / source.name).exists() for source in first_package.files))
+            self.assertTrue(all(path.is_file() for path in second_install.files))
+
+            second_removal = manager.remove(game_root=second_game)
+            self.assertEqual(second_removal.game_root, second_game.resolve())
+            self.assertFalse(any(path.exists() for path in second_install.files))
 
     # Check refuses overwrite conflicting unowned file
     def test_refuses_to_overwrite_a_conflicting_unowned_file(self) -> None:

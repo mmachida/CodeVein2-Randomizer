@@ -15,6 +15,7 @@ from cv2randomizer.game.motorcycle_unlock_generation import (
     MOTORCYCLE_UNLOCK_FLAGS_PACKAGE,
     MOTORCYCLE_UNLOCK_FLAG_ROWS,
     MOTORCYCLE_UNLOCK_PACKAGES,
+    MotorcycleUnlockError,
     MotorcycleUnlockResult,
     MotorcycleUnlockSerializer,
     apply_motorcycle_unlock,
@@ -194,6 +195,61 @@ class MotorcycleUnlockGenerationTests(unittest.TestCase):
             self.assertEqual(extractor.requests, [MOTORCYCLE_UNLOCK_PACKAGES])
             self.assertFalse((root / "motorcycle-unlock-extract").exists())
             self.assertTrue(result.patched_mount_gate)
+
+    # Check all partial motorcycle outputs are rolled back
+    def test_partial_outputs_are_removed_when_second_package_has_another_layout(self) -> None:
+        class Extractor:
+            # Extract requested game assets
+            def extract_assets(self, _game_root, packages, **_kwargs):
+                assets = []
+                for package in packages:
+                    source = root / "cache" / f"{package.rsplit('/', 1)[-1]}.uasset"
+                    source.parent.mkdir(parents=True, exist_ok=True)
+                    source.write_bytes(b"source")
+                    sidecar = source.with_suffix(".uexp")
+                    sidecar.write_bytes(b"source data")
+                    assets.append(ExtractedAsset(package, (source, sidecar)))
+                return tuple(assets)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            generation = root / "generation"
+            generation.mkdir()
+            mappings = root / "CV2.usmap"
+            mappings.write_bytes(b"mapping")
+            output_root = generation / "staging" / "Content"
+            serializer = Mock()
+
+            def patch(**kwargs):
+                output = kwargs["output_file"]
+                output.parent.mkdir(parents=True, exist_ok=True)
+                output.write_bytes(b"partial header")
+                output.with_suffix(".uexp").write_bytes(b"partial data")
+                if kwargs["virtual_package"] == MOTORCYCLE_PLAYER_PACKAGE:
+                    raise MotorcycleUnlockError("InvalidDataException: mount gate schema changed")
+                return MotorcycleUnlockResult(
+                    (output, output.with_suffix(".uexp")),
+                    MOTORCYCLE_UNLOCK_FLAG_ROWS,
+                    False,
+                    True,
+                )
+
+            serializer.patch.side_effect = patch
+            with self.assertRaisesRegex(MotorcycleUnlockError, "InvalidDataException"):
+                apply_motorcycle_unlock(
+                    game_root=root / "game",
+                    work_root=generation,
+                    output_content_root=output_root,
+                    mappings_path=mappings,
+                    game_version="fixture",
+                    data_revision="revision",
+                    extractor=Extractor(),
+                    package_inventory=PackageInventory.create(MOTORCYCLE_UNLOCK_PACKAGES),
+                    serializer=serializer,
+                )
+
+            self.assertEqual(tuple(output_root.rglob("*.uasset")), ())
+            self.assertEqual(tuple(output_root.rglob("*.uexp")), ())
 
     # Check serializer validate story flag patch
     def test_serializer_validates_story_flag_patch_response(self) -> None:

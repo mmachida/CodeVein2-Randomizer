@@ -57,6 +57,7 @@ class BloodCodeGrantSnapshot:
     asset_name_number: int = 0
     sub_path_string: str = ""
     articles_count: int | None = None
+    package_export_names: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -306,10 +307,14 @@ class BloodCodeSerializer:
             raw_grants = output.get("grants")
             if not isinstance(raw_grants, list) or output.get("grantCount") != len(raw_grants):
                 raise BloodCodeGenerationError(f"UAssetAPI omitted or miscounted grants for {expected['virtualPackage']}.")
+            raw_export_names = output.get("exportNames")
+            if not isinstance(raw_export_names, list) or any(not isinstance(name, str) for name in raw_export_names):
+                raise BloodCodeGenerationError(f"UAssetAPI omitted or invalidated export names for {expected['virtualPackage']}.")
+            package_export_names = tuple(raw_export_names)
             for raw in raw_grants:
                 if not isinstance(raw, dict):
                     raise BloodCodeGenerationError("UAssetAPI returned an invalid Blood Code grant record.")
-                snapshots.append(_parse_grant(raw, expected["virtualPackage"]))
+                snapshots.append(_parse_grant(raw, expected["virtualPackage"], package_export_names))
         return tuple(snapshots)
 
     # Patch package reward data
@@ -561,7 +566,7 @@ def apply_blood_code_plan(
     if not _is_within(output_root, root) or output_root == root or output_root == (root / "source" / "Content").resolve():
         raise BloodCodeGenerationError("Blood Code output must be a separate Content tree inside the generation workspace.")
     output_root.mkdir(parents=True, exist_ok=True)
-    source_by_package = {asset.virtual_path: asset for asset in preparation.source_assets}
+    source_by_package = {asset.virtual_path.casefold(): asset for asset in preparation.source_assets}
     assignments_by_package: dict[str, list[dict[str, Any]]] = defaultdict(list)
     references_by_package: dict[str, list[dict[str, Any]]] = defaultdict(list)
     object_references_by_package: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -614,7 +619,12 @@ def apply_blood_code_plan(
             (object_references_by_package, object_reference_requests),
         ):
             for virtual, assignments in sorted(grouped.items(), key=lambda item: item[0].casefold()):
-                source = source_by_package[virtual].primary_file.resolve(strict=True)
+                source_asset = source_by_package.get(virtual.casefold())
+                if source_asset is None:
+                    raise BloodCodeGenerationError(
+                        f"Prepared Blood Code source package is missing: {virtual}."
+                    )
+                source = source_asset.primary_file.resolve(strict=True)
                 output = output_root.joinpath(*virtual.split("/")[2:]).with_suffix(source.suffix)
                 output.parent.mkdir(parents=True, exist_ok=True)
                 if any(path.exists() for path in _package_files(output)):
@@ -661,7 +671,10 @@ def apply_blood_code_plan(
                 for path in package_files
             ):
                 raise BloodCodeGenerationError(f"UAssetAPI returned an invalid output inventory for {virtual}.")
-            if any(source_asset.suffix.casefold() == ".uexp" for source_asset in source_by_package[virtual].files) and not any(path.suffix.casefold() == ".uexp" for path in package_files):
+            if any(
+                source_asset.suffix.casefold() == ".uexp"
+                for source_asset in source_by_package[virtual.casefold()].files
+            ) and not any(path.suffix.casefold() == ".uexp" for path in package_files):
                 raise BloodCodeGenerationError(f"Patched Blood Code package {virtual} is missing its .uexp sidecar.")
             committed.extend(package_files)
             if progress:
@@ -685,7 +698,11 @@ def apply_blood_code_plan(
 
 
 # Parse grant
-def _parse_grant(raw: dict[str, Any], expected_virtual: str) -> BloodCodeGrantSnapshot:
+def _parse_grant(
+    raw: dict[str, Any],
+    expected_virtual: str,
+    package_export_names: tuple[str, ...] = (),
+) -> BloodCodeGrantSnapshot:
     if raw.get("package") != expected_virtual:
         raise BloodCodeGenerationError("UAssetAPI returned a grant under the wrong virtual package.")
     integers = ("exportIndex", "bulkIndex", "rewardIndex", "count")
@@ -719,6 +736,7 @@ def _parse_grant(raw: dict[str, Any], expected_virtual: str) -> BloodCodeGrantSn
         raw.get("assetNameNumber", 0),
         str(raw.get("subPathString", "")),
         raw.get("articlesCount"),
+        package_export_names,
     )
 
 

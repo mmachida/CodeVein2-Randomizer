@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import unittest
+import tempfile
 from pathlib import Path
+from cv2randomizer.game.asset_extraction import ExtractedAsset
 
 from cv2randomizer.game.blood_code_mastery_generation import (
     BloodCodeMasteryError,
     _validate_patch_response,
+    apply_blood_code_mastery,
     blood_code_mastery_packages,
     inventory_for_blood_code_mastery,
 )
@@ -122,6 +125,52 @@ class BloodCodeMasteryResponseTests(unittest.TestCase):
 
         with self.assertRaisesRegex(BloodCodeMasteryError, "does not match Lou 1 source"):
             _validate_patch_response(response, list(expected), None, 1)
+
+    # Check partial mastery outputs are rolled back
+    def test_partial_mastery_outputs_are_removed_when_layout_validation_fails(self) -> None:
+        package = ROOT + "Base/DA_BloodCode_Lou_01"
+
+        class Extractor:
+            # Extract requested Article packages
+            def extract_assets(self, _game_root, packages, **_kwargs):
+                result = []
+                for virtual_path in packages:
+                    source = root / "cache" / "DA_BloodCode_Lou_01.uasset"
+                    source.parent.mkdir(parents=True, exist_ok=True)
+                    source.write_bytes(b"source")
+                    sidecar = source.with_suffix(".uexp")
+                    sidecar.write_bytes(b"source data")
+                    result.append(ExtractedAsset(virtual_path, (source, sidecar)))
+                return tuple(result)
+
+        class FailingSerializer:
+            # Partially patch and reject layout
+            def patch(self, *, packages, **_kwargs):
+                for _virtual, _source, output in packages:
+                    output.parent.mkdir(parents=True, exist_ok=True)
+                    output.write_bytes(b"partial header")
+                    output.with_suffix(".uexp").write_bytes(b"partial data")
+                raise RuntimeError("InvalidDataException: Article layout changed")
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            generation = root / "generation"
+            generation.mkdir()
+            output_root = generation / "staging" / "Content"
+            with self.assertRaisesRegex(RuntimeError, "InvalidDataException"):
+                apply_blood_code_mastery(
+                    game_root=root / "game",
+                    work_root=generation,
+                    output_content_root=output_root,
+                    mappings_path=root / "CV2.usmap",
+                    game_version="fixture",
+                    data_revision="revision",
+                    extractor=Extractor(),
+                    package_inventory=PackageInventory.create((package,)),
+                    serializer=FailingSerializer(),
+                )
+            self.assertEqual(tuple(output_root.rglob("*.uasset")), ())
+            self.assertEqual(tuple(output_root.rglob("*.uexp")), ())
 
 
 if __name__ == "__main__":

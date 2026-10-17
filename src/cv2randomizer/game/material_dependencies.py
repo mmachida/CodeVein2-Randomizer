@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import subprocess
 import uuid
 from collections.abc import Callable, Iterable
@@ -21,6 +22,7 @@ from .asset_extraction import (
 )
 from .catalogs import MaterialLocation, is_world_map_package
 from .world_loot_serialization import SUPPORTED_ENGINE_VERSION
+from .version_compatibility import is_game_data_layout_mismatch
 
 
 MATERIAL_BLUEPRINT_PARENT_PREFIX = "/Game/Blueprint/FieldGimmick/Material/BP_PickupMaterial_"
@@ -28,6 +30,7 @@ _GENERATED_MATERIAL_MAP_PREFIXES = (
     "/Game/Map/MainWorld/MainWorld/_Generated_/",
     "/Game/Map/MainWorld/DlcWorld/_Generated_/",
 )
+LOGGER = logging.getLogger(__name__)
 
 
 class MaterialDependencyError(RuntimeError):
@@ -141,67 +144,178 @@ class MaterialDependencyResolver:
         content_root = root / "source" / "Content"
         known: dict[str, MaterializedAsset] = {}
         metadata: dict[str, dict[str, Any]] = {}
+        unavailable_packages: dict[str, str] = {}
         pending = set(expected_packages.values())
         try:
             while pending:
                 round_packages = sorted(
-                    {package for package in pending if package.casefold() not in known},
+                    {
+                        package for package in pending
+                        if package.casefold() not in known and package.casefold() not in unavailable_packages
+                    },
                     key=str.casefold,
                 )
                 if not round_packages:
                     break
                 if len(known) + len(round_packages) > 4096:
                     raise MaterialDependencyError("Material Blueprint hierarchy exceeded the package safety limit.")
-                extracted = asset_source.extract_assets(
-                    game_root,
-                    round_packages,
-                    game_version=game_version,
-                    data_revision=data_revision,
-                    progress=progress,
-                )
+                try:
+                    extracted = asset_source.extract_assets(
+                        game_root,
+                        round_packages,
+                        optional_virtual_paths=round_packages,
+                        game_version=game_version,
+                        data_revision=data_revision,
+                        progress=progress,
+                    )
+                except AssetExtractionError as error:
+                    if not is_game_data_layout_mismatch(error):
+                        raise
+                    extracted = ()
+                    for package in round_packages:
+                        try:
+                            extracted += asset_source.extract_assets(
+                                game_root,
+                                (package,),
+                                optional_virtual_paths=(package,),
+                                game_version=game_version,
+                                data_revision=data_revision,
+                                progress=progress,
+                            )
+                        except AssetExtractionError as package_error:
+                            if not is_game_data_layout_mismatch(package_error):
+                                raise
+                            unavailable_packages[package.casefold()] = str(package_error)
+                            LOGGER.warning(
+                                "Skipping incompatible material Blueprint %s: %s", package, package_error,
+                            )
                 materialized = materialize_extracted_assets(extracted, content_root)
                 for asset in materialized:
                     known[asset.virtual_path.casefold()] = asset
+                returned = {asset.virtual_path.casefold() for asset in materialized}
+                for package in round_packages:
+                    if package.casefold() not in returned and package.casefold() not in unavailable_packages:
+                        unavailable_packages[package.casefold()] = (
+                            "Blueprint package is absent from this game version."
+                        )
+                        LOGGER.info("Skipping absent material Blueprint %s", package)
+                if not materialized:
+                    pending = set()
+                    continue
                 if progress:
                     progress("resolving-material-class-defaults", len(known), 0)
-                rows = self._run_blueprint_parents(root, mappings, materialized)
-                if not isinstance(rows, list) or len(rows) != len(materialized):
-                    raise MaterialDependencyError("UAssetAPI Blueprint-parent count did not match staged assets.")
-                pending = set()
-                for asset, row in zip(materialized, rows, strict=True):
+                rows_by_package: dict[str, dict[str, Any]] = {}
+                try:
+                    rows = self._run_blueprint_parents(root, mappings, materialized)
+                    if not isinstance(rows, list) or len(rows) != len(materialized):
+                        raise MaterialDependencyError("UAssetAPI Blueprint-parent count did not match staged assets.")
+                    rows_by_package = {
+                        asset.virtual_path.casefold(): row
+                        for asset, row in zip(materialized, rows, strict=True)
+                        if isinstance(row, dict)
+                    }
+                    if len(rows_by_package) != len(materialized):
+                        raise MaterialDependencyError("UAssetAPI returned an invalid Blueprint-parent row.")
+                except MaterialDependencyError as error:
+                    if not is_game_data_layout_mismatch(error):
+                        raise
+                    for asset in materialized:
+                        try:
+                            isolated = self._run_blueprint_parents(root, mappings, (asset,))
+                            if not isinstance(isolated, list) or len(isolated) != 1 or not isinstance(isolated[0], dict):
+                                raise MaterialDependencyError(
+                                    f"UAssetAPI returned an invalid Blueprint-parent row for {asset.virtual_path}."
+                                )
+                        except MaterialDependencyError as package_error:
+                            if not is_game_data_layout_mismatch(package_error):
+                                raise
+                            unavailable_packages[asset.virtual_path.casefold()] = str(package_error)
+                            LOGGER.warning(
+                                "Skipping incompatible material Blueprint %s: %s",
+                                asset.virtual_path,
+                                package_error,
+                            )
+                        else:
+                            rows_by_package[asset.virtual_path.casefold()] = isolated[0]
+
+                next_pending: set[str] = set()
+                for asset in materialized:
+                    row = rows_by_package.get(asset.virtual_path.casefold())
+                    if row is None:
+                        continue
                     class_name = row.get("classExportName")
                     parent_name = row.get("parentClassName")
                     parent_package = row.get("parentPackage")
                     reset_value = row.get("resetOnYadorigiRest")
                     if not isinstance(class_name, str) or not isinstance(parent_name, str):
-                        raise MaterialDependencyError("Blueprint class metadata is incomplete.")
+                        unavailable_packages[asset.virtual_path.casefold()] = (
+                            "Blueprint class metadata is incomplete for this game version."
+                        )
+                        LOGGER.warning("Skipping material Blueprint with incomplete metadata: %s", asset.virtual_path)
+                        continue
                     if parent_package is not None:
-                        parent_package = _validate_blueprint_path(parent_package)
-                        if parent_package.casefold() not in known:
-                            pending.add(parent_package)
+                        try:
+                            parent_package = _validate_blueprint_path(parent_package)
+                        except MaterialDependencyError as error:
+                            unavailable_packages[asset.virtual_path.casefold()] = str(error)
+                            LOGGER.warning(
+                                "Skipping material Blueprint with an invalid parent path %s: %s",
+                                asset.virtual_path,
+                                error,
+                            )
+                            continue
+                        if (
+                            parent_package.casefold() not in known
+                            and parent_package.casefold() not in unavailable_packages
+                        ):
+                            next_pending.add(parent_package)
                     if reset_value is not None and type(reset_value) is not bool:
-                        raise MaterialDependencyError("Blueprint reset default must be true, false, or absent.")
+                        unavailable_packages[asset.virtual_path.casefold()] = (
+                            "Blueprint reset default has an unsupported value in this game version."
+                        )
+                        LOGGER.warning("Skipping material Blueprint with invalid reset data: %s", asset.virtual_path)
+                        continue
                     metadata[asset.virtual_path.casefold()] = {
                         "class_name": class_name,
                         "parent_package": parent_package,
                         "reset": reset_value,
                         "parent_class_name": parent_name,
                     }
+                pending = next_pending
 
-            missing = set(expected_names) - metadata.keys()
-            if missing:
-                raise MaterialDependencyError(f"UAssetAPI omitted material classes: {sorted(missing)!r}")
-            for package, expected_name in expected_names.items():
-                actual_name = metadata[package]["class_name"]
-                if actual_name != expected_name:
-                    raise MaterialDependencyError(
-                        f"Material class name mismatch for {package}: {actual_name} != {expected_name}."
+            profiles_list: list[MaterialClassProfile] = []
+            for package_key, expected_name in sorted(expected_names.items()):
+                package = expected_packages[package_key]
+                row = metadata.get(package_key)
+                if row is None:
+                    reason = unavailable_packages.get(
+                        package_key, "Blueprint class could not be validated against this game version.",
                     )
-
-            profiles = tuple(
-                self._profile(expected_packages[key], expected_name, metadata)
-                for key, expected_name in sorted(expected_names.items())
-            )
+                    profiles_list.append(MaterialClassProfile(
+                        package, expected_name, None, False, None, False, reason,
+                    ))
+                    continue
+                if row["class_name"] != expected_name:
+                    reason = (
+                        f"Material class name differs from the catalog: {row['class_name']} != {expected_name}."
+                    )
+                    profiles_list.append(MaterialClassProfile(
+                        package, expected_name, row.get("parent_package"), False, None, False, reason,
+                    ))
+                    continue
+                try:
+                    profiles_list.append(self._profile(package, expected_name, metadata))
+                except MaterialDependencyError as error:
+                    profiles_list.append(MaterialClassProfile(
+                        package,
+                        expected_name,
+                        row.get("parent_package"),
+                        False,
+                        None,
+                        False,
+                        f"Blueprint ancestry could not be validated for this game version: {error}",
+                    ))
+            profiles = tuple(profiles_list)
             return MaterialClassValidation(
                 content_root, tuple(known[key] for key in sorted(known)), profiles,
             )

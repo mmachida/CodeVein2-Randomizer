@@ -6,7 +6,7 @@ import secrets
 from dataclasses import replace
 from pathlib import Path
 
-from platformdirs import user_data_dir, user_log_dir
+from platformdirs import user_data_dir
 from PySide6.QtCore import Qt, QUrl, Signal
 from PySide6.QtGui import (
     QColor,
@@ -56,6 +56,7 @@ from cv2randomizer import (
 from cv2randomizer.core.config import SettingsError, SettingsStore
 from cv2randomizer.core.determinism import RANDOMIZER_ALGORITHM_VERSION
 from cv2randomizer.core.models import AppSettings, GenerationOptions
+from cv2randomizer.core.logging_config import activity_log_path
 from cv2randomizer.core.resources import (
     ApplicationResourceError,
     application_resource,
@@ -228,7 +229,8 @@ class MainWindow(QMainWindow):
             self._mappings_path = None
             self._mappings_error = str(error)
         self._data_path = Path(user_data_dir(APP_NAME))
-        self._log_path = Path(user_log_dir(APP_NAME))
+        self._log_file_path = activity_log_path()
+        self._log_path = self._log_file_path.parent
         self._output_path = self._data_path / "output"
         if self._settings.output_dir:
             try:
@@ -708,6 +710,9 @@ li { margin: 3px 0; }
 <h2>How Randomize works</h2>
 <p>Randomize creates a separate mod and leaves the original game files untouched. To remove it, click <b>Uninstall Randomizer</b>, or delete the Randomizer files from the game's <code>~mods</code> folder.</p>
 <p>Choose a seed and the options you want, then click <b>Randomize</b>. The same seed, options, and game version give you the same result.</p>
+
+<h3>Compatibility</h3>
+<p>The randomizer is fully compatible with Code Vein 2 <b>v2.0.3</b>. Other versions may have missing or different files. Items that are not compatible are left unchanged and counted by category in <code>Spoiler.txt</code>.</p>
 
 <h3>Items that can change</h3>
 <ul>
@@ -1592,7 +1597,7 @@ li { margin: 3px 0; }
     # Show task error
     def _show_task_error(self, error: Exception) -> None:
         LOGGER.error("Randomizer task failed: %s", error)
-        message = f"The task could not be completed. {error} Activity log: {self._log_path}."
+        message = f"The task could not be completed. {error} Activity log: {self._log_file_path}."
         self.status_label.setText("Task failed. See the activity log for details.")
         self.progress_bar.setRange(0, 100)
         self.progress_bar.setValue(0)

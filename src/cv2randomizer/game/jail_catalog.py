@@ -118,9 +118,11 @@ class JailCatalog:
     # Validate world sources
     def validate_world_sources(self, locations: tuple[WorldLootLocation, ...]) -> None:
         """Bind researched Jail slots to the authoritative current World Loot catalog."""
-        by_slot: dict[tuple[str, int], list[WorldLootLocation]] = {}
+        by_export_identity: dict[tuple[str, str], list[WorldLootLocation]] = {}
         for location in locations:
-            by_slot.setdefault((location.package_path.casefold(), location.export_index), []).append(location)
+            by_export_identity.setdefault(
+                (location.package_path.casefold(), location.export_name.casefold()), []
+            ).append(location)
 
         # A catalog source identifies one logical Jail occurrence. Map variants
         # explicitly marked as mirrors serialize that same occurrence and do
@@ -142,7 +144,7 @@ class JailCatalog:
                 None if item.vanilla_source.source_type == "INITIAL_INVENTORY"
                 else (
                     item.vanilla_source.package_path.casefold(),
-                    item.vanilla_source.export_index,
+                    (item.vanilla_source.export_name or "").casefold(),
                     item.vanilla_source.reward_index,
                 )
             )
@@ -165,7 +167,7 @@ class JailCatalog:
                 actual = found[0]
                 actual_slot = (
                     actual[0].package_path.casefold(),
-                    actual[0].export_index,
+                    actual[0].export_name.casefold(),
                     actual[1],
                 )
                 if actual_slot != expected:
@@ -188,22 +190,22 @@ class JailCatalog:
                 source = item.vanilla_source
                 expected_mirror_source = (
                     None if source.source_type == "INITIAL_INVENTORY" else (
-                        source.package_path.casefold(), source.export_index,
+                        source.package_path.casefold(), (source.export_name or "").casefold(),
                     )
                 )
-                actual_mirror_source = (
-                    location.mirror_of_package_path.casefold(),
-                    location.mirror_of_export_index,
+                canonical = (
+                    [] if expected_mirror_source is None else
+                    by_export_identity.get(expected_mirror_source, [])
                 )
-                if (
-                    expected_mirror_source is None
-                    or actual_mirror_source != expected_mirror_source
-                ):
+                if expected_mirror_source is None or len(canonical) != 1:
                     raise JailCatalogError(
                         f"World Loot Jail mirror for {item.object} does not point to its audited canonical source."
                     )
-                canonical = by_slot.get(expected_mirror_source, [])
-                if len(canonical) != 1 or reward_index >= len(canonical[0].rewards):
+                if location.mirror_of_export_index != canonical[0].export_index:
+                    raise JailCatalogError(
+                        f"World Loot Jail mirror for {item.object} does not point to its audited canonical source."
+                    )
+                if reward_index >= len(canonical[0].rewards):
                     raise JailCatalogError(
                         f"World Loot Jail mirror for {item.object} has no matching canonical reward payload."
                     )
@@ -223,8 +225,9 @@ class JailCatalog:
                 continue
             assert source.package_path is not None
             assert source.export_index is not None
-            slot = (source.package_path.casefold(), source.export_index)
-            matches = by_slot.get(slot, [])
+            assert source.export_name is not None
+            identity = (source.package_path.casefold(), source.export_name.casefold())
+            matches = by_export_identity.get(identity, [])
             if len(matches) != 1:
                 raise JailCatalogError(
                     f"Vanilla Jail source {item.object} must match exactly one current World Loot slot."

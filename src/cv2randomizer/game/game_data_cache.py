@@ -34,7 +34,7 @@ CACHE_FORMAT_VERSION = 5
 CACHE_INFO_FILENAME = "cache_info.json"
 SOURCE_REGISTRY_REVISION = "catalogued-sources-v27-quest-world-loot-grants"
 WORLD_LOOT_DESCRIPTOR_REVISION = 13
-WORLD_LOOT_PREPARATION_REVISION = 15
+WORLD_LOOT_PREPARATION_REVISION = 19
 RAW_EXTRACTION_REVISION = 1
 PREPARED_CACHE_REVISION = 1
 _LEGACY_CACHE_ENTRY_NAME = re.compile(r"[0-9a-f]{64}\Z")
@@ -326,6 +326,54 @@ class GameDataCacheStore:
                 GameDataCacheState.INVALID, entry,
                 "Cached World Loot dependency index is invalid or belongs to another cache identity.",
             )
+        if isinstance(world_loot_index, dict):
+            expected_profile = detection.world_loot_compatibility_profile
+            if world_loot_index.get("compatibility_profile") != expected_profile:
+                return GameDataCacheSnapshot(
+                    GameDataCacheState.OUTDATED, entry,
+                    "Cached World Loot data uses a different version profile; extract game data again.",
+                    detection.version_id, detection.catalog_revision,
+                )
+            rebindings = world_loot_index.get("world_loot_export_rebindings", [])
+            if not isinstance(rebindings, list):
+                return GameDataCacheSnapshot(
+                    GameDataCacheState.INVALID, entry,
+                    "Cached World Loot export rebindings are malformed.",
+                )
+            rebound_sources: set[tuple[str, int]] = set()
+            rebound_targets: set[tuple[str, int]] = set()
+            for row in rebindings:
+                if not isinstance(row, dict):
+                    return GameDataCacheSnapshot(
+                        GameDataCacheState.INVALID, entry,
+                        "Cached World Loot export rebinding is malformed.",
+                    )
+                package = row.get("package_path")
+                source_index = row.get("catalog_export_index")
+                target_index = row.get("resolved_export_index")
+                export_name = row.get("export_name")
+                class_package = row.get("class_package")
+                if (
+                    not isinstance(package, str) or not package.startswith("/Game/Map/")
+                    or not isinstance(source_index, int) or isinstance(source_index, bool) or source_index < 1
+                    or not isinstance(target_index, int) or isinstance(target_index, bool) or target_index < 1
+                    or source_index == target_index
+                    or not isinstance(export_name, str) or not export_name
+                    or not isinstance(class_package, str) or not class_package.startswith("/Game/")
+                ):
+                    return GameDataCacheSnapshot(
+                        GameDataCacheState.INVALID, entry,
+                        "Cached World Loot export rebinding has an invalid identity.",
+                    )
+                source_key = (package.casefold(), source_index)
+                target_key = (package.casefold(), target_index)
+                if source_key in rebound_sources or target_key in rebound_targets:
+                    return GameDataCacheSnapshot(
+                        GameDataCacheState.INVALID, entry,
+                        "Cached World Loot export rebindings contain duplicate slots.",
+                    )
+                rebound_sources.add(source_key)
+                rebound_targets.add(target_key)
         if metadata.get("game_archive_sha256") != identity.get("game_archive_sha256"):
             return GameDataCacheSnapshot(
                 GameDataCacheState.OUTDATED, entry,

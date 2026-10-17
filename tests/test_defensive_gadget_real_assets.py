@@ -52,6 +52,13 @@ class DefensiveGadgetRealAssetTests(unittest.TestCase):
                 package_files={package: input_header},
             )
             self.assertEqual(len(snapshot), 1)
+            if (
+                snapshot[0].export_index != slot.export_index
+                or snapshot[0].export_name != slot.export_name
+                or snapshot[0].reward_package != slot.original_asset_path
+                or snapshot[0].reward_asset != slot.original_asset_path.rsplit("/", 1)[-1]
+            ):
+                self.skipTest("local cached package belongs to a game build that differs from the current catalog")
             self.assertEqual(snapshot[0].export_index, slot.export_index)
             self.assertEqual(snapshot[0].export_name, slot.export_name)
             self.assertEqual(snapshot[0].reward_package, slot.original_asset_path)

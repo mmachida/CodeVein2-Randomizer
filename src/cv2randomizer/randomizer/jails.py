@@ -15,10 +15,10 @@ def jail_world_candidates(
     world_loot: tuple[WorldLootLocation, ...] | None = None,
 ) -> tuple[WorldLootRewardCandidate, ...]:
     """Return canonical Jail identities without creating synthetic locations."""
-    rewards_by_source: dict[tuple[str, int], WorldLootLocation] = {}
+    rewards_by_source: dict[tuple[str, str], WorldLootLocation] = {}
     if world_loot is not None:
         rewards_by_source = {
-            (location.package_path.casefold(), location.export_index): location
+            (location.package_path.casefold(), location.export_name.casefold()): location
             for location in world_loot
         }
     return tuple(
@@ -57,30 +57,30 @@ def jail_world_candidates(
 # Find jail source location
 def _jail_source_location(
     item: JailReward,
-    sources: dict[tuple[str, int], WorldLootLocation],
+    sources: dict[tuple[str, str], WorldLootLocation],
 ) -> WorldLootLocation | None:
     source = item.vanilla_source
-    if source.package_path is None or source.export_index is None:
+    if source.package_path is None or source.export_name is None:
         return None
-    return sources.get((source.package_path.casefold(), source.export_index))
+    return sources.get((source.package_path.casefold(), source.export_name.casefold()))
 
 
 # Read jail occurrence ID
 def _jail_occurrence_id(
     item: JailReward,
-    sources: dict[tuple[str, int], WorldLootLocation],
+    sources: dict[tuple[str, str], WorldLootLocation],
 ) -> str:
     source = item.vanilla_source
-    if source.package_path is None or source.export_index is None or source.reward_index is None:
+    if source.package_path is None or source.export_name is None or source.reward_index is None:
         raise ValueError(f"Movable Jail reward {item.object} has no physical source occurrence.")
-    location = sources.get((source.package_path.casefold(), source.export_index))
+    location = sources.get((source.package_path.casefold(), source.export_name.casefold()))
     if location is None:
         raise ValueError(f"Movable Jail reward {item.object} is missing from the World Loot source catalog.")
     return world_loot_occurrence_id(location, source.reward_index)
 
 
 # Read jail reward payload
-def _jail_reward_payload(item: JailReward, sources: dict[tuple[str, int], WorldLootLocation]) -> RewardPayload:
+def _jail_reward_payload(item: JailReward, sources: dict[tuple[str, str], WorldLootLocation]) -> RewardPayload:
     """Reuse exact source FName identity from the audited World Loot location."""
     source = item.vanilla_source
     if source.source_type == "INITIAL_INVENTORY":
@@ -94,9 +94,9 @@ def _jail_reward_payload(item: JailReward, sources: dict[tuple[str, int], WorldL
             item.content_class,
             SoftObjectPathIdentity.from_literal_path(item.asset_path),
         )
-    if source.package_path is None or source.export_index is None or source.reward_index is None:
+    if source.package_path is None or source.export_name is None or source.reward_index is None:
         raise ValueError(f"Jail reward {item.object} has no audited physical Article source.")
-    location = sources.get((source.package_path.casefold(), source.export_index))
+    location = sources.get((source.package_path.casefold(), source.export_name.casefold()))
     if location is None or source.reward_index >= len(location.rewards):
         raise ValueError(f"Jail reward {item.object} is missing its audited World Loot source location.")
     reward = location.rewards[source.reward_index]

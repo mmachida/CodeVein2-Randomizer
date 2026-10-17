@@ -169,6 +169,7 @@ class BequeathedFormaGenerationTests(unittest.TestCase):
                         "virtualPackage": grant.quest_asset,
                         "inputFile": str(source),
                         "grantCount": 1,
+                        "exportNames": ["QSTask_GainItem_0"],
                         "grants": [{
                             "package": grant.quest_asset,
                             "exportIndex": grant.export_index,

@@ -15,6 +15,9 @@ from .world_loot import WorldLootRandomizationPlan
 STINGER_ARTICLE = "/Game/Blueprint/Article/Jail/DA_Jail_Stinger"
 STINGER_WORLD_PACKAGE = "/Game/Map/MainWorld/MainWorld/_Generated_/61Y5LAV87NWVD213F35X2VK87"
 STINGER_WORLD_EXPORT = 272
+STINGER_WORLD_EXPORT_NAME = (
+    "BP_PickupItem_WithFlagChange_C_UAID_A8A159A4A14B9D8902_1822678819_3eb3acb6c4c82637"
+)
 STINGER_SHOP_FAMILY = "NORMAL"
 STINGER_SHOP_ROW = "Shop_SC_Normal1"
 STINGER_SHOP_PRODUCT_INDEX = 20
@@ -252,7 +255,7 @@ def build_stinger_shop_mirror_assignment(
     matches = [
         assignment for assignment in world_plan.assignments
         if assignment.destination.package_path.casefold() == STINGER_WORLD_PACKAGE.casefold()
-        and assignment.destination.export_index == STINGER_WORLD_EXPORT
+        and assignment.destination.export_name.casefold() == STINGER_WORLD_EXPORT_NAME.casefold()
     ]
     if len(matches) != 1:
         raise ValueError(f"Expected one canonical Josee Stinger World Loot assignment, found {len(matches)}.")
@@ -286,6 +289,7 @@ __all__ = [
     "STINGER_SHOP_PRODUCT_INDEX",
     "STINGER_SHOP_ROW",
     "STINGER_WORLD_EXPORT",
+    "STINGER_WORLD_EXPORT_NAME",
     "STINGER_WORLD_PACKAGE",
     "build_stinger_shop_mirror_assignment",
     "build_ogre_shop_mirror_assignment",

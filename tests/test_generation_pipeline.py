@@ -466,6 +466,94 @@ def _spoiler_product(row: str, index: int, item: str, *, price: int, stock: int)
 
 
 class GenerationPipelineTests(unittest.TestCase):
+    # Validate structural pickup profiles
+    def test_extract_profiles_match_structural_class_package(self) -> None:
+        from cv2randomizer.game.material_dependencies import MaterialClassProfile
+        from cv2randomizer.game.renewable_ingredients import renewable_material_locations
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            engine = self._engine(root / "data")
+            catalogs = CatalogStore(_REPOSITORY_ROOT / "data" / "catalogs").load("current")
+            location = next(
+                item for item in catalogs.world_loot
+                if item.location_type == "RENEWABLE_INGREDIENT" and item.structural_class_package
+            )
+            class_package = location.structural_class_package
+            assert class_package is not None
+            expected_class_name = f"{class_package.rsplit('/', 1)[-1]}_C"
+            index = {
+                "schema_version": 1,
+                "game_version": "fixture-build",
+                "catalog_revision": "current",
+                "maps": {
+                    location.package_path: {
+                        str(location.export_index): {
+                            "export_name": location.export_name,
+                            "class_name": expected_class_name,
+                            "class_package": class_package,
+                        },
+                    },
+                },
+                "blueprint_packages": [],
+                "blueprint_cdo_defaults": {},
+                "incompatible_world_loot_locations": [],
+            }
+
+            class WorldLootResolver:
+                # Return prepared fixture index
+                def stage_for_locations(self, **kwargs):
+                    self.stage_kwargs = kwargs
+                    return SimpleNamespace(dependency_index=index)
+
+            class MaterialResolver:
+                # Return validated fixture profile
+                def validate_classes(self, *, locations, **_kwargs):
+                    self.locations = tuple(locations)
+                    return SimpleNamespace(profiles=(MaterialClassProfile(
+                        package_path=class_package,
+                        class_name=expected_class_name,
+                        direct_parent_package=None,
+                        material_hierarchy=True,
+                        effective_reset_on_yadorigi_rest=True,
+                        eligible=True,
+                        reason=None,
+                    ),))
+
+            engine.world_loot_resolver = WorldLootResolver()
+            engine.material_resolver = MaterialResolver()
+            diagnostics = SimpleNamespace(
+                set_job=lambda *_args, **_kwargs: None,
+                record_operation=lambda *_args, **_kwargs: None,
+                observe_helper=lambda *_args, **_kwargs: None,
+            )
+            result = engine._prefetch_cached_dependencies(
+                catalogs=replace(catalogs, world_loot=(location,), unsafe_packages=frozenset()),
+                installed_inventory=PackageInventory.create((
+                    location.package_path,
+                    class_package,
+                )),
+                game_root=root,
+                mappings_path=root / "CV2.usmap",
+                work_root=root / "work",
+                game_version="fixture-build",
+                data_revision="current",
+                compatibility_profile=None,
+                display_version="2.0.3.0",
+                extractor=engine.extractor,
+                material_locations=renewable_material_locations((location,)),
+                progress=None,
+                memory_scheduler=SimpleNamespace(),
+                memory_diagnostics=diagnostics,
+            )
+
+        self.assertEqual(result["incompatible_world_loot_locations"], [])
+        self.assertEqual(engine.world_loot_resolver.stage_kwargs["display_version"], "2.0.3.0")
+        self.assertEqual(
+            result["renewable_class_profiles"][class_package.casefold()]["class_name"],
+            expected_class_name,
+        )
+
     # Check extract source registry caches every
     def test_extract_source_registry_caches_every_renewable_blueprint_class(self) -> None:
         catalogs = CatalogStore(_REPOSITORY_ROOT / "data" / "catalogs").load("current")
@@ -556,12 +644,21 @@ class GenerationPipelineTests(unittest.TestCase):
             cheaper_booster_extractor=True,
             low_blood_code_mastery_exp=True,
         )
-        metadata = _spoiler_metadata("fixture-game-version")
+        metadata = _spoiler_metadata(VersionDetection(
+            supported=False,
+            version_id="local-unverified-abc123",
+            catalog_revision="current",
+            executable_path=Path("CodeVein2.exe"),
+            reason="local only",
+            local_unverified=True,
+            display_version="1.0.2.0",
+        ))
         settings = _spoiler_settings(options)
 
         self.assertEqual(metadata, {
-            "App Version": "v0.9.1",
-            "Game Version": "fixture-game-version",
+            "App Version": "v0.9.3",
+            "Game Version": "1.0.2.0",
+            "Version Validation": "Local, unverified",
         })
         self.assertEqual(settings[0], "Enabled World Loot (always on)")
         self.assertIn("Enabled Unlock all NPC Trader Shop Tiers", settings)
@@ -576,20 +673,11 @@ class GenerationPipelineTests(unittest.TestCase):
         self.assertEqual(len(settings), 17)
         self.assertFalse(any("Pipe Shop" in line or "Pre-Order" in line for line in settings))
 
-    # Check motorcycle inventory preparation failure is
-    def test_motorcycle_inventory_preparation_failure_is_fatal(self) -> None:
+    # Check incompatible initial inventory preparation is skipped
+    def test_initial_inventory_preparation_failure_is_recorded_as_a_skip(self) -> None:
         warnings: list[str] = []
-        with self.assertRaisesRegex(GenerationError, "Could not grant Motorcycle Forma"):
-            _handle_initial_inventory_preparation_failure(
-                RuntimeError("source occurrence transfer failed"),
-                motorcycle_unlocked=True,
-                availability_warnings=warnings,
-            )
-        self.assertEqual(warnings, [])
-
         _handle_initial_inventory_preparation_failure(
             RuntimeError("source occurrence transfer failed"),
-            motorcycle_unlocked=False,
             availability_warnings=warnings,
         )
         self.assertEqual(warnings, [
@@ -915,7 +1003,7 @@ class GenerationPipelineTests(unittest.TestCase):
             self.assertEqual(document["status"], "assignments_only")
             self.assertTrue(document["dry_run"])
             self.assertEqual(document["seed"]["display"], "phase12-seed")
-            self.assertEqual(document["app_version"], "0.9.1")
+            self.assertEqual(document["app_version"], "0.9.3")
             self.assertTrue(document["generated_at"].endswith("Z"))
             self.assertEqual(document["errors"], 0)
             self.assertIn("world_loot", document["skipped"])
@@ -950,7 +1038,11 @@ class GenerationPipelineTests(unittest.TestCase):
             self.assertEqual(world_rows, expected_rows)
             gadget_counts = document["counts"]["defensive_gadgets"]
             self.assertEqual(gadget_counts["catalog_count"], 17)
-            self.assertEqual(gadget_counts["world_loot"]["canonical_catalog_candidates"], 10)
+            self.assertEqual(gadget_counts["world_loot"]["canonical_catalog_candidates"], 9)
+            self.assertTrue(any(
+                "Jadwiga Servant - Lightning Barrage Reward" in warning
+                for warning in document["content_availability"]["skipped_feature_groups"]
+            ))
             self.assertEqual(gadget_counts["world_loot"]["injected_canonical_candidates"], 0)
             jail_counts = document["jails"]
             self.assertEqual(jail_counts["catalog_count"], 12)
@@ -976,7 +1068,7 @@ class GenerationPipelineTests(unittest.TestCase):
             self.assertEqual(jail_counts["world_loot"]["shared_overlay_displaced_payloads"], 0)
             self.assertFalse(jail_counts["starting_jail_randomization"]["enabled"])
             self.assertFalse(jail_counts["game_assets_packaged"])
-            self.assertEqual(document["counts"]["world_loot"]["canonical_reward_candidates"], 20)
+            self.assertEqual(document["counts"]["world_loot"]["canonical_reward_candidates"], 19)
             self.assertEqual(document["counts"]["world_loot"]["booster_candidates"], 0)
             self.assertEqual(document["counts"]["world_loot"]["booster_candidates_injected"], 0)
             self.assertEqual(document["counts"]["world_loot"]["booster_duplicate_sources_removed"], 0)
@@ -1292,7 +1384,7 @@ class GenerationPipelineTests(unittest.TestCase):
             self.assertEqual(gadget_counts["catalog_count"], 17)
             self.assertEqual(gadget_counts["npc_grants"]["assignments"], 1)
             self.assertEqual(gadget_counts["npc_grants"]["changed"], 1)
-            self.assertEqual(gadget_counts["npc_grants"]["candidate_count"], 10)
+            self.assertEqual(gadget_counts["npc_grants"]["candidate_count"], 9)
             self.assertEqual(gadget_counts["npc_grants"]["validation_status"], "output_reopened_and_validated")
             self.assertEqual(gadget_counts["npc_grants"]["pending"], [])
             self.assertTrue(manifest["options"]["randomize_world_loot"])
@@ -1395,10 +1487,17 @@ class GenerationPipelineTests(unittest.TestCase):
             root = Path(temporary)
             workspace = WorkspaceManager(root / "data").create_generation(normalize_seed("spoiler-seed"))
             products = (
-                _spoiler_product("Shop_A", 0, "DA_Test_0", price=17, stock=2),
-                _spoiler_product("Shop_A", 1, "DA_Test_1", price=29, stock=5),
+                replace(
+                    _spoiler_product("Shop_A", 0, "DA_Booster_Dex", price=17, stock=2),
+                    article_path="/Game/Blueprint/Article/Booster/Basic/DA_Booster_Dex",
+                ),
+                replace(
+                    _spoiler_product("Shop_A", 1, "DA_Item_MatBasicRecoveryCountUp_1", price=29, stock=5),
+                    article_path="/Game/Blueprint/Article/Item/Material/DA_Item_MatBasicRecoveryCountUp_1",
+                ),
             )
             shop_plan = build_shop_randomization_plan(products, "spoiler-seed", enabled_families=("NORMAL",))
+            self.assertTrue(all(item.stock_override == 1 for item in shop_plan.assignments))
             options = GenerationOptions(
                 randomize_world_loot=False,
                 randomize_bequeathed_formae_quest_rewards=False,
@@ -1424,7 +1523,7 @@ class GenerationPipelineTests(unittest.TestCase):
                     item.source.article_path,
                     str(item.destination.price),
                     str(item.destination.uses_stock),
-                    str(item.destination.stock),
+                    str(item.stock_override if item.stock_override is not None else item.destination.stock),
                 )
                 for item in shop_plan.assignments
             }
@@ -1722,9 +1821,6 @@ class GenerationPipelineTests(unittest.TestCase):
             ))
             staged_paths = {path.as_posix() for path in result.output_files}
             direct_package_names = (
-                "BP_SmallScenario_JadwigaServant1",
-                "BP_SmallScenario_JadwigaServant2",
-                "BP_SmallScenario_JadwigaServant3",
                 "QST_MainEpisode_DLC_e90360",
                 "QST_CharacterEpisode_Iris_c00010",
                 "QST_CharacterEpisode_Iris_c00070",
@@ -1734,6 +1830,19 @@ class GenerationPipelineTests(unittest.TestCase):
                 self.assertTrue(any(path.endswith(package_name + ".uexp") for path in staged_paths))
             self.assertEqual(len(result.package_result.files), 3)
             document = json.loads(result.manifest_path.read_text(encoding="utf-8"))
+            self.assertFalse(any(
+                path.endswith(package_name + ".uasset")
+                for path in staged_paths
+                for package_name in (
+                    "BP_SmallScenario_JadwigaServant1",
+                    "BP_SmallScenario_JadwigaServant2",
+                    "BP_SmallScenario_JadwigaServant3",
+                )
+            ))
+            self.assertTrue(any(
+                "Jadwiga Servant - Lightning Barrage Reward" in warning
+                for warning in document["content_availability"]["skipped_feature_groups"]
+            ))
             self.assertEqual(document["status"], "package_validated")
             self.assertEqual(document["spoiler_txt_file"], "Spoiler.txt")
             spoiler_text = result.spoiler_text_path.read_text(encoding="utf-8")
@@ -1743,7 +1852,11 @@ class GenerationPipelineTests(unittest.TestCase):
             self.assertIn("#", spoiler_text)
             self.assertIn("Total Randomized:", spoiler_text)
             self.assertIn("Unchanged:", spoiler_text)
-            self.assertIn("App Version: v0.9.1", spoiler_text)
+            self.assertIn(
+                "Skipped for this game version: 4 (3x World Loot, 1x Defensive Gadget Grants)",
+                spoiler_text,
+            )
+            self.assertIn("App Version: v0.9.3", spoiler_text)
             self.assertIn("Game Version: fixture-build", spoiler_text)
             self.assertIn("Randomizer Settings:\n", spoiler_text)
             self.assertIn("Disabled Unlock all 6 Booster Slots", spoiler_text)
@@ -1796,6 +1909,7 @@ class GenerationPipelineTests(unittest.TestCase):
                 location.destination_id for location in catalogs.world_loot
                 if location.destination_id is not None
                 and location.destination_kind in {"RAW_ARTICLE_GRANT", "QUEST_ARTICLE_GRANT"}
+                and location.destination_kind != "RAW_ARTICLE_GRANT"
                 and location.destination_id not in expected_field_ids
                 and not location.destination_id.startswith(("one_time_enemy_", "harmony_moon_", "QST_FieldEnemy_"))
             }
@@ -1839,9 +1953,6 @@ class GenerationPipelineTests(unittest.TestCase):
                     or row["destination"] in non_enemy_story_labels
                 )},
                 {
-                    "Jadwiga Servant - Lightning Barrage Reward",
-                    "Jadwiga Servant - Booster Dex Reward",
-                    "Jadwiga Servant - Initial Parry Reward",
                     "DLC e90360 - Gift Heal Point Up Reward",
                     *non_enemy_story_labels,
                 },
@@ -2157,6 +2268,22 @@ class GenerationPipelineTests(unittest.TestCase):
                 source for source in material_sources if source != missing_source
             )
             self.assertEqual(_available_material_locations((material,), partial_inventory), ())
+
+    # Check Harmony quests follow DLC availability
+    def test_harmony_quest_rewards_are_available_only_with_their_packages(self) -> None:
+        from cv2randomizer.generation.pipeline import _available_world_locations
+
+        catalogs = CatalogStore(_REPOSITORY_ROOT / "data" / "catalogs").load("current")
+        harmony_rewards = tuple(
+            item for item in catalogs.world_loot
+            if (item.destination_id or "").startswith("harmony_moon_")
+        )
+        self.assertEqual(len(harmony_rewards), 5)
+        self.assertTrue(all(item.destination_kind == "QUEST_ARTICLE_GRANT" for item in harmony_rewards))
+        self.assertEqual(_available_world_locations(harmony_rewards, PackageInventory.create(())), ())
+
+        installed_dlc = PackageInventory.create(item.package_path for item in harmony_rewards)
+        self.assertEqual(_available_world_locations(harmony_rewards, installed_dlc), harmony_rewards)
 
     # Check renewable ingredients are prepared separate
     def test_renewable_ingredients_are_prepared_as_a_separate_pool(self) -> None:

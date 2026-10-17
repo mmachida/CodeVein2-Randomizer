@@ -94,8 +94,14 @@ if (args.Length == 5 && args[0] == "patch-defensive-gadget-grants")
 if (args.Length == 5 && args[0] == "inspect-raw-article-grant")
     return RawArticleGrantPatcher.Inspect(args);
 
+if (args.Length == 5 && args[0] == "inspect-raw-article-grant-profile")
+    return RawArticleGrantPatcher.InspectCompatibilityProfile(args);
+
 if (args.Length == 5 && args[0] == "patch-raw-article-grant")
     return RawArticleGrantPatcher.Patch(args);
+
+if (args.Length == 5 && args[0] == "patch-raw-article-grant-profile")
+    return RawArticleGrantPatcher.PatchCompatibilityProfile(args);
 
 if (args.Length == 1 && args[0] == "test-raw-article-grant-fixtures")
     return RawArticleGrantPatcher.TestFixtures();
@@ -136,6 +142,35 @@ if (args.Length == 5 && args[0] == "inspect-map-batch")
             results.Add(InspectMapRequest(workRoot, request, engineVersion, mappings));
             // Keep the worker reusable without retaining the previous map's
             // UAsset object graph while the next World Partition map is read.
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: false);
+            GC.WaitForPendingFinalizers();
+        }
+        Console.WriteLine(JsonSerializer.Serialize(results, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
+        return 0;
+    }
+    catch (Exception exception)
+    {
+        Console.Error.WriteLine(exception.ToString());
+        return 1;
+    }
+}
+
+if (args.Length == 5 && args[0] == "find-map-exports")
+{
+    try
+    {
+        var workRoot = Path.GetFullPath(args[1]);
+        var document = JsonSerializer.Deserialize<MapExportSearchBatch>(File.ReadAllText(args[2]),
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+            ?? throw new InvalidDataException("Map export search manifest is empty.");
+        if (document.Maps is null || document.Maps.Count == 0 || document.Maps.Any(request => request is null))
+            throw new InvalidDataException("Map export search manifest must contain at least one valid map request.");
+        var mappings = new Usmap(Path.GetFullPath(args[3]));
+        var engineVersion = Enum.Parse<EngineVersion>(args[4], ignoreCase: false);
+        var results = new List<MapExportSearchResult>();
+        foreach (var request in document.Maps)
+        {
+            results.Add(FindMapExports(workRoot, request, engineVersion, mappings));
             GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: false);
             GC.WaitForPendingFinalizers();
         }
@@ -1416,24 +1451,129 @@ static MapInspectionResult InspectMapRequest(
     var inputPath = Path.GetFullPath(request.InputFile);
     if (!IsWithin(inputPath, workRoot)) throw new InvalidDataException("Input map must stay inside the supplied work root.");
     var loadTimer = Stopwatch.StartNew();
-    var asset = new UAsset(inputPath, engineVersion, mappings);
+    UAsset asset;
+    try
+    {
+        asset = new UAsset(inputPath, engineVersion, mappings);
+    }
+    catch (Exception exception) when (exception is not OutOfMemoryException and not StackOverflowException)
+    {
+        loadTimer.Stop();
+        inspectionTimer.Stop();
+        return new MapInspectionResult(
+            inputPath, new List<ClassInspection>(), new List<ActorSchemaValidationResult>(),
+            CaptureHelperMemory(inspectionTimer.ElapsedMilliseconds), loadTimer.ElapsedMilliseconds,
+            0, $"{exception.GetType().Name}: {exception.Message}");
+    }
     loadTimer.Stop();
     var analysisTimer = Stopwatch.StartNew();
     var inspections = new List<ClassInspection>();
     foreach (var oneBasedIndex in request.ExportIndices.Distinct().Order())
     {
         var exportIndex = oneBasedIndex - 1;
-        if (exportIndex < 0 || exportIndex >= asset.Exports.Count)
-            throw new ArgumentOutOfRangeException(nameof(request.ExportIndices));
+        if (exportIndex < 0 || exportIndex >= asset.Exports.Count) continue;
         var export = asset.Exports[exportIndex];
-        var classInfo = ResolveClassImport(asset, export.ClassIndex);
-        inspections.Add(new ClassInspection(
-            export.ObjectName.ToString(), oneBasedIndex, classInfo.ClassName, classInfo.PackagePath));
+        try
+        {
+            var classInfo = ResolveClassImport(asset, export.ClassIndex);
+            inspections.Add(new ClassInspection(
+                export.ObjectName.ToString(), oneBasedIndex, classInfo.ClassName, classInfo.PackagePath));
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException and not StackOverflowException)
+        {
+            // Python treats omitted catalog exports as incompatible locations.
+        }
+    }
+    var validations = new List<ActorSchemaValidationResult>();
+    var registeredBlueprintSchemaPackages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    using var exportReader = asset.PathToReader(inputPath, true);
+    foreach (var validation in request.ActorValidations ?? new List<ActorSchemaValidationRequest>())
+    {
+        var exportIndex = validation.ExportIndex - 1;
+        if (exportIndex < 0 || exportIndex >= asset.Exports.Count)
+        {
+            validations.Add(new ActorSchemaValidationResult(
+                validation.ExportIndex, validation.ExportName, false, "Catalog export index is not present in this map."));
+            continue;
+        }
+
+        try
+        {
+            var targetExport = asset.Exports[exportIndex];
+            var targetClass = ResolveClassImport(asset, targetExport.ClassIndex);
+            if (!String.Equals(targetExport.ObjectName.ToString(), validation.ExportName, StringComparison.Ordinal))
+                throw new InvalidDataException("Catalog export identity does not match the source map.");
+            if (targetClass.ClassName == "BlueprintGeneratedClass" &&
+                targetClass.PackagePath.StartsWith("/Game/", StringComparison.Ordinal))
+            {
+                RegisterBlueprintSchemaPackage(
+                    workRoot, inputPath, targetClass.PackagePath, engineVersion, mappings,
+                    registeredBlueprintSchemaPackages, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+            }
+            if (asset.Exports[exportIndex] is not NormalExport)
+                asset.ParseExport(exportReader, exportIndex, true);
+            if (asset.Exports[exportIndex] is not NormalExport actor)
+                throw new InvalidDataException(
+                    $"Target export parsed as {asset.Exports[exportIndex].GetType().Name}; required Blueprint schemas could not be loaded.");
+
+            for (var rewardIndex = 0; rewardIndex < validation.ExpectedRewards.Count; rewardIndex++)
+            {
+                var actual = ReadReward(actor, rewardIndex);
+                if (!RewardTupleMatches(actual, validation.ExpectedRewards[rewardIndex]))
+                    throw new InvalidDataException($"Reward {rewardIndex} no longer matches the catalog.");
+            }
+            if (validation.RequireUniqueSaveId &&
+                !String.Equals(ReadUniqueSaveId(actor), validation.ExpectedSaveId, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidDataException("UniqueSaveID no longer matches the catalog.");
+
+            validations.Add(new ActorSchemaValidationResult(
+                validation.ExportIndex, validation.ExportName, true, null));
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException and not StackOverflowException)
+        {
+            validations.Add(new ActorSchemaValidationResult(
+                validation.ExportIndex, validation.ExportName, false,
+                $"{exception.GetType().Name}: {exception.Message}"));
+        }
     }
     analysisTimer.Stop();
     inspectionTimer.Stop();
     return new MapInspectionResult(
-        inputPath, inspections, CaptureHelperMemory(inspectionTimer.ElapsedMilliseconds),
+        inputPath, inspections, validations, CaptureHelperMemory(inspectionTimer.ElapsedMilliseconds),
+        loadTimer.ElapsedMilliseconds, analysisTimer.ElapsedMilliseconds, null);
+}
+
+// Find exports by exact object name
+static MapExportSearchResult FindMapExports(
+    string workRoot,
+    MapExportSearchRequest request,
+    EngineVersion engineVersion,
+    Usmap mappings)
+{
+    var timer = Stopwatch.StartNew();
+    var inputPath = Path.GetFullPath(request.InputFile);
+    if (!IsWithin(inputPath, workRoot)) throw new InvalidDataException("Input map must stay inside the supplied work root.");
+    if (request.ExportNames is null || request.ExportNames.Length == 0 || request.ExportNames.Length > 20000)
+        throw new InvalidDataException("Map export search requires a bounded list of object names.");
+    var expectedNames = new HashSet<string>(request.ExportNames, StringComparer.OrdinalIgnoreCase);
+    var loadTimer = Stopwatch.StartNew();
+    var asset = new UAsset(inputPath, engineVersion, mappings);
+    loadTimer.Stop();
+    var analysisTimer = Stopwatch.StartNew();
+    var matches = new List<NamedMapExport>();
+    for (var index = 0; index < asset.Exports.Count; index++)
+    {
+        var export = asset.Exports[index];
+        var exportName = export.ObjectName.ToString();
+        if (!expectedNames.Contains(exportName)) continue;
+        var classInfo = ResolveClassImport(asset, export.ClassIndex);
+        matches.Add(new NamedMapExport(
+            exportName, index + 1, classInfo.ClassName, classInfo.PackagePath));
+    }
+    analysisTimer.Stop();
+    timer.Stop();
+    return new MapExportSearchResult(
+        inputPath, matches, CaptureHelperMemory(timer.ElapsedMilliseconds),
         loadTimer.ElapsedMilliseconds, analysisTimer.ElapsedMilliseconds);
 }
 
@@ -1485,13 +1625,34 @@ static (string ClassName, string PackagePath) ResolveClassImport(UAsset asset, F
 }
 
 sealed record MapInspectionBatch(List<MapInspectionRequest> Maps);
-sealed record MapInspectionRequest(string InputFile, int[] ExportIndices);
+sealed record MapInspectionRequest(
+    string InputFile,
+    int[] ExportIndices,
+    List<ActorSchemaValidationRequest>? ActorValidations = null);
 sealed record MapInspectionResult(
     string InputFile,
     List<ClassInspection> Classes,
+    List<ActorSchemaValidationResult> Validations,
+    HelperMemoryResult Memory,
+    long LoadMilliseconds,
+    long AnalysisMilliseconds,
+    string? InspectionError);
+sealed record ActorSchemaValidationRequest(
+    int ExportIndex,
+    string ExportName,
+    List<RewardTuple> ExpectedRewards,
+    bool RequireUniqueSaveId = false,
+    string? ExpectedSaveId = null);
+sealed record ActorSchemaValidationResult(int ExportIndex, string ExportName, bool Compatible, string? Reason);
+sealed record MapExportSearchBatch(List<MapExportSearchRequest> Maps);
+sealed record MapExportSearchRequest(string InputFile, string[] ExportNames);
+sealed record MapExportSearchResult(
+    string InputFile,
+    List<NamedMapExport> Matches,
     HelperMemoryResult Memory,
     long LoadMilliseconds,
     long AnalysisMilliseconds);
+sealed record NamedMapExport(string ExportName, int ExportIndex, string ClassName, string PackagePath);
 sealed record BinaryMapDescriptorBatch(List<BinaryMapDescriptorRequest> Maps, List<string> CandidateNameValues);
 sealed record BinaryMapDescriptorRequest(
     string InputFile, string PackagePath, List<BinaryRewardFieldRequest> Rewards,

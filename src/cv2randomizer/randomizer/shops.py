@@ -63,6 +63,53 @@ class ShopAssignment:
     destination: ShopTableProduct
     source: ShopTableProduct | ArticleRewardIdentity
     article_only: bool = False
+    stock_override: int | None = None
+
+    # Set single-item shop stock
+    def __post_init__(self) -> None:
+        override = self.stock_override
+        if override is None:
+            override = _single_quantity_shop_override(self.source)
+        if override is not None:
+            if type(override) is not int or override < 1:
+                raise ValueError("Shop stock overrides must be positive integers.")
+            object.__setattr__(self, "stock_override", override)
+
+
+# Classify single-quantity shop items
+def _single_quantity_shop_override(
+    source: ShopTableProduct | ArticleRewardIdentity,
+) -> int | None:
+    """Return one for Booster and healing item sources."""
+    healing_locations = {
+        "HEALING_UPGRADE_GOLDEN_SEED",
+        "HEALING_UPGRADE_GOLDEN_BLOOD_BEAD",
+    }
+    healing_articles = {
+        "/game/blueprint/article/item/material/da_item_matbasicrecoverycountup_1",
+        "/game/blueprint/article/item/material/da_item_matbasicrecoveryamountup_1",
+    }
+    if isinstance(source, ArticleRewardIdentity):
+        article_path = source.canonical_path
+        category = (source.candidate_category or "").casefold()
+        location_type = (
+            source.source_world_location.location_type.upper()
+            if source.source_world_location is not None else ""
+        )
+    else:
+        article_path = source.article_package_path
+        category = ""
+        location_type = ""
+
+    normalized_path = article_path.casefold()
+    if (
+        category in {"booster", "boosters", "healing", "healing_item", "healing_items"}
+        or location_type in healing_locations
+        or "/blueprint/article/booster/" in normalized_path
+        or normalized_path in healing_articles
+    ):
+        return 1
+    return None
 
 
 @dataclass(frozen=True, slots=True)

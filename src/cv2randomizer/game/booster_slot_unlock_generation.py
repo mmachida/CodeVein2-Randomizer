@@ -222,13 +222,18 @@ def apply_booster_slot_unlocks(
             raise BoosterSlotUnlockError("Refusing to overwrite an existing staged StoryFlag DataTable package.")
         if progress:
             progress("patching-equipment-slot-flags", 0, 1)
-        result = serializer.patch(
-            work_root=root,
-            mappings_path=mappings_path,
-            input_file=source_asset.primary_file,
-            output_file=output_file,
-            target_flags=target_flags,
-        )
+        try:
+            result = serializer.patch(
+                work_root=root,
+                mappings_path=mappings_path,
+                input_file=source_asset.primary_file,
+                output_file=output_file,
+                target_flags=target_flags,
+            )
+        except Exception:
+            for path in _package_sidecars(output_file):
+                path.unlink(missing_ok=True)
+            raise
         if progress:
             progress("patching-equipment-slot-flags", 1, 1)
         return result

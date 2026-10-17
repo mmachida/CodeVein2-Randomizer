@@ -201,6 +201,12 @@ class InitialInventoryTests(unittest.TestCase):
             self.assertEqual(lou.article_path, "/Game/Blueprint/Article/BloodCode/DA_BloodCode_Lou_01")
 
     # Check motorcycle forma can be added
+    @unittest.skipUnless(
+        SOURCE_ASSET.is_file()
+        and SOURCE_ASSET.with_suffix(".uexp").is_file()
+        and MAPPING_FILE.is_file(),
+        "requires local extracted game assets",
+    )
     def test_motorcycle_forma_can_be_added_without_randomizing_starting_slots(self) -> None:
         serializer = InitialInventorySerializer()
         with tempfile.TemporaryDirectory() as temporary:

@@ -15,7 +15,11 @@ from cv2randomizer.game.catalogs import CatalogStore
 from cv2randomizer.game.content_availability import PackageInventory
 from cv2randomizer.game.extractor_catalog import ExtractorCatalogStore
 from cv2randomizer.game.extractor_generation import (
+    ExtractorGenerationError,
+    ExtractorPreparation,
     ExtractorSerializer,
+    ExtractorTableSnapshot,
+    ExtractorRowSnapshot,
     apply_extractor_plan,
     prepare_extractor_plan,
 )
@@ -62,6 +66,49 @@ class _CachedExtractor:
             )
             for package in self.requested
         )
+
+
+class _TemporaryExtractor:
+    # Materialize fixture source packages
+    def __init__(self, root: Path) -> None:
+        self.root = root
+
+    def extract_assets(self, _game_root, virtual_paths, **_kwargs):
+        assets = []
+        for package in virtual_paths:
+            path = self.root.joinpath(*package.split("/")[2:])
+            path.parent.mkdir(parents=True, exist_ok=True)
+            files = []
+            for suffix in (".uasset", ".uexp"):
+                source = path.with_suffix(suffix)
+                source.write_bytes((package + suffix).encode())
+                files.append(source)
+            assets.append(ExtractedAsset(package, tuple(files)))
+        return tuple(assets)
+
+
+class _OneTableLayoutMismatchExtractorSerializer:
+    # Reject the DLC recipe file
+    def inspect_tables(self, *, package_files, **_kwargs):
+        if DLC_PACKAGE in package_files:
+            raise ExtractorGenerationError(
+                "UAssetAPI inspect-extractor failed: System.IO.InvalidDataException: table layout changed"
+            )
+        package, source = next(iter(package_files.items()))
+        catalog = ExtractorCatalogStore().load("current")
+        table = catalog.table(package)
+        assert table is not None
+        rows = tuple(
+            ExtractorRowSnapshot(
+                row.row_index, row.row_name, row.original_article_path,
+                hashlib.sha256(f"snapshot:{row.row_name}".encode()).hexdigest(),
+                row.immutable_fingerprint_sha256,
+                hashlib.sha256(f"structure:{row.row_name}".encode()).hexdigest(),
+                (2,), ("/Game/Blueprint/Article/Item/DA_Material",), 100,
+            )
+            for row in table.rows
+        )
+        return (ExtractorTableSnapshot(package, source, len(rows), rows),)
 
 
 class _LocalVersionDetector:
@@ -196,6 +243,7 @@ class ExtractorGenerationRealAssetTests(unittest.TestCase):
             if DLC_PACKAGE not in available_tables:
                 self.assertFalse(any("DT_BoosterRecipe_DLC" in path for path in output_paths))
 
+
     # Check missing optional table is not
     def test_missing_optional_table_is_not_extracted_or_staged(self) -> None:
         self._round_trip(available_tables=(BASE_PACKAGE,))
@@ -263,6 +311,49 @@ class ExtractorGenerationRealAssetTests(unittest.TestCase):
             self.assertEqual({path.suffix for path in result.package_result.files}, {".pak", ".utoc", ".ucas"})
             self.assertTrue(any("DT_BoosterRecipe.uasset" in item for item in packager.package_paths))
             self.assertFalse(any("DT_BoosterRecipe_DLC" in item for item in packager.package_paths))
+
+
+class ExtractorCompatibilityTests(unittest.TestCase):
+    # Skip one unsupported recipe file
+    def test_incompatible_recipe_file_is_removed_before_pool_planning(self) -> None:
+        catalog = ExtractorCatalogStore(ROOT / "data" / "extractor" / "current").load("current")
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            extracted = _TemporaryExtractor(root / "source")
+            # Bind fixture hashes so the test reaches the per-table schema probe.
+            assets = extracted.extract_assets(root / "game", (BASE_PACKAGE, DLC_PACKAGE))
+            hashes_by_package = {
+                asset.virtual_path: {
+                    path.suffix: hashlib.sha256(path.read_bytes()).hexdigest()
+                    for path in asset.files
+                }
+                for asset in assets
+            }
+            catalog = replace(catalog, tables=tuple(
+                replace(table, source_package_sha256=hashes_by_package[table.virtual_package])
+                for table in catalog.tables
+            ))
+            mappings = root / "CV2.usmap"
+            mappings.write_bytes(b"fixture mapping")
+            preparation = prepare_extractor_plan(
+                catalog,
+                (),
+                "extractor-skip-dlc-file",
+                game_root=root / "game",
+                work_root=root / "generation",
+                mappings_path=mappings,
+                game_version="1.0.2",
+                data_revision="current",
+                extractor=extracted,
+                serializer=_OneTableLayoutMismatchExtractorSerializer(),
+                mix_postgame_dlc_with_base=False,
+                randomize_recipes=False,
+            )
+
+        self.assertEqual(preparation.incompatible_tables, ("DT_BoosterRecipe_DLC",))
+        self.assertEqual(tuple(table.table_name for table in preparation.catalog.tables), ("DT_BoosterRecipe",))
+        self.assertEqual(tuple(asset.virtual_path for asset in preparation.source_assets), (BASE_PACKAGE,))
+        self.assertIsNone(preparation.plan)
 
 
 if __name__ == "__main__":

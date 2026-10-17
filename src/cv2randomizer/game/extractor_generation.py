@@ -29,6 +29,7 @@ from cv2randomizer.game.extractor_catalog import (
 )
 from cv2randomizer.game.content_availability import package_path_from_object_path
 from cv2randomizer.game.world_loot_serialization import SUPPORTED_ENGINE_VERSION
+from cv2randomizer.game.version_compatibility import is_game_data_layout_mismatch
 from cv2randomizer.randomizer.extractor import ExtractorPlan, ExtractorPlanError, build_extractor_plan
 
 
@@ -63,6 +64,7 @@ class ExtractorPreparation:
     catalog: ExtractorCatalog
     source_assets: tuple[MaterializedAsset, ...]
     source_tables: tuple[ExtractorTableSnapshot, ...]
+    incompatible_tables: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -202,37 +204,90 @@ def prepare_extractor_plan(
         )
         assets_by_virtual = {asset.virtual_path.casefold(): asset for asset in materialized}
         files_by_virtual = {package: assets_by_virtual[package.casefold()].primary_file for package in requested}
+        inspect_by_package: dict[str, ExtractorTableSnapshot] = {}
+        batch_error: ExtractorGenerationError | None = None
+        try:
+            batch = serializer.inspect_tables(
+                work_root=root, mappings_path=mappings, package_files=files_by_virtual,
+            )
+            inspect_by_package = {item.virtual_package.casefold(): item for item in batch}
+            if set(inspect_by_package) != {package.casefold() for package in requested}:
+                raise ExtractorGenerationError("UAssetAPI recipe table set differs from the catalog.")
+        except ExtractorGenerationError as error:
+            if not is_game_data_layout_mismatch(error):
+                raise
+            batch_error = error
+        compatible_tables: list[ExtractorRecipeTable] = []
+        compatible_snapshots: list[ExtractorTableSnapshot] = []
+        incompatible_tables: list[str] = []
         for table in tables:
             asset = assets_by_virtual[table.virtual_package.casefold()]
-            _validate_fingerprint(table.source_package_sha256, asset, table.table_name)
-        observed = serializer.inspect_tables(work_root=root, mappings_path=mappings, package_files=files_by_virtual)
-        observed_by_virtual = {item.virtual_package.casefold(): item for item in observed}
-        if set(observed_by_virtual) != {package.casefold() for package in requested}:
-            raise ExtractorGenerationError("UAssetAPI omitted an expected recipe table.")
-        for table in tables:
-            _validate_rows(table, observed_by_virtual[table.virtual_package.casefold()])
+            try:
+                _validate_fingerprint(table.source_package_sha256, asset, table.table_name)
+                observed = inspect_by_package.get(table.virtual_package.casefold())
+                if observed is None and batch_error is not None:
+                    isolated = serializer.inspect_tables(
+                        work_root=root,
+                        mappings_path=mappings,
+                        package_files={table.virtual_package: files_by_virtual[table.virtual_package]},
+                    )
+                    if len(isolated) == 1 and isolated[0].virtual_package.casefold() == table.virtual_package.casefold():
+                        observed = isolated[0]
+                if observed is None:
+                    raise ExtractorGenerationError(f"UAssetAPI omitted the expected recipe table {table.table_name}.")
+                _validate_rows(table, observed)
+            except (ExtractorGenerationError, ExtractorCatalogError) as error:
+                if not is_game_data_layout_mismatch(error):
+                    raise
+                incompatible_tables.append(table.table_name)
+                continue
+            compatible_tables.append(table)
+            compatible_snapshots.append(observed)
+        if not compatible_tables:
+            raise ExtractorGenerationError("No Extractor recipe table matches this game's layout.")
         available = None if available_reward_packages is None else frozenset(
             package_path_from_object_path(value).casefold() for value in available_reward_packages
         )
-        active_catalog = catalog if available is None else ExtractorCatalog(
+        active_catalog = ExtractorCatalog(
             catalog.revision,
             tuple(
                 replace(
                     table,
                     rows=tuple(
                         row for row in table.rows
-                        if package_path_from_object_path(row.original_article_path).casefold() in available
+                        if available is None
+                        or package_path_from_object_path(row.original_article_path).casefold() in available
                     ),
                 )
-                for table in catalog.tables
+                for table in compatible_tables
             ),
         )
+        rejected_recipe_prefixes = tuple(
+            f"extractor-recipe:{table.virtual_package.casefold()}#"
+            for table in tables
+            if table.table_name in incompatible_tables
+        )
+        compatible_candidates = tuple(
+            candidate for candidate in candidates
+            if not any(
+                origin.casefold().startswith(rejected_prefix)
+                for origin in candidate.origins
+                for rejected_prefix in rejected_recipe_prefixes
+            )
+        )
         plan = build_extractor_plan(
-            active_catalog, candidates, seed, mix_postgame_dlc_with_base=mix_postgame_dlc_with_base,
+            active_catalog, compatible_candidates, seed,
+            mix_postgame_dlc_with_base=mix_postgame_dlc_with_base,
         ) if randomize_recipes else None
         if progress:
             progress("inspecting-extractor-recipe-tables", len(requested), len(requested))
-        return ExtractorPreparation(plan, catalog, tuple(assets_by_virtual[item.casefold()] for item in requested), observed)
+        return ExtractorPreparation(
+            plan,
+            active_catalog,
+            tuple(assets_by_virtual[item.virtual_package.casefold()] for item in compatible_tables),
+            tuple(compatible_snapshots),
+            tuple(incompatible_tables),
+        )
     except (AssetExtractionError, ExtractorCatalogError, ExtractorPlanError, OSError, ValueError, KeyError) as error:
         if isinstance(error, ExtractorGenerationError):
             raise

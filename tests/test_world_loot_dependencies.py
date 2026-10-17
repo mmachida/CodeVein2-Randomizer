@@ -12,7 +12,13 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from cv2randomizer.game.asset_extraction import ExtractedAsset
-from cv2randomizer.game.catalogs import RewardPayload, WorldLootLocation
+from cv2randomizer.game.catalogs import (
+    SCRIPTED_REWARD_MODE_ARTICLE_ONLY_PRESERVE_FLAGS,
+    CatalogStore,
+    RewardPayload,
+    WorldLootLocation,
+    is_valid_scripted_reward_only_location,
+)
 from cv2randomizer.game.fname_identity import SoftObjectPathIdentity
 from cv2randomizer.game.world_loot_dependencies import (
     WorldLootDependencyResolver,
@@ -20,9 +26,16 @@ from cv2randomizer.game.world_loot_dependencies import (
     _run_batch_with_failure_isolation,
     _uassetapi_build_command,
 )
+from cv2randomizer.game.world_loot_compatibility import apply_world_loot_export_rebindings
 from cv2randomizer.game.content_availability import PackageInventory
 from cv2randomizer.core.memory_budget import GIB, MemoryBudgetScheduler
-from cv2randomizer.generation.pipeline import _validate_world_loot_prepared_descriptors, _world_reward_fname_identity
+from cv2randomizer.generation.pipeline import (
+    _compatible_world_loot_locations,
+    _validate_world_loot_prepared_descriptors,
+    _world_reward_fname_identity,
+)
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 class FakeExtractor:
@@ -50,10 +63,36 @@ class FakeExtractor:
         return tuple(results)
 
 
+# Report an explicit package inventory
+class InventoryFakeExtractor(FakeExtractor):
+    # Initialize available packages
+    def __init__(self, root: Path, packages: set[str]) -> None:
+        super().__init__(root)
+        self.package_inventory = PackageInventory.create(packages)
+
+    # Return packages for the selected build
+    def inspect_package_inventory(self, _game_root: Path) -> PackageInventory:
+        return self.package_inventory
+
+
+# Return successful schema validation rows
+def _schema_validation_rows(request: dict[str, object]) -> list[dict[str, object]]:
+    return [
+        {
+            "exportIndex": actor["exportIndex"],
+            "exportName": actor["exportName"],
+            "compatible": True,
+            "reason": None,
+        }
+        for actor in request.get("actorValidations", [])
+    ]
+
+
 class DependencyInspectionRunner:
     # Initialize this object
-    def __init__(self, export_name: str) -> None:
+    def __init__(self, export_name: str, schema_failures: set[int] | None = None) -> None:
         self.export_name = export_name
+        self.schema_failures = schema_failures or set()
         self.commands: list[list[str]] = []
 
     # Call the wrapped operation
@@ -65,6 +104,14 @@ class DependencyInspectionRunner:
             for request in manifest["maps"]:
                 results.append({
                     "inputFile": request["inputFile"],
+                    "validations": [
+                        {
+                            **row,
+                            "compatible": row["exportIndex"] not in self.schema_failures,
+                            "reason": "Blueprint schema could not be loaded" if row["exportIndex"] in self.schema_failures else None,
+                        }
+                        for row in _schema_validation_rows(request)
+                    ],
                     "classes": [
                         {
                             "exportName": self.export_name,
@@ -91,6 +138,37 @@ class DependencyInspectionRunner:
         return subprocess.CompletedProcess(command, 0, stdout + "\n", "")
 
 
+class IncompatibleMapInspectionRunner(DependencyInspectionRunner):
+    # Configure an incompatible map
+    def __init__(self, export_name: str, bad_package: str, *, actor_schema_only: bool = False) -> None:
+        super().__init__(export_name)
+        self.bad_package = bad_package.casefold()
+        self.actor_schema_only = actor_schema_only
+
+    # Reject one incompatible map
+    def __call__(self, command: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+        if "inspect-map-batch" in command:
+            manifest = json.loads(Path(command[-3]).read_text(encoding="utf-8"))
+            requests = manifest["maps"]
+            contains_bad_map = any(
+                (
+                    str(request.get("packagePath", "")).casefold() == self.bad_package
+                    or self.bad_package.rsplit("/", 1)[-1].casefold()
+                    in Path(str(request.get("inputFile", ""))).stem.casefold()
+                )
+                for request in requests
+            )
+            is_actor_schema_check = any("actorValidations" in request for request in requests)
+            if contains_bad_map and (not self.actor_schema_only or is_actor_schema_check):
+                return subprocess.CompletedProcess(
+                    command,
+                    1,
+                    "",
+                    "InvalidDataException: required Blueprint schemas could not be loaded",
+                )
+        return super().__call__(command, **kwargs)
+
+
 class PerMapClassInspectionRunner:
     # Initialize this object
     def __init__(self) -> None:
@@ -107,6 +185,7 @@ class PerMapClassInspectionRunner:
                 package = "/Game/Blueprint/Pickup/BP_Generic" if map_name == "Map001" else "/Game/Blueprint/Pickup/BP_FlagChange"
                 results.append({
                     "inputFile": request["inputFile"],
+                    "validations": _schema_validation_rows(request),
                     "classes": [
                         {
                             "exportName": f"BP_Pickup_C_UAID_{index}",
@@ -139,6 +218,90 @@ class UnexpectedMapInspectionRunner:
         raise AssertionError(f"prepared map should not be reopened for discovery: {command}")
 
 
+class MixedCompatibilityInspectionRunner:
+    # Return matching and changed exports
+    def __call__(self, command: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
+        if "inspect-map-batch" in command:
+            manifest = json.loads(Path(command[-3]).read_text(encoding="utf-8"))
+            results = []
+            for request in manifest["maps"]:
+                results.append({
+                    "inputFile": request["inputFile"],
+                    "validations": _schema_validation_rows(request),
+                    "classes": [
+                        {
+                            "exportName": "BP_Pickup_C_UAID_old_build" if index == 8 else "BP_Pickup_C_UAID_second",
+                            "exportIndex": index,
+                            "className": "BlueprintGeneratedClass",
+                            "packagePath": "/Game/Blueprint/Pickup/BP_Pickup",
+                        }
+                        for index in request["exportIndices"]
+                    ],
+                })
+            return subprocess.CompletedProcess(command, 0, json.dumps(results) + "\n", "")
+        if "blueprint-parents" in command:
+            arguments = command[command.index("--") + 1:]
+            return subprocess.CompletedProcess(command, 0, json.dumps([
+                {
+                    "classExportName": Path(path).stem + "_C",
+                    "parentClassName": "Actor",
+                    "parentPackage": None,
+                }
+                for path in arguments[4:]
+            ]) + "\n", "")
+        raise AssertionError(f"unexpected command: {command}")
+
+
+class ExactNameRebindingRunner:
+    # Configure the test export name
+    def __init__(self, export_name: str = "BP_Pickup_C_UAID_example") -> None:
+        self.export_name = export_name
+
+    # Return one moved exact-name export
+    def __call__(self, command: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
+        operation = command[command.index("--") + 1]
+        if operation == "find-map-exports":
+            manifest = json.loads(Path(command[-3]).read_text(encoding="utf-8"))
+            return subprocess.CompletedProcess(command, 0, json.dumps([
+                {
+                    "inputFile": request["inputFile"],
+                    "matches": [{
+                        "exportName": request["exportNames"][0],
+                        "exportIndex": 12,
+                        "className": "BlueprintGeneratedClass",
+                        "packagePath": "/Game/Blueprint/Pickup/BP_Pickup",
+                    }],
+                }
+                for request in manifest["maps"]
+            ]) + "\n", "")
+        if operation == "inspect-map-batch":
+            manifest = json.loads(Path(command[-3]).read_text(encoding="utf-8"))
+            return subprocess.CompletedProcess(command, 0, json.dumps([
+                {
+                    "inputFile": request["inputFile"],
+                    "validations": _schema_validation_rows(request),
+                    "classes": [{
+                        "exportName": self.export_name,
+                        "exportIndex": index,
+                        "className": "BlueprintGeneratedClass",
+                        "packagePath": "/Game/Blueprint/Pickup/BP_Pickup",
+                    } for index in request["exportIndices"]],
+                }
+                for request in manifest["maps"]
+            ]) + "\n", "")
+        if operation == "blueprint-parents":
+            arguments = command[command.index("--") + 1:]
+            return subprocess.CompletedProcess(command, 0, json.dumps([
+                {
+                    "classExportName": Path(path).stem + "_C",
+                    "parentClassName": "Actor",
+                    "parentPackage": None,
+                }
+                for path in arguments[4:]
+            ]) + "\n", "")
+        raise AssertionError(f"unexpected helper operation: {operation}")
+
+
 # Build a test location record
 def _location() -> WorldLootLocation:
     return WorldLootLocation(
@@ -161,6 +324,323 @@ def _location() -> WorldLootLocation:
 
 
 class WorldLootDependencyResolverTests(unittest.TestCase):
+    # Rebind an actor by exact name
+    def test_109_profile_rebinds_unique_exact_export_before_preparation(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            mappings = root / "CV2.usmap"
+            mappings.write_bytes(b"test mapping")
+            helper = root / "helper.csproj"
+            helper.write_text("test project", encoding="utf-8")
+            location = _location()
+            resolver = WorldLootDependencyResolver(
+                extractor=FakeExtractor(root / "cache"),
+                helper_project=helper,
+                runner=ExactNameRebindingRunner(),
+            )
+
+            result = resolver.stage_for_locations(
+                game_root=root / "game",
+                locations=(location,),
+                work_root=root / "generation",
+                mappings_path=mappings,
+                game_version="local-unverified-1.0.9",
+                data_revision="current",
+                compatibility_profile="1.0.9",
+            )
+
+            index = result.dependency_index
+            assert index is not None
+            self.assertEqual(index["compatibility_profile"], "1.0.9")
+            self.assertEqual(index["world_loot_export_rebindings"], [{
+                "package_path": location.package_path,
+                "catalog_export_index": location.export_index,
+                "resolved_export_index": 12,
+                "export_name": location.export_name,
+                "class_package": "/Game/Blueprint/Pickup/BP_Pickup",
+            }])
+            self.assertEqual(index["maps"][location.package_path]["12"]["export_name"], location.export_name)
+            self.assertEqual(index["incompatible_world_loot_locations"], [])
+
+    # Rebind approved flag pickups
+    def test_109_profile_preserves_approved_scripted_pickup_rebinding(self) -> None:
+        catalogs = CatalogStore(ROOT / "data" / "catalogs").load("current")
+        location = next(
+            item for item in catalogs.world_loot
+            if item.scripted_reward_mode == SCRIPTED_REWARD_MODE_ARTICLE_ONLY_PRESERVE_FLAGS
+            and item.actor_class == "BP_PickupItem_C"
+            and is_valid_scripted_reward_only_location(item)
+        )
+        self.assertTrue(is_valid_scripted_reward_only_location(location))
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            mappings = root / "CV2.usmap"
+            mappings.write_bytes(b"test mapping")
+            helper = root / "helper.csproj"
+            helper.write_text("test project", encoding="utf-8")
+            resolver = WorldLootDependencyResolver(
+                extractor=FakeExtractor(root / "cache"),
+                helper_project=helper,
+                runner=ExactNameRebindingRunner(location.export_name),
+            )
+            result = resolver.stage_for_locations(
+                game_root=root / "game",
+                locations=(location,),
+                work_root=root / "generation",
+                mappings_path=mappings,
+                game_version="local-unverified-1.0.9",
+                data_revision="current",
+                compatibility_profile="1.0.9",
+            )
+
+        index = result.dependency_index
+        assert index is not None
+        rebound = next(
+            item for item in apply_world_loot_export_rebindings((location,), index)
+        )
+        self.assertEqual(rebound.export_index, 12)
+        self.assertTrue(is_valid_scripted_reward_only_location(rebound))
+
+    # Check only the mismatched export is skipped
+    def test_map_export_mismatch_does_not_skip_matching_sibling_locations(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            mappings = root / "CV2.usmap"
+            mappings.write_bytes(b"test mapping")
+            helper = root / "helper.csproj"
+            helper.write_text("test project", encoding="utf-8")
+            mismatched = _location()
+            matching = replace(mismatched, export_index=9, export_name="BP_Pickup_C_UAID_second")
+            resolver = WorldLootDependencyResolver(
+                extractor=FakeExtractor(root / "cache"),
+                helper_project=helper,
+                runner=MixedCompatibilityInspectionRunner(),
+            )
+
+            result = resolver.stage_for_locations(
+                game_root=root / "game",
+                locations=(mismatched, matching),
+                work_root=root / "generation",
+                mappings_path=mappings,
+                game_version="test-build",
+                data_revision="current",
+            )
+
+            index = result.dependency_index
+            assert index is not None
+            self.assertEqual(index["incompatible_world_loot_maps"], [])
+            self.assertEqual(index["maps"][matching.package_path], {
+                "9": {
+                    "export_name": matching.export_name,
+                    "class_name": "BlueprintGeneratedClass",
+                    "class_package": "/Game/Blueprint/Pickup/BP_Pickup",
+                },
+            })
+            incompatible = index["incompatible_world_loot_locations"]
+            self.assertEqual(len(incompatible), 1)
+            self.assertEqual(incompatible[0]["package_path"], mismatched.package_path)
+            self.assertEqual(incompatible[0]["export_index"], mismatched.export_index)
+            self.assertIn("expected 'BP_Pickup_C_UAID_example'", "; ".join(incompatible[0]["reasons"]))
+            self.assertEqual(_compatible_world_loot_locations((mismatched, matching), index), (matching,))
+
+    # Skip actors that cannot be parsed
+    def test_old_build_actor_schema_failure_is_saved_as_incompatible(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            mappings = root / "CV2.usmap"
+            mappings.write_bytes(b"test mapping")
+            helper = root / "helper.csproj"
+            helper.write_text("test project", encoding="utf-8")
+            location = _location()
+            resolver = WorldLootDependencyResolver(
+                extractor=FakeExtractor(root / "cache"),
+                helper_project=helper,
+                runner=DependencyInspectionRunner(
+                    "BP_Pickup_C_UAID_example", schema_failures={location.export_index},
+                ),
+            )
+
+            result = resolver.stage_for_locations(
+                game_root=root / "game",
+                locations=(location,),
+                work_root=root / "generation",
+                mappings_path=mappings,
+                game_version="local-unverified-old-build",
+                data_revision="current",
+            )
+
+            index = result.dependency_index
+            assert index is not None
+            self.assertTrue(index["actor_schema_compatibility_checked"])
+            self.assertEqual(len(index["incompatible_world_loot_locations"]), 1)
+            row = index["incompatible_world_loot_locations"][0]
+            self.assertEqual(row["export_index"], location.export_index)
+            self.assertIn("Blueprint schema could not be loaded", "; ".join(row["reasons"]))
+            self.assertEqual(_compatible_world_loot_locations((location,), index), ())
+
+    # Keep the recognized baseline out of legacy checks
+    def test_recognized_203_display_version_skips_legacy_actor_schema_check(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            mappings = root / "CV2.usmap"
+            mappings.write_bytes(b"test mapping")
+            helper = root / "helper.csproj"
+            helper.write_text("test project", encoding="utf-8")
+            location = _location()
+            resolver = WorldLootDependencyResolver(
+                extractor=FakeExtractor(root / "cache"),
+                helper_project=helper,
+                runner=DependencyInspectionRunner(
+                    "BP_Pickup_C_UAID_example", schema_failures={location.export_index},
+                ),
+            )
+
+            with patch.object(
+                resolver,
+                "_validate_legacy_actor_schemas",
+                side_effect=AssertionError("2.0.3 must not run legacy actor checks"),
+            ):
+                result = resolver.stage_for_locations(
+                    game_root=root / "game",
+                    locations=(location,),
+                    work_root=root / "generation",
+                    mappings_path=mappings,
+                    game_version="local-unverified-203-fingerprint",
+                    display_version="2.0.3.0",
+                    data_revision="current",
+                )
+
+            index = result.dependency_index
+            assert index is not None
+            self.assertFalse(index["actor_schema_compatibility_checked"])
+            self.assertEqual(index["incompatible_world_loot_locations"], [])
+
+    # Keep compatible maps after an actor preflight failure
+    def test_actor_preflight_isolates_one_incompatible_map_from_its_batch(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            mappings = root / "CV2.usmap"
+            mappings.write_bytes(b"test mapping")
+            helper = root / "helper.csproj"
+            helper.write_text("test project", encoding="utf-8")
+            template = _location()
+            bad = replace(
+                template,
+                package_path="/Game/Map/MainWorld/MainWorld/_Generated_/MapBad",
+                source_file="MapBad.umap",
+                save_id="bad-map-save-id",
+            )
+            good = replace(
+                template,
+                package_path="/Game/Map/MainWorld/MainWorld/_Generated_/MapGood",
+                source_file="MapGood.umap",
+                save_id="good-map-save-id",
+            )
+            resolver = WorldLootDependencyResolver(
+                extractor=FakeExtractor(root / "cache"),
+                helper_project=helper,
+                runner=IncompatibleMapInspectionRunner(
+                    template.export_name, bad.package_path, actor_schema_only=True,
+                ),
+            )
+
+            result = resolver.stage_for_locations(
+                game_root=root / "game",
+                locations=(bad, good),
+                work_root=root / "generation",
+                mappings_path=mappings,
+                game_version="local-unverified-new-build",
+                data_revision="current",
+            )
+
+            index = result.dependency_index
+            assert index is not None
+            self.assertEqual(index["incompatible_world_loot_maps"], [])
+            self.assertEqual(
+                [(row["package_path"], row["export_index"])
+                 for row in index["incompatible_world_loot_locations"]],
+                [(bad.package_path, bad.export_index)],
+            )
+            self.assertIn(good.package_path, index["maps"])
+
+    # Keep healthy sibling maps after a map parse failure
+    def test_map_class_inspection_isolates_one_incompatible_file(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            mappings = root / "CV2.usmap"
+            mappings.write_bytes(b"test mapping")
+            helper = root / "helper.csproj"
+            helper.write_text("test project", encoding="utf-8")
+            template = _location()
+            bad = replace(
+                template,
+                package_path="/Game/Map/MainWorld/MainWorld/_Generated_/MapBad",
+                source_file="MapBad.umap",
+                save_id="bad-map-save-id",
+            )
+            good = replace(
+                template,
+                package_path="/Game/Map/MainWorld/MainWorld/_Generated_/MapGood",
+                source_file="MapGood.umap",
+                save_id="good-map-save-id",
+            )
+            resolver = WorldLootDependencyResolver(
+                extractor=FakeExtractor(root / "cache"),
+                helper_project=helper,
+                runner=IncompatibleMapInspectionRunner(template.export_name, bad.package_path),
+            )
+
+            result = resolver.stage_for_locations(
+                game_root=root / "game",
+                locations=(bad, good),
+                work_root=root / "generation",
+                mappings_path=mappings,
+                game_version="local-unverified-new-build",
+                data_revision="current",
+            )
+
+            index = result.dependency_index
+            assert index is not None
+            self.assertEqual(
+                [row["package_path"] for row in index["incompatible_world_loot_maps"]],
+                [bad.package_path],
+            )
+            self.assertIn(good.package_path, index["maps"])
+            self.assertNotIn(bad.package_path, index["maps"])
+
+    # Skip locations whose Blueprint is absent
+    def test_missing_old_build_blueprint_is_skipped_without_extract_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            mappings = root / "CV2.usmap"
+            mappings.write_bytes(b"test mapping")
+            helper = root / "helper.csproj"
+            helper.write_text("test project", encoding="utf-8")
+            location = _location()
+            extractor = InventoryFakeExtractor(root / "cache", set())
+            resolver = WorldLootDependencyResolver(
+                extractor=extractor,
+                helper_project=helper,
+                runner=DependencyInspectionRunner("BP_Pickup_C_UAID_example"),
+            )
+
+            result = resolver.stage_for_locations(
+                game_root=root / "game",
+                locations=(location,),
+                work_root=root / "generation",
+                mappings_path=mappings,
+                game_version="local-unverified-old-build",
+                data_revision="current",
+            )
+
+            index = result.dependency_index
+            assert index is not None
+            self.assertEqual(len(extractor.requests), 1)
+            self.assertEqual(result.blueprint_packages, ())
+            self.assertEqual(len(index["incompatible_world_loot_locations"]), 1)
+            reason = "; ".join(index["incompatible_world_loot_locations"][0]["reasons"])
+            self.assertIn("package is absent from this game version", reason)
+
     # Check namemap preparation runs independent batches
     def test_namemap_preparation_runs_independent_batches_under_memory_limit(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -463,6 +943,27 @@ class WorldLootDependencyResolverTests(unittest.TestCase):
             self.assertEqual(len(result.blueprint_packages), 1)
             self.assertEqual(runner.commands, [])
 
+            dependency_index["maps"][location.package_path] = {}
+            dependency_index["blueprint_packages"] = []
+            dependency_index["world_loot_location_descriptors"] = {}
+            dependency_index["incompatible_world_loot_locations"] = [{
+                "package_path": location.package_path,
+                "export_index": location.export_index,
+                "reasons": ["Blueprint schema could not be loaded"],
+            }]
+            skipped = resolver.stage_for_locations(
+                game_root=root / "game",
+                locations=(location,),
+                work_root=root / "generation-skipped",
+                mappings_path=mappings,
+                game_version="test-build",
+                data_revision="current",
+                dependency_index=dependency_index,
+            )
+            self.assertEqual(skipped.blueprint_packages, ())
+            self.assertEqual(extractor.requests[-1], (location.package_path,))
+            self.assertEqual(runner.commands, [])
+
     # Check cached class index reject different
     def test_cached_class_index_rejects_a_different_expected_reward_descriptor(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -579,7 +1080,7 @@ class WorldLootDependencyResolverTests(unittest.TestCase):
             self.assertTrue((result.content_root / "Blueprint" / "Base" / "BP_Base.uasset").is_file())
             self.assertEqual(len(extractor.requests), 3)
             self.assertEqual([command[command.index("--") + 1] for command in runner.commands], [
-                "inspect-map-batch", "blueprint-parents", "blueprint-parents",
+                "inspect-map-batch", "blueprint-parents", "blueprint-parents", "inspect-map-batch",
             ])
 
     # Check same actor class keep map
@@ -633,7 +1134,7 @@ class WorldLootDependencyResolverTests(unittest.TestCase):
                 "/Game/Blueprint/Pickup/BP_FlagChange",
                 "/Game/Blueprint/Pickup/BP_Generic",
             ))
-            self.assertEqual(sum("inspect-map-batch" in command for command in runner.commands), 1)
+            self.assertEqual(sum("inspect-map-batch" in command for command in runner.commands), 2)
 
     # Check name map preparation class results
     def test_name_map_preparation_class_results_replace_a_second_map_discovery_open(self) -> None:
@@ -672,7 +1173,7 @@ class WorldLootDependencyResolverTests(unittest.TestCase):
                     locations=(location,),
                     work_root=root / "generation",
                     mappings_path=mappings,
-                    game_version="test-build",
+                    game_version="2.0.3",
                     data_revision="current",
                     candidate_name_values=("DA_Item_1",),
                     prepared_cache_root=root / "prepared",

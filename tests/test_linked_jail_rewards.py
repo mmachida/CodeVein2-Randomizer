@@ -9,6 +9,7 @@ from cv2randomizer.randomizer.linked_jail_rewards import (
     STINGER_ARTICLE,
     STINGER_SHOP_TABLE_PACKAGE,
     STINGER_WORLD_EXPORT,
+    STINGER_WORLD_EXPORT_NAME,
     STINGER_WORLD_PACKAGE,
     build_ogre_shop_mirror_assignment,
     build_stinger_shop_mirror_assignment,
@@ -59,7 +60,7 @@ class LinkedJailRewardTests(unittest.TestCase):
         )
 
     # Build world plan
-    def _world_plan(self, assigned_article: str):
+    def _world_plan(self, assigned_article: str, *, export_index: int = STINGER_WORLD_EXPORT):
         reward = SimpleNamespace(
             article_path=assigned_article,
             content_class="BASE",
@@ -69,7 +70,8 @@ class LinkedJailRewardTests(unittest.TestCase):
         )
         destination = SimpleNamespace(
             package_path=STINGER_WORLD_PACKAGE,
-            export_index=STINGER_WORLD_EXPORT,
+            export_index=export_index,
+            export_name=STINGER_WORLD_EXPORT_NAME,
             mirror_of_package_path=None,
         )
         candidate = SimpleNamespace(
@@ -127,6 +129,17 @@ class LinkedJailRewardTests(unittest.TestCase):
         self.assertTrue(linked.article_only)
         self.assertEqual(linked.destination, product)
         self.assertEqual(linked.source.canonical_path, assigned)
+
+    # Follow rebound Stinger export indices
+    def test_linked_shop_route_follows_profile_export_rebinding(self) -> None:
+        product = self._shop_product()
+        linked = build_stinger_shop_mirror_assignment(
+            self._world_plan("/Game/Blueprint/Article/Jail/DA_Jail_Bat", export_index=50_272),
+            product,
+        )
+
+        self.assertIsNotNone(linked)
+        self.assertEqual(linked.source.canonical_path, "/Game/Blueprint/Article/Jail/DA_Jail_Bat")
 
     # Check vanilla stinger result does not
     def test_vanilla_stinger_result_does_not_create_a_second_assignment(self) -> None:

@@ -303,12 +303,21 @@ class WorldLootSerializer:
             maximum_workers=4,
         )
         memory_status = scheduler.status()
-        worker_count = max(1, scheduler.recommended_worker_count())
+        # Shared Blueprint schemas require serial batches.
+        has_blueprint_schema_reads = any(
+            package.blueprint_schema_package is not None
+            for package in validated_packages
+        )
+        worker_count = (
+            1 if has_blueprint_schema_reads
+            else max(1, scheduler.recommended_worker_count())
+        )
         LOGGER.info(
-            "World Loot helper pool workers=%d batch_size=%d estimated_per_helper=%.2f GiB "
+            "World Loot helper pool workers=%d batch_size=%d shared_blueprint_schemas=%s estimated_per_helper=%.2f GiB "
             "available_ram=%.2f GiB parallel_worker_reserve=%.2f GiB",
             worker_count,
             batch_size,
+            has_blueprint_schema_reads,
             DEFAULT_UASSET_JOB_BYTES / (1024**3),
             memory_status.available_bytes / (1024**3),
             scheduler.reserve_bytes(memory_status.total_bytes) / (1024**3),

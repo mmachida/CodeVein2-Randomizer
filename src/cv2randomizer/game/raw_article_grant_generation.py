@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import json
 import hashlib
+import logging
 import subprocess
 import uuid
 import time
+import tempfile
 from collections.abc import Callable
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -21,7 +23,11 @@ from cv2randomizer.game.asset_extraction import (
     MaterializedAsset,
     materialize_extracted_assets,
 )
-from cv2randomizer.game.blood_code_generation import BloodCodeGrantSnapshot, BloodCodeSerializer
+from cv2randomizer.game.blood_code_generation import (
+    BloodCodeGenerationError,
+    BloodCodeGrantSnapshot,
+    BloodCodeSerializer,
+)
 from cv2randomizer.game.catalogs import (
     SUPPORTED_DIRECT_ARTICLE_GRANT_DESTINATIONS,
     QuestArticleGrantLayout,
@@ -29,10 +35,12 @@ from cv2randomizer.game.catalogs import (
     WorldLootLocation,
 )
 from cv2randomizer.game.world_loot_serialization import SUPPORTED_ENGINE_VERSION
+from cv2randomizer.game.version_compatibility import is_game_data_layout_mismatch
 from cv2randomizer.randomizer.world_loot import WorldLootAssignment, WorldLootRandomizationPlan
 
 
 SUPPORTED_DIRECT_GRANT_DESTINATIONS = SUPPORTED_DIRECT_ARTICLE_GRANT_DESTINATIONS
+LOGGER = logging.getLogger(__name__)
 
 
 class RawArticleGrantGenerationError(RuntimeError):
@@ -64,6 +72,533 @@ class WorldLootDirectGrantResult:
     changed: bool
     output_files: tuple[Path, ...]
     reopened_and_validated: bool
+
+
+# Keep only catalog-compatible raw grants
+def filter_compatible_raw_article_grants(
+    locations: tuple[WorldLootLocation, ...],
+    *,
+    game_root: Path,
+    game_version: str,
+    data_revision: str,
+    extractor: IoStoreAssetExtractor,
+    compatibility_profile: str | None = None,
+    work_root: Path | None = None,
+    mappings_path: Path | None = None,
+    serializer: "RawArticleGrantSerializer | None" = None,
+    progress: Callable[[str, int, int], None] | None = None,
+) -> tuple[tuple[WorldLootLocation, ...], tuple[WorldLootLocation, ...]]:
+    """Leave raw reward slots vanilla when their source package changed."""
+    candidates = tuple(
+        location for location in locations
+        if location.destination_kind == "RAW_ARTICLE_GRANT"
+        and not location.protected
+        and location.raw_article_layout is not None
+    )
+    if not candidates:
+        return locations, ()
+
+    by_package: dict[str, WorldLootLocation] = {}
+    for location in candidates:
+        by_package.setdefault(location.package_path.casefold(), location)
+    requested = tuple(location.package_path for location in by_package.values())
+    rejected_packages: set[str] = set()
+    rebound_locations: dict[tuple[str, str], WorldLootLocation] = {}
+    try:
+        extracted = extractor.extract_assets(
+            game_root,
+            requested,
+            optional_virtual_paths=requested,
+            game_version=game_version,
+            data_revision=data_revision,
+            progress=progress,
+        )
+        assets = {asset.virtual_path.casefold(): asset for asset in extracted}
+    except (AssetExtractionError, OSError, RuntimeError, ValueError):
+        assets = {}
+
+    for package_key, location in by_package.items():
+        layout = location.raw_article_layout
+        asset = assets.get(package_key)
+        if layout is None or asset is None:
+            rejected_packages.add(package_key)
+            continue
+        files = {path.suffix.casefold(): path for path in asset.files}
+        header = files.get(".uasset")
+        exports = files.get(".uexp")
+        if header is None or exports is None:
+            rejected_packages.add(package_key)
+            continue
+        recorded_hashes = (
+            {
+                path.suffix.casefold(): digest
+                for path, digest in zip(asset.files, asset.file_hashes, strict=True)
+            }
+            if len(asset.files) == len(asset.file_hashes) else {}
+        )
+        header_hash = recorded_hashes.get(".uasset")
+        exports_hash = recorded_hashes.get(".uexp")
+        if not isinstance(header_hash, str) or not isinstance(exports_hash, str):
+            try:
+                header_hash = _sha256_file(header)
+                exports_hash = _sha256_file(exports)
+            except OSError:
+                rejected_packages.add(package_key)
+                continue
+        if (
+            header_hash != layout.source_uasset_sha256
+            or exports_hash != layout.source_uexp_sha256
+        ):
+            if (
+                compatibility_profile != "1.0.9"
+                or mappings_path is None
+                or serializer is None
+            ):
+                rejected_packages.add(package_key)
+                continue
+            try:
+                # Inspect one temporary package
+                def inspect_profile(root: Path) -> RawArticleGrantSnapshot:
+                    with tempfile.TemporaryDirectory(prefix=".cv2-raw-check-", dir=root) as temporary:
+                        materialized = materialize_extracted_assets(
+                            (asset,), Path(temporary) / "Content", verify_hashes=False,
+                        )
+                        if len(materialized) != 1:
+                            raise RawArticleGrantGenerationError(
+                                "Raw Article profile inspection returned an unexpected package count."
+                            )
+                        return serializer.inspect_compatibility_profile(
+                            work_root=root,
+                            mappings_path=mappings_path,
+                            slot=location,
+                            input_file=materialized[0].primary_file,
+                            compatibility_profile=compatibility_profile,
+                        )
+
+                if work_root is None:
+                    with tempfile.TemporaryDirectory(prefix="cv2-raw-profile-") as temporary_root:
+                        snapshot = inspect_profile(Path(temporary_root))
+                else:
+                    snapshot = inspect_profile(work_root.expanduser().resolve(strict=True))
+                rebound_layout = replace(
+                    layout,
+                    expected_path_name_index=snapshot.path_name_index,
+                    expected_path_name_map_value=snapshot.path_name_map_value,
+                    expected_object_name_index=snapshot.object_name_index,
+                    expected_object_name_map_value=snapshot.object_name_map_value,
+                    expected_vanilla_number=snapshot.path_number,
+                    source_uasset_sha256=header_hash,
+                    source_uexp_sha256=exports_hash,
+                )
+                rebound_locations[_raw_grant_identity(location)] = replace(
+                    location,
+                    export_index=snapshot.export_index,
+                    raw_article_layout=rebound_layout,
+                )
+            except (AssetExtractionError, OSError, RawArticleGrantGenerationError, RuntimeError, ValueError):
+                rejected_packages.add(package_key)
+
+    rejected = tuple(
+        location for location in candidates
+        if location.package_path.casefold() in rejected_packages
+    )
+    rejected_ids = {_raw_grant_identity(location) for location in rejected}
+    compatible = tuple(
+        rebound_locations.get(_raw_grant_identity(location), location)
+        for location in locations
+        if _raw_grant_identity(location) not in rejected_ids
+    )
+    return compatible, rejected
+
+
+# Identify one raw reward slot
+def _raw_grant_identity(location: WorldLootLocation) -> tuple[str, str]:
+    return location.package_path.casefold(), str(location.destination_id or location.export_index).casefold()
+
+
+# Keep only catalog-compatible quest grants
+def filter_compatible_world_loot_quest_grants(
+    locations: tuple[WorldLootLocation, ...],
+    *,
+    game_root: Path,
+    work_root: Path,
+    mappings_path: Path,
+    game_version: str,
+    data_revision: str,
+    extractor: IoStoreAssetExtractor,
+    serializer: BloodCodeSerializer,
+    compatibility_profile: str | None = None,
+    progress: Callable[[str, int, int], None] | None = None,
+) -> tuple[tuple[WorldLootLocation, ...], tuple[WorldLootLocation, ...]]:
+    """Leave structured quest rewards vanilla when the installed task differs."""
+    candidates = tuple(
+        location for location in locations
+        if location.destination_kind == "QUEST_ARTICLE_GRANT"
+        and not location.protected
+        and location.quest_grant_layouts
+    )
+    if not candidates:
+        return locations, ()
+
+    by_package: dict[str, list[WorldLootLocation]] = defaultdict(list)
+    package_paths: dict[str, str] = {}
+    for location in candidates:
+        key = location.package_path.casefold()
+        by_package[key].append(location)
+        package_paths.setdefault(key, location.package_path)
+    requested = tuple(package_paths.values())
+    rejected_ids: set[tuple[str, str]] = set()
+    rebound_locations: dict[tuple[str, str], WorldLootLocation] = {}
+    try:
+        extracted = extractor.extract_assets(
+            game_root,
+            requested,
+            optional_virtual_paths=requested,
+            game_version=game_version,
+            data_revision=data_revision,
+            progress=progress,
+        )
+    except (AssetExtractionError, OSError, RuntimeError, ValueError):
+        rejected_ids.update(_quest_grant_identity(item) for item in candidates)
+        return _without_quest_grants(locations, rejected_ids), candidates
+
+    assets_by_key = {asset.virtual_path.casefold(): asset for asset in extracted}
+    inspected_assets = []
+    inspect_package_ids: dict[str, list[WorldLootLocation]] = {}
+    for package_key, package_locations in by_package.items():
+        asset = assets_by_key.get(package_key)
+        if asset is None:
+            rejected_ids.update(_quest_grant_identity(item) for item in package_locations)
+            continue
+        expected_fingerprints = tuple(
+            (layout.source_uasset_sha256, layout.source_uexp_sha256)
+            for item in package_locations
+            for layout in item.quest_grant_layouts
+            if layout.source_uasset_sha256 is not None or layout.source_uexp_sha256 is not None
+        )
+        if expected_fingerprints:
+            try:
+                hashes = {
+                    path.suffix.casefold(): digest
+                    for path, digest in zip(asset.files, asset.file_hashes, strict=True)
+                } if len(asset.files) == len(asset.file_hashes) else {}
+                header_hash = hashes.get(".uasset")
+                exports_hash = hashes.get(".uexp")
+                if not isinstance(header_hash, str) or not isinstance(exports_hash, str):
+                    header = next(path for path in asset.files if path.suffix.casefold() == ".uasset")
+                    exports = next(path for path in asset.files if path.suffix.casefold() == ".uexp")
+                    header_hash = _sha256_file(header)
+                    exports_hash = _sha256_file(exports)
+                fingerprint_matches = all(
+                    expected_header == header_hash and expected_exports == exports_hash
+                    for expected_header, expected_exports in expected_fingerprints
+                )
+            except (OSError, StopIteration, ValueError):
+                fingerprint_matches = False
+            if not fingerprint_matches and compatibility_profile != "1.0.9":
+                rejected_ids.update(_quest_grant_identity(item) for item in package_locations)
+                continue
+            if fingerprint_matches:
+                continue
+        inspected_assets.append(asset)
+        inspect_package_ids[package_key] = package_locations
+
+    if inspect_package_ids:
+        root = work_root.expanduser().resolve(strict=True)
+        try:
+            with tempfile.TemporaryDirectory(prefix=".cv2-quest-check-", dir=root) as temporary:
+                materialized = materialize_extracted_assets(
+                    inspected_assets,
+                    Path(temporary) / "Content",
+                    verify_hashes=False,
+                )
+                files_by_key = {item.virtual_path.casefold(): item.primary_file for item in materialized}
+                package_files = {
+                    package_paths[key]: files_by_key[key]
+                    for key in inspect_package_ids
+                    if key in files_by_key
+                }
+                try:
+                    snapshots = serializer.inspect_world_loot_quest_packages(
+                        work_root=root,
+                        mappings_path=mappings_path,
+                        package_files=package_files,
+                    )
+                except BloodCodeGenerationError as batch_error:
+                    if not is_game_data_layout_mismatch(batch_error):
+                        raise
+                    isolated_snapshots: list[BloodCodeGrantSnapshot] = []
+                    for package_key, package_locations in inspect_package_ids.items():
+                        package_path = package_paths[package_key]
+                        try:
+                            package_snapshots = serializer.inspect_world_loot_quest_packages(
+                                work_root=root,
+                                mappings_path=mappings_path,
+                                package_files={package_path: package_files[package_path]},
+                            )
+                        except BloodCodeGenerationError as package_error:
+                            if not is_game_data_layout_mismatch(package_error):
+                                raise
+                            rejected_ids.update(
+                                _quest_grant_identity(item) for item in package_locations
+                            )
+                            LOGGER.warning(
+                                "Leaving incompatible World Loot quest file unchanged (%s): %s",
+                                package_path,
+                                package_error,
+                            )
+                            continue
+                        isolated_snapshots.extend(package_snapshots)
+                    snapshots = tuple(isolated_snapshots)
+            snapshots_by_target: dict[tuple[str, int, int, int], list[BloodCodeGrantSnapshot]] = defaultdict(list)
+            for snapshot in snapshots:
+                snapshots_by_target[(
+                    snapshot.virtual_package.casefold(),
+                    snapshot.export_index,
+                    snapshot.bulk_index,
+                    snapshot.reward_index,
+                )].append(snapshot)
+            for package_key, package_locations in inspect_package_ids.items():
+                package_snapshots = tuple(
+                    snapshot for snapshot in snapshots
+                    if snapshot.virtual_package.casefold() == package_key
+                )
+                if compatibility_profile == "1.0.9":
+                    for location in package_locations:
+                        try:
+                            rebound_locations[_quest_grant_identity(location)] = _rebind_quest_location_for_profile(
+                                location, package_snapshots,
+                            )
+                        except (RawArticleGrantGenerationError, StopIteration):
+                            rejected_ids.add(_quest_grant_identity(location))
+                else:
+                    for location in package_locations:
+                        try:
+                            for export_index, export_name, bulk_index, reward_index in _quest_article_target_coordinates(location):
+                                found = snapshots_by_target.get((package_key, export_index, bulk_index, reward_index), ())
+                                if len(found) != 1 or found[0].export_name != export_name:
+                                    raise RawArticleGrantGenerationError(
+                                        "Structured quest Article target was not uniquely found in the installed package."
+                                    )
+                                layout = next(
+                                    value for value in location.quest_grant_layouts
+                                    if value.bulk_index == bulk_index and value.reward_index == reward_index
+                                )
+                                _validate_quest_article_snapshot(
+                                    location,
+                                    layout,
+                                    found[0],
+                                    assigned=False,
+                                    target_export_index=export_index,
+                                    target_export_name=export_name,
+                                )
+                                preserved_index = layout.preserved_export_index
+                                if preserved_index is not None:
+                                    export_names = found[0].package_export_names
+                                    if (
+                                        preserved_index < 1
+                                        or preserved_index > len(export_names)
+                                        or export_names[preserved_index - 1] != layout.preserved_export_name
+                                    ):
+                                        raise RawArticleGrantGenerationError(
+                                            "Structured quest preserved task does not match the installed package."
+                                        )
+                        except (RawArticleGrantGenerationError, StopIteration):
+                            rejected_ids.add(_quest_grant_identity(location))
+        except (AssetExtractionError, BloodCodeGenerationError, OSError, RuntimeError, ValueError):
+            for package_locations in inspect_package_ids.values():
+                rejected_ids.update(_quest_grant_identity(item) for item in package_locations)
+
+    rejected = tuple(item for item in candidates if _quest_grant_identity(item) in rejected_ids)
+    compatible = tuple(
+        rebound_locations.get(_quest_grant_identity(item), item)
+        for item in locations
+        if _quest_grant_identity(item) not in rejected_ids
+    )
+    return compatible, rejected
+
+
+# Match one quest reward slot
+def _match_quest_reward_snapshot(
+    location: WorldLootLocation,
+    layout: QuestArticleGrantLayout,
+    snapshots: tuple[BloodCodeGrantSnapshot, ...],
+    *,
+    export_name: str | None,
+) -> BloodCodeGrantSnapshot:
+    matches: list[BloodCodeGrantSnapshot] = []
+    for snapshot in snapshots:
+        if (
+            (export_name is not None and snapshot.export_name != export_name)
+            or snapshot.bulk_index != layout.bulk_index
+            or snapshot.reward_index != layout.reward_index
+        ):
+            continue
+        try:
+            _validate_quest_article_snapshot(
+                location,
+                layout,
+                snapshot,
+                assigned=False,
+                target_export_index=snapshot.export_index,
+                target_export_name=snapshot.export_name,
+            )
+        except RawArticleGrantGenerationError:
+            continue
+        matches.append(snapshot)
+    if len(matches) != 1:
+        raise RawArticleGrantGenerationError(
+            "Installed quest reward does not uniquely match its catalogued Article payload."
+        )
+    return matches[0]
+
+
+# Rebind profile quest layout
+def _rebind_quest_location_for_profile(
+    location: WorldLootLocation,
+    snapshots: tuple[BloodCodeGrantSnapshot, ...],
+) -> WorldLootLocation:
+    layouts = location.quest_grant_layouts
+    if not layouts:
+        raise RawArticleGrantGenerationError("Structured quest Article slot has no validated layout.")
+
+    rebound_layouts: list[QuestArticleGrantLayout] = []
+    target_export_indices: set[int] = set()
+    for layout in layouts:
+        rebound_export_name = layout.export_name
+        if (
+            location.package_path.casefold()
+            == "/game/quest/characterepisode/characterepisode_iris/qst_characterepisode_iris_c00070"
+            and layout.mirrored_exports
+        ):
+            mirror_targets = [
+                snapshot for snapshot in snapshots
+                if snapshot.export_name.startswith("QSTask_GainItem_")
+                and snapshot.bulk_index == layout.bulk_index
+                and snapshot.reward_index == layout.reward_index
+            ]
+            exact_targets = tuple(
+                candidate for candidate in mirror_targets
+                if _snapshot_matches_quest_layout(location, layout, candidate)
+            )
+            expected_target_count = 1 + len(layout.mirrored_exports)
+            if (
+                len(exact_targets) != expected_target_count
+                or len({item.export_index for item in exact_targets}) != expected_target_count
+            ):
+                raise RawArticleGrantGenerationError(
+                    "Iris quest reward mirrors do not uniquely match their catalogued Articles."
+                )
+            ordered_targets = tuple(sorted(exact_targets, key=lambda item: item.export_index))
+            target = next(
+                (item for item in ordered_targets if item.export_index == location.export_index),
+                ordered_targets[0],
+            )
+            rebound_export_name = target.export_name
+            rebound_mirrors = [
+                replace(mirror, export_index=mirror_target.export_index, export_name=mirror_target.export_name)
+                for mirror, mirror_target in zip(
+                    layout.mirrored_exports,
+                    (item for item in ordered_targets if item.export_index != target.export_index),
+                    strict=True,
+                )
+            ]
+        else:
+            target = _match_quest_reward_snapshot(
+                location, layout, snapshots, export_name=layout.export_name,
+            )
+            rebound_mirrors = []
+            for mirror in layout.mirrored_exports:
+                mirror_snapshot = _match_quest_reward_snapshot(
+                    location, layout, snapshots, export_name=mirror.export_name,
+                )
+                rebound_mirrors.append(replace(mirror, export_index=mirror_snapshot.export_index))
+        target_export_indices.add(target.export_index)
+
+        preserved_index = layout.preserved_export_index
+        preserved_name = layout.preserved_export_name
+        export_names = target.package_export_names
+        if preserved_name is not None:
+            matching_preserved = [
+                index + 1 for index, name in enumerate(export_names)
+                if name == preserved_name
+            ]
+            if len(matching_preserved) == 1:
+                preserved_index = matching_preserved[0]
+            elif (
+                preserved_name == "QSTask_GainMultiplayReward_0"
+                and preserved_index is not None
+                and 1 <= preserved_index <= len(export_names)
+                and export_names[preserved_index - 1] in {"QSTask_GoalLocation_0", "QSTask_GoalLocation_1"}
+            ):
+                preserved_index = None
+                preserved_name = None
+            else:
+                raise RawArticleGrantGenerationError(
+                    "Structured quest preserved task does not match the installed package."
+                )
+
+        rebound_layouts.append(replace(
+            layout,
+            export_name=rebound_export_name,
+            preserved_export_index=preserved_index,
+            preserved_export_name=preserved_name,
+            mirrored_exports=tuple(rebound_mirrors),
+            require_strict_export_snapshots=True,
+            source_uasset_sha256=None,
+            source_uexp_sha256=None,
+        ))
+    if len(target_export_indices) != 1:
+        raise RawArticleGrantGenerationError(
+            "Structured quest reward bundle spans unexpected task exports."
+        )
+
+    primary_layout = rebound_layouts[0]
+    return replace(
+        location,
+        export_index=next(iter(target_export_indices)),
+        quest_article_layout=primary_layout if location.quest_article_layout is not None else None,
+        quest_article_layouts=tuple(rebound_layouts) if location.quest_article_layouts else (),
+    )
+
+
+# Check one quest payload
+def _snapshot_matches_quest_layout(
+    location: WorldLootLocation,
+    layout: QuestArticleGrantLayout,
+    snapshot: BloodCodeGrantSnapshot,
+) -> bool:
+    try:
+        _validate_quest_article_snapshot(
+            location,
+            layout,
+            snapshot,
+            assigned=False,
+            target_export_index=snapshot.export_index,
+            target_export_name=snapshot.export_name,
+        )
+    except RawArticleGrantGenerationError:
+        return False
+    return True
+
+
+# Identify one quest reward slot
+def _quest_grant_identity(location: WorldLootLocation) -> tuple[str, str]:
+    return location.package_path.casefold(), str(location.destination_id or location.export_index).casefold()
+
+
+# Remove rejected quest rewards
+def _without_quest_grants(
+    locations: tuple[WorldLootLocation, ...],
+    rejected_ids: set[tuple[str, str]],
+) -> tuple[WorldLootLocation, ...]:
+    return tuple(item for item in locations if _quest_grant_identity(item) not in rejected_ids)
+
+
+# Hash one source file
+def _sha256_file(path: Path) -> str:
+    with path.open("rb") as handle:
+        return hashlib.file_digest(handle, "sha256").hexdigest()
 
 
 class RawArticleGrantSerializer:
@@ -111,6 +646,29 @@ class RawArticleGrantSerializer:
         })
         return _parse_snapshot(raw, slot, source)
 
+    # Inspect recognized version package
+    def inspect_compatibility_profile(
+        self,
+        *,
+        work_root: Path,
+        mappings_path: Path,
+        slot: WorldLootLocation,
+        input_file: Path,
+        compatibility_profile: str,
+    ) -> RawArticleGrantSnapshot:
+        if compatibility_profile != "1.0.9":
+            raise RawArticleGrantGenerationError("Raw direct-grant profile is not supported for this game version.")
+        root, mappings = self._validate_roots(work_root, mappings_path)
+        source = input_file.resolve(strict=True)
+        if not _is_within(source, root) or not source.is_file():
+            raise RawArticleGrantGenerationError("Direct reward source must be inside the generation workspace.")
+        raw = self._run_json(root, mappings, "inspect-raw-article-grant-profile", {
+            "virtualPackage": slot.package_path,
+            "inputFile": str(source),
+            "slot": _slot_document(slot),
+        })
+        return _parse_snapshot(raw, slot, source)
+
     # Patch the prepared asset package
     def patch(
         self,
@@ -121,6 +679,7 @@ class RawArticleGrantSerializer:
         input_file: Path,
         output_file: Path,
         assigned_article_path: str,
+        compatibility_profile: str | None = None,
     ) -> tuple[RawArticleGrantSnapshot, tuple[Path, ...]]:
         root, mappings = self._validate_roots(work_root, mappings_path)
         source = input_file.resolve(strict=True)
@@ -129,7 +688,14 @@ class RawArticleGrantSerializer:
             raise RawArticleGrantGenerationError("Direct reward patch source and output must be separate workspace paths.")
         if output.exists() or any(path.exists() for path in _package_files(output)):
             raise RawArticleGrantGenerationError("Refusing to overwrite an existing direct reward output package.")
-        raw = self._run_json(root, mappings, "patch-raw-article-grant", {
+        if compatibility_profile not in {None, "1.0.9"}:
+            raise RawArticleGrantGenerationError("Raw direct-grant profile is not supported for this game version.")
+        operation = (
+            "patch-raw-article-grant-profile"
+            if compatibility_profile == "1.0.9"
+            else "patch-raw-article-grant"
+        )
+        raw = self._run_json(root, mappings, operation, {
             "virtualPackage": slot.package_path,
             "inputFile": str(source),
             "outputFile": str(output),
@@ -211,6 +777,7 @@ def apply_world_loot_direct_grants(
     serializer: RawArticleGrantSerializer,
     quest_serializer: BloodCodeSerializer | None = None,
     validated_quest_destination_ids: frozenset[str] | set[str] | tuple[str, ...] = (),
+    compatibility_profile: str | None = None,
     progress: Callable[[str, int, int], None] | None = None,
 ) -> tuple[WorldLootDirectGrantResult, ...]:
     """Serialize researched RawExport and structured quest Article destinations in World Loot."""
@@ -281,7 +848,8 @@ def apply_world_loot_direct_grants(
         results_by_id[destination_id] = _apply_one_world_loot_direct_grant(
             assignment, game_root=game_root, work_root=work_root, output_content_root=output_content_root,
             mappings_path=mappings_path, game_version=game_version, data_revision=data_revision,
-            extractor=extractor, serializer=serializer, progress=progress,
+            extractor=extractor, serializer=serializer,
+            compatibility_profile=compatibility_profile, progress=progress,
         )
         raw_helper_seconds += time.perf_counter() - raw_started
         raw_helper_invocations += 1
@@ -847,6 +1415,7 @@ def _apply_one_world_loot_direct_grant(
     data_revision: str,
     extractor: IoStoreAssetExtractor,
     serializer: RawArticleGrantSerializer,
+    compatibility_profile: str | None,
     progress: Callable[[str, int, int], None] | None,
 ) -> WorldLootDirectGrantResult:
     slot = assignment.destination
@@ -883,6 +1452,9 @@ def _apply_one_world_loot_direct_grant(
             raise RawArticleGrantGenerationError("Extracted direct reward package does not match its catalogued virtual path.")
         output = output_root.joinpath(*slot.package_path.split("/")[2:]).with_suffix(".uasset")
         output.parent.mkdir(parents=True, exist_ok=True)
+        patch_options: dict[str, Any] = {}
+        if compatibility_profile is not None:
+            patch_options["compatibility_profile"] = compatibility_profile
         patched_snapshot, output_files = serializer.patch(
             work_root=root,
             mappings_path=mappings_path,
@@ -890,6 +1462,7 @@ def _apply_one_world_loot_direct_grant(
             input_file=source_asset.primary_file,
             output_file=output,
             assigned_article_path=assigned_path,
+            **patch_options,
         )
         if patched_snapshot.article_path != assigned_path or patched_snapshot.path_number != 0 or patched_snapshot.object_number != 0:
             raise RawArticleGrantGenerationError("Reopened direct reward package failed its literal Article identity check.")

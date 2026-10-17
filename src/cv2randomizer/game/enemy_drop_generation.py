@@ -26,6 +26,7 @@ from cv2randomizer.game.asset_extraction import (
 )
 from cv2randomizer.game.enemy_drop_catalog import EnemyDropCatalog
 from cv2randomizer.game.world_loot_serialization import SUPPORTED_ENGINE_VERSION
+from cv2randomizer.game.version_compatibility import is_game_data_layout_mismatch
 from cv2randomizer.randomizer.enemy_drops import (
     EnemyDropPlan,
     EnemyDropPlanError,
@@ -59,6 +60,7 @@ class EnemyDropPreparation:
     catalog: EnemyDropCatalog
     source_tables: tuple[MaterializedAsset, ...]
     original_snapshots: tuple[EnemyDropTableSnapshot, ...]
+    incompatible_tables: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -105,7 +107,7 @@ class EnemyDropSerializer:
         table_files: Mapping[str, Path],
     ) -> tuple[EnemyDropTableSnapshot, ...]:
         root, mappings = self._validate_roots(work_root, mappings_path)
-        _validate_available_tables(tuple(table_files), "inspection")
+        _validate_available_tables(tuple(table_files), "inspection", require_base=False)
         requests = []
         for table, _virtual_path in ENEMY_DROP_TABLES:
             if table not in table_files:
@@ -176,7 +178,7 @@ class EnemyDropSerializer:
         root, mappings = self._validate_roots(work_root, mappings_path)
         active_names = _validate_available_tables(tuple(patch_tables), "patch", require_base=False)
         selected_sources = source_tables or {table: request[0] for table, request in patch_tables.items()}
-        source_names = _validate_available_tables(tuple(selected_sources), "source")
+        source_names = _validate_available_tables(tuple(selected_sources), "source", require_base=False)
         if not set(active_names).issubset(source_names):
             raise EnemyDropGenerationError("Enemy Drop patch request is missing an active source table.")
         requests = []
@@ -315,7 +317,9 @@ def prepare_enemy_drop_plan(
     root = work_root.expanduser().resolve()
     mappings = mappings_path.expanduser().resolve(strict=True)
     selected_names = (
-        _TABLE_NAMES if active_tables is None else _validate_available_tables(tuple(active_tables), "source")
+        _TABLE_NAMES if active_tables is None else _validate_available_tables(
+            tuple(active_tables), "source", require_base=False,
+        )
     )
     selected_tables = tuple((table, package) for table, package in ENEMY_DROP_TABLES if table in selected_names)
     if not selected_tables:
@@ -344,21 +348,88 @@ def prepare_enemy_drop_plan(
         }
         if progress:
             progress("inspecting-enemy-drop-tables", 0, len(selected_tables))
-        snapshots = serializer.inspect_tables(work_root=root, mappings_path=mappings, table_files=table_files)
+        incompatible_tables: list[str] = []
+        try:
+            inspected_tables = serializer.inspect_tables(
+                work_root=root, mappings_path=mappings, table_files=table_files,
+            )
+            inspected_by_table = {snapshot.table: snapshot for snapshot in inspected_tables}
+            if set(inspected_by_table) != {table for table, _virtual in selected_tables}:
+                raise EnemyDropGenerationError("UAssetAPI omitted an expected Enemy Drop table.")
+        except EnemyDropGenerationError as error:
+            if not is_game_data_layout_mismatch(error):
+                raise
+            # Isolate a rejected batch so one bad table cannot block the others.
+            inspected_by_table = {}
+            for table_name, _virtual in selected_tables:
+                try:
+                    result = serializer.inspect_tables(
+                        work_root=root,
+                        mappings_path=mappings,
+                        table_files={table_name: table_files[table_name]},
+                    )
+                    if len(result) != 1 or result[0].table != table_name:
+                        raise EnemyDropGenerationError(
+                            f"UAssetAPI returned an unexpected {table_name} table while checking compatibility."
+                        )
+                    inspected_by_table[table_name] = result[0]
+                except EnemyDropGenerationError as file_error:
+                    if not is_game_data_layout_mismatch(file_error):
+                        raise
+                    incompatible_tables.append(table_name)
+                    LOGGER.warning(
+                        "Skipping incompatible Enemy Drop file %s (%s): %s",
+                        table_name,
+                        dict(ENEMY_DROP_TABLES)[table_name],
+                        file_error,
+                    )
+
+        snapshots: list[EnemyDropTableSnapshot] = []
+        compatible_tables: list[str] = []
+        for table_name, _virtual in selected_tables:
+            inspected = inspected_by_table.get(table_name)
+            if inspected is None:
+                continue
+            try:
+                # Validate this file's row and slot layout before it joins the pool.
+                build_enemy_drop_plan(
+                    (inspected,),
+                    catalog,
+                    seed,
+                    mix_postgame_dlc_with_base=mix_postgame_dlc_with_base,
+                    active_tables=(table_name,),
+                )
+            except (EnemyDropGenerationError, EnemyDropPlanError) as error:
+                if not is_game_data_layout_mismatch(error) and not isinstance(error, EnemyDropPlanError):
+                    raise
+                incompatible_tables.append(table_name)
+                LOGGER.warning(
+                    "Skipping incompatible Enemy Drop file %s (%s): %s",
+                    table_name,
+                    dict(ENEMY_DROP_TABLES)[table_name],
+                    error,
+                )
+                continue
+            snapshots.append(inspected)
+            compatible_tables.append(table_name)
+        if not compatible_tables:
+            raise EnemyDropGenerationError("No Enemy Drop table matches this game's layout.")
+        active_names = tuple(name for name in _TABLE_NAMES if name in set(compatible_tables))
         plan = build_enemy_drop_plan(
             snapshots,
             catalog,
             seed,
             mix_postgame_dlc_with_base=mix_postgame_dlc_with_base,
-            active_tables=selected_names,
+            active_tables=active_names,
         )
         if progress:
             progress("inspecting-enemy-drop-tables", len(selected_tables), len(selected_tables))
         return EnemyDropPreparation(
             plan,
             catalog,
-            tuple(asset_by_virtual[virtual.casefold()] for _table, virtual in selected_tables),
-            snapshots,
+            tuple(asset_by_virtual[virtual.casefold()] for _table, virtual in selected_tables if _table in active_names),
+            tuple(snapshots),
+            tuple(incompatible_tables),
         )
     except (AssetExtractionError, EnemyDropPlanError, OSError, ValueError, KeyError) as error:
         if isinstance(error, EnemyDropGenerationError):
@@ -555,7 +626,7 @@ def _parse_rows_from_patch_result(table: str, result: dict[str, Any]) -> tuple[E
 
 # Validate preparation
 def _validate_preparation(preparation: EnemyDropPreparation, root: Path) -> None:
-    active = _validate_available_tables(tuple(preparation.plan.active_tables), "plan")
+    active = _validate_available_tables(tuple(preparation.plan.active_tables), "plan", require_base=False)
     snapshot_names = tuple(snapshot.table for snapshot in preparation.original_snapshots)
     if snapshot_names != active:
         raise EnemyDropGenerationError("Enemy Drop preparation snapshots do not match its canonical active table set.")

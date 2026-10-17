@@ -14,6 +14,8 @@ from cv2randomizer.game.asset_extraction import MaterializedAsset
 from cv2randomizer.game.shop_generation import (
     ParsedShopTable,
     ShopTablesStage,
+    _expected_after,
+    _validate_mixed_shop_output,
     apply_shop_plan,
 )
 from cv2randomizer.game.shop_packages import CookedShopNameMap, SHOP_TABLE_NAMES, read_cooked_name_map
@@ -297,6 +299,56 @@ class ShopPatcherTests(unittest.TestCase):
             self.assertEqual(result.data[original.price_offset:original.price_offset + 4], original.price_bytes)
             self.assertEqual(result.data[original.uses_stock_offset:original.uses_stock_offset + 1], original.uses_stock_bytes)
             self.assertEqual(result.data[original.stock_offset:original.stock_offset + 4], original.stock_bytes)
+
+    # Check special shop items set stock
+    def test_article_only_stock_override_sets_one_and_preserves_other_fields(self) -> None:
+        data, expected, name_map, mappings = _fixture(first_stock=4, second_stock=3)
+        parsed = self._parse(data, expected, name_map, mappings)
+        destination, source_product = parsed.products
+        source = ArticleRewardIdentity(
+            source_id="world:booster",
+            canonical_path=source_product.article_package_path,
+            article_path=source_product.article_path,
+            item_object=source_product.item_object,
+            article_path_number=source_product.article_path_number,
+            item_object_number=source_product.item_object_number,
+            origin_kind="WORLD",
+            origin_label="Booster Dex",
+        )
+        assignment = ShopAssignment(
+            destination=destination,
+            source=source,
+            article_only=True,
+            stock_override=1,
+        )
+        expected_after = _expected_after(expected, (assignment,))
+        self.assertEqual(expected_after[0].stock, 1)
+        encoded = {
+            ("NORMAL", destination.shop_row, destination.product_index): struct.pack(
+                "<iiiii", name_map.names.index(source.article_path), source.article_path_number,
+                name_map.names.index(source.item_object), source.item_object_number, 0,
+            ),
+        }
+
+        result = patch_shop_table(
+            data,
+            parsed,
+            (assignment,),
+            reparse=lambda output: self._parse(output, expected_after, name_map, mappings),
+            encoded_article_path_bytes=encoded,
+        )
+
+        patched = {item.product_index: item for item in result.parsed.products}
+        table = ParsedShopTable(
+            "NORMAL", "DT_ShopLineup", _PACKAGE_NAME,
+            MaterializedAsset(_PACKAGE_NAME, ()), data, name_map, parsed, expected,
+        )
+        _validate_mixed_shop_output(table, result.parsed, (assignment,))
+        self.assertEqual(patched[0].stock, 1)
+        self.assertEqual(patched[0].stock_bytes, struct.pack("<i", 1))
+        self.assertEqual(patched[0].price, destination.price)
+        self.assertEqual(patched[0].uses_stock, destination.uses_stock)
+        self.assertEqual(patched[1].stock, source_product.stock)
 
     # Check linked alternate assignment is physically
     def test_linked_alternate_assignment_is_physically_patched_without_pool_assignment(self) -> None:

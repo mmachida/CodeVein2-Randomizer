@@ -23,7 +23,11 @@ from cv2randomizer.game.asset_extraction import (
     materialize_extracted_assets,
 )
 from cv2randomizer.game.catalogs import RuntimeCatalogs, ShopProduct
-from cv2randomizer.game.shop_packages import SHOP_TABLE_NAMES, read_cooked_name_map
+from cv2randomizer.game.shop_packages import (
+    SHOP_TABLE_NAMES,
+    ShopPackageError,
+    read_cooked_name_map,
+)
 from cv2randomizer.game.shop_tables import ShopTableParseResult, ShopTableProduct, parse_shop_table
 from cv2randomizer.game.usmap import read_usmap
 from cv2randomizer.patching.shop_tables import (
@@ -64,6 +68,9 @@ class ShopTablesStage:
     content_root: Path
     tables: tuple[ParsedShopTable, ...]
     unavailable_optional_families: tuple[str, ...] = ()
+    unavailable_families: tuple[str, ...] = ()
+    incompatible_families: tuple[str, ...] = ()
+    skipped_catalog_product_count: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -172,13 +179,14 @@ def prepare_shop_tables(
         if family in selected_families and family in catalog_families
     )
     optional_families = tuple(family for family in requested_families if family in {"DLC", "TRADE_DLC"})
-    required_families = tuple(family for family in requested_families if family not in optional_families)
     package_by_family = {
         family: f"/Game/Blueprint/GameSystem/Shop/{SHOP_TABLE_NAMES[family]}"
         for family in requested_families
     }
     package_paths = tuple(package_by_family.values())
-    optional_paths = tuple(package_by_family[family] for family in optional_families)
+    # Shop tables vary between game versions. A missing family must not block
+    # extraction of unrelated systems, so every selected table is optional here.
+    optional_paths = package_paths
     service = extractor or IoStoreAssetExtractor()
     try:
         extracted = service.extract_assets(
@@ -194,45 +202,105 @@ def prepare_shop_tables(
         mappings = read_usmap(mappings_file)
         tables: list[ParsedShopTable] = []
         unavailable_optional: list[str] = []
+        unavailable: list[str] = []
+        incompatible: list[str] = []
+        skipped_catalog_products = 0
         for index, family in enumerate(requested_families, start=1):
             table_name = SHOP_TABLE_NAMES[family]
             virtual_path = package_by_family[family]
             asset = by_virtual.get(virtual_path.casefold())
             if asset is None:
+                unavailable.append(family)
                 if family in optional_families:
                     unavailable_optional.append(family)
-                    continue
-                raise ShopGenerationError(f"Extraction omitted required {family} shop table.")
+                if progress:
+                    progress("parsing-shop-tables", index, len(requested_families))
+                continue
             export_path = asset.primary_file.with_suffix(".uexp")
-            if not export_path.is_file():
-                raise ShopGenerationError(f"Extracted {family} table has no .uexp export.")
             expected = tuple(product for product in catalogs.shops if product.family == family)
-            name_map = read_cooked_name_map(
-                asset.primary_file,
-                expected_package_name=virtual_path,
-            )
-            raw_export = export_path.read_bytes()
-            parsed = parse_shop_table(
-                raw_export,
-                family=family,
-                name_map=name_map,
-                mappings=mappings,
-                expected_products=expected,
-                source=str(export_path),
-                verify_stock_against_catalog=False,
-            )
+            try:
+                if not export_path.is_file():
+                    raise ShopPackageError(f"Extracted {family} table has no .uexp export.")
+                name_map = read_cooked_name_map(
+                    asset.primary_file,
+                    expected_package_name=virtual_path,
+                )
+                names = set(name_map.names)
+                compatible_expected = tuple(
+                    product for product in expected
+                    if product.shop_row in names
+                    and product.original_product_path in names
+                    and product.item_object in names
+                )
+                missing_finite_offers = sum(
+                    _is_finite_catalog_offer(product)
+                    for product in expected
+                    if product not in compatible_expected
+                )
+                if not compatible_expected:
+                    raise ShopPackageError(
+                        f"{family} has no catalogued products in this game's NameMap."
+                    )
+                expected_by_row: dict[str, list[int]] = defaultdict(list)
+                for product in compatible_expected:
+                    expected_by_row[product.shop_row].append(product.product_index)
+                if any(
+                    sorted(indices) != list(range(len(indices)))
+                    for indices in expected_by_row.values()
+                ):
+                    raise ShopPackageError(
+                        f"{family} has gaps in the catalog slots available in this game's NameMap."
+                    )
+                raw_export = export_path.read_bytes()
+                parsed = parse_shop_table(
+                    raw_export,
+                    family=family,
+                    name_map=name_map,
+                    mappings=mappings,
+                    expected_products=compatible_expected,
+                    source=str(export_path),
+                    verify_stock_against_catalog=False,
+                )
+            except (OSError, ShopPackageError, ValueError):
+                # Leave an unsupported table untouched while other systems keep
+                # using the packages that were validated successfully.
+                unavailable.append(family)
+                incompatible.append(family)
+                if progress:
+                    progress("parsing-shop-tables", index, len(requested_families))
+                continue
+            skipped_catalog_products += missing_finite_offers
             tables.append(ParsedShopTable(
-                family, table_name, virtual_path, asset, raw_export, name_map, parsed, expected,
+                family, table_name, virtual_path, asset, raw_export, name_map, parsed,
+                compatible_expected,
             ))
             if progress:
                 progress("parsing-shop-tables", index, len(requested_families))
-        if not set(required_families).issubset({table.family for table in tables}):
-            raise ShopGenerationError("One or more required shop tables were not parsed.")
-        return ShopTablesStage(content_root, tuple(tables), tuple(unavailable_optional))
+        return ShopTablesStage(
+            content_root,
+            tuple(tables),
+            tuple(unavailable_optional),
+            tuple(dict.fromkeys(unavailable)),
+            tuple(dict.fromkeys(incompatible)),
+            skipped_catalog_products,
+        )
     except ShopGenerationError:
         raise
     except (AssetExtractionError, OSError, ValueError) as error:
         raise ShopGenerationError(f"Could not prepare shop DataTables: {error}") from error
+
+
+# Check catalog slot stock
+def _is_finite_catalog_offer(product: object) -> bool:
+    protected = getattr(product, "protected", False)
+    uses_stock = getattr(product, "uses_stock", True)
+    stock = getattr(product, "stock", 1)
+    return (
+        protected is False
+        and uses_stock is True
+        and type(stock) is int
+        and stock > 0
+    )
 
 
 # Apply shop plan
@@ -617,11 +685,21 @@ def _validate_mixed_shop_output(
             raise ShopGenerationError(f"{table.family}:{row_name} product slot count changed.")
         for before, current in zip(before_row.products, after_row.products, strict=True):
             assignment = assigned.get((row_name, before.product_index))
+            expected_stock = (
+                assignment.stock_override
+                if assignment is not None and assignment.stock_override is not None
+                else before.stock
+            )
+            expected_stock_bytes = (
+                struct.pack("<i", expected_stock)
+                if assignment is not None and assignment.stock_override is not None
+                else before.stock_bytes
+            )
             stock_valid = (
                 current.uses_stock == before.uses_stock
                 and current.uses_stock_bytes == before.uses_stock_bytes
-                and current.stock == before.stock
-                and current.stock_bytes == before.stock_bytes
+                and current.stock == expected_stock
+                and current.stock_bytes == expected_stock_bytes
             )
             if assignment is None:
                 unchanged = (
@@ -707,8 +785,7 @@ def _expected_after(
         if assignment.article_only:
             if not isinstance(source, ArticleRewardIdentity):
                 raise ShopGenerationError("Article-only assignment is missing its canonical Article source.")
-            result[slot] = replace(
-                catalog,
+            changes = dict(
                 original_product_path=source.article_path,
                 item_object=source.item_object,
                 what_content_class=source.content_class,
@@ -716,14 +793,16 @@ def _expected_after(
                 item_object_number=source.item_object_number,
             )
         else:
-            result[slot] = replace(
-                catalog,
+            changes = dict(
                 original_product_path=source.article_path,
                 item_object=source.item_object,
                 what_content_class=source.what_content_class,
                 article_path_number=source.article_path_number,
                 item_object_number=source.item_object_number,
             )
+        if assignment.stock_override is not None:
+            changes["stock"] = assignment.stock_override
+        result[slot] = replace(catalog, **changes)
     return tuple(result[key] for key in sorted(result))
 
 

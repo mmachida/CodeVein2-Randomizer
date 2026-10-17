@@ -235,11 +235,17 @@ def apply_tutorial_disable(
             patches.append(TutorialTablePatch(package, asset.primary_file, output_file))
         if progress:
             progress("patching-tutorial-flags", 0, len(patches))
-        result = serializer.patch(
-            work_root=root,
-            mappings_path=mappings_path,
-            tables=tuple(patches),
-        )
+        try:
+            result = serializer.patch(
+                work_root=root,
+                mappings_path=mappings_path,
+                tables=tuple(patches),
+            )
+        except Exception:
+            for patch in patches:
+                for path in _package_sidecars(patch.output_file):
+                    path.unlink(missing_ok=True)
+            raise
         if progress:
             progress("patching-tutorial-flags", len(patches), len(patches))
         return result
