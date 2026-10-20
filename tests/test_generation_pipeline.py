@@ -22,6 +22,7 @@ from cv2randomizer.game.asset_extraction import (
 )
 from cv2randomizer.game.game_data_cache import GameDataCacheState, GameDataCacheStore
 from cv2randomizer.game.content_availability import PackageInventory
+from cv2randomizer.game.dialogue_skip_generation import DialogueSkipError, DialogueSkipResult
 from cv2randomizer.game.blood_code_catalog import BloodCodeCatalogStore
 from cv2randomizer.game.blood_code_generation import BloodCodeGenerationResult, BloodCodeGrantSnapshot
 from cv2randomizer.game.bequeathed_formae_catalog import BequeathedFormaCatalogStore
@@ -62,6 +63,7 @@ from cv2randomizer.generation.pipeline import (
     GenerationError,
     GenerationRequest,
     _copy_world_outputs,
+    _generation_error_cause,
     _handle_initial_inventory_preparation_failure,
     _known_source_packages,
     _remap_world_result,
@@ -466,6 +468,14 @@ def _spoiler_product(row: str, index: int, item: str, *, price: int, stock: int)
 
 
 class GenerationPipelineTests(unittest.TestCase):
+    # Preserve cancellation through optional wrappers
+    def test_wrapped_generation_cancellation_is_not_treated_as_optional_failure(self) -> None:
+        cancelled = GenerationError("Generation was cancelled by the user.")
+        wrapped = RuntimeError("Optional dialogue patch failed.")
+        wrapped.__cause__ = cancelled
+
+        self.assertIs(_generation_error_cause(wrapped), cancelled)
+
     # Validate structural pickup profiles
     def test_extract_profiles_match_structural_class_package(self) -> None:
         from cv2randomizer.game.material_dependencies import MaterialClassProfile
@@ -641,6 +651,7 @@ class GenerationPipelineTests(unittest.TestCase):
             motorcycle_unlocked=True,
             second_weapon_unlocked=True,
             disable_tutorials=True,
+            tap_to_skip_dialogue=True,
             cheaper_booster_extractor=True,
             low_blood_code_mastery_exp=True,
         )
@@ -656,7 +667,7 @@ class GenerationPipelineTests(unittest.TestCase):
         settings = _spoiler_settings(options)
 
         self.assertEqual(metadata, {
-            "App Version": "v0.9.3",
+            "App Version": "v1.0.0",
             "Game Version": "1.0.2.0",
             "Version Validation": "Local, unverified",
         })
@@ -666,11 +677,17 @@ class GenerationPipelineTests(unittest.TestCase):
         self.assertIn("Enabled Unlock Motorcycle at Start", settings)
         self.assertIn("Enabled Unlock Second Weapon Slot", settings)
         self.assertIn("Enabled Disable Tutorial Pop-ups", settings)
+        self.assertIn("Enabled Tap Instead of Holding to Skip Dialogue", settings)
+        skipped_settings = _spoiler_settings(
+            options,
+            DialogueSkipResult((), False, "unsupported layout"),
+        )
+        self.assertIn("Disabled Tap Instead of Holding to Skip Dialogue", skipped_settings)
         self.assertIn("Enabled Cheaper Booster Extractor", settings)
         self.assertIn("Enabled Unrestricted Blood Code Mastery", settings)
         self.assertIn("Disabled Booster Extractor", settings)
         self.assertIn("Disabled Mix Boosters with World Loot", settings)
-        self.assertEqual(len(settings), 17)
+        self.assertEqual(len(settings), 18)
         self.assertFalse(any("Pipe Shop" in line or "Pre-Order" in line for line in settings))
 
     # Check incompatible initial inventory preparation is skipped
@@ -1003,7 +1020,7 @@ class GenerationPipelineTests(unittest.TestCase):
             self.assertEqual(document["status"], "assignments_only")
             self.assertTrue(document["dry_run"])
             self.assertEqual(document["seed"]["display"], "phase12-seed")
-            self.assertEqual(document["app_version"], "0.9.3")
+            self.assertEqual(document["app_version"], "1.0.0")
             self.assertTrue(document["generated_at"].endswith("Z"))
             self.assertEqual(document["errors"], 0)
             self.assertIn("world_loot", document["skipped"])
@@ -1856,7 +1873,7 @@ class GenerationPipelineTests(unittest.TestCase):
                 "Skipped for this game version: 4 (3x World Loot, 1x Defensive Gadget Grants)",
                 spoiler_text,
             )
-            self.assertIn("App Version: v0.9.3", spoiler_text)
+            self.assertIn("App Version: v1.0.0", spoiler_text)
             self.assertIn("Game Version: fixture-build", spoiler_text)
             self.assertIn("Randomizer Settings:\n", spoiler_text)
             self.assertIn("Disabled Unlock all 6 Booster Slots", spoiler_text)
@@ -1990,6 +2007,39 @@ class GenerationPipelineTests(unittest.TestCase):
             self.assertNotIn("dlc_enabled", manifest)
             self.assertEqual(manifest["options"], options.to_dict())
             self.assertTrue(manifest["content_availability"]["source_packages"]["missing_sources"])
+
+    # Keep generating if the optional dialogue patch fails
+    def test_dialogue_skip_failure_does_not_abort_generation(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            mappings = root / "CV2.usmap"
+            mappings.write_bytes(b"fixture mapping")
+            engine = GenerationEngine(
+                version_detector=_Detector(),
+                catalog_store=CatalogStore(_REPOSITORY_ROOT / "data" / "catalogs"),
+                workspace_manager=WorkspaceManager(root / "data"),
+                extractor=_FakeRawArticleExtractor(root / "cache", package_paths=()),
+            )
+            options = GenerationOptions(
+                randomize_world_loot=False,
+                randomize_bequeathed_formae_quest_rewards=False,
+                randomize_materials=False,
+                randomize_shops=False,
+                tap_to_skip_dialogue=True,
+                install_after_generation=False,
+            )
+            with patch(
+                "cv2randomizer.generation.pipeline.apply_tap_to_skip_dialogue",
+                side_effect=DialogueSkipError("unsupported subtitle layout"),
+            ):
+                result = engine.generate(
+                    GenerationRequest(Path("fixture-game"), mappings, "dialogue-skip-failure", options)
+                )
+
+        self.assertIsNotNone(result)
+        self.assertIsNotNone(result.dialogue_skip_result)
+        self.assertFalse(result.dialogue_skip_result.applied)
+        self.assertTrue(any("unsupported subtitle layout" in warning for warning in result.availability_warnings))
 
     # Check missing core installation asset still
     def test_missing_core_installation_asset_still_blocks_generation(self) -> None:

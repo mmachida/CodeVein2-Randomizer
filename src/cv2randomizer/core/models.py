@@ -26,6 +26,7 @@ class GenerationOptions:
     unlock_npc_trader_shops: bool = False
     unlock_all_booster_slots: bool = False
     disable_tutorials: bool = False
+    tap_to_skip_dialogue: bool = False
     motorcycle_unlocked: bool = False
     second_weapon_unlocked: bool = False
     mix_postgame_dlc_with_base: bool = False

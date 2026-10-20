@@ -130,6 +130,7 @@ class SettingsAndWorkspaceTests(unittest.TestCase):
                 last_options=GenerationOptions(
                     randomize_shops=False,
                     randomize_bequeathed_formae_quest_rewards=True,
+                    tap_to_skip_dialogue=True,
                 ),
             )
 

@@ -12,7 +12,7 @@ class MainStartupTests(unittest.TestCase):
     # Check startup smoke flag exits before
     def test_startup_smoke_flag_exits_before_creating_the_ui(self) -> None:
         with (
-            patch.object(sys, "argv", ["CodeVein2Randomizer-v0.9.1.exe", "--startup-smoke-test"]),
+            patch.object(sys, "argv", ["CodeVein2Randomizer-v1.0.0.exe", "--startup-smoke-test"]),
             patch("cv2randomizer.main.QApplication") as application,
             patch("cv2randomizer.main.QIcon") as icon,
             patch("cv2randomizer.main.resolve_app_icon", return_value=Path("icon.ico")),
@@ -26,7 +26,7 @@ class MainStartupTests(unittest.TestCase):
         ):
             self.assertEqual(main(), 0)
 
-        application.assert_called_once_with(["CodeVein2Randomizer-v0.9.1.exe"])
+        application.assert_called_once_with(["CodeVein2Randomizer-v1.0.0.exe"])
         application.return_value.setWindowIcon.assert_called_once_with(icon.return_value)
         icon.assert_called_once_with(str(Path("icon.ico")))
         resource.assert_any_call("ico", "icon.png")

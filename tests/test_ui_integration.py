@@ -233,6 +233,86 @@ class MainWindowIntegrationTests(unittest.TestCase):
             self.assertEqual(window._worker, None)
             window.close()
 
+    # Browse from selected game folder
+    def test_game_path_browse_starts_at_selected_folder(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            selected = root / "selected-game"
+            selected.mkdir()
+            window = self._ready_window(
+                generation_engine=_FakeEngine(root / "generation"),
+                installer=_FakeInstaller(),
+                settings_store=SettingsStore(root / "settings.json"),
+            )
+            window.game_path.setText(str(selected))
+
+            with patch(
+                "cv2randomizer.ui.main_window.QFileDialog.getExistingDirectory",
+                return_value="",
+            ) as browse:
+                window._browse_game_path()
+
+            self.assertEqual(browse.call_args.args[2], str(selected))
+            window.close()
+
+    # Browse from app folder when selected folder is unavailable
+    def test_game_path_browse_falls_back_to_app_folder(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            app_folder = root / "app"
+            app_folder.mkdir()
+            window = self._ready_window(
+                generation_engine=_FakeEngine(root / "generation"),
+                installer=_FakeInstaller(),
+                settings_store=SettingsStore(root / "settings.json"),
+            )
+            window.game_path.setText(str(root / "unavailable-game"))
+
+            def browsable(directory: Path) -> bool:
+                return directory == app_folder
+
+            with (
+                patch.object(window, "_directory_can_be_browsed", side_effect=browsable),
+                patch("cv2randomizer.ui.main_window.application_root", return_value=app_folder),
+                patch(
+                    "cv2randomizer.ui.main_window.QFileDialog.getExistingDirectory",
+                    return_value="",
+                ) as browse,
+            ):
+                window._browse_game_path()
+
+            self.assertEqual(browse.call_args.args[2], str(app_folder))
+            window.close()
+
+    # Browse from app folder when no folder is selected
+    def test_game_path_browse_uses_app_folder_when_empty(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            app_folder = root / "app"
+            app_folder.mkdir()
+            window = self._ready_window(
+                generation_engine=_FakeEngine(root / "generation"),
+                installer=_FakeInstaller(),
+                settings_store=SettingsStore(root / "settings.json"),
+            )
+            window.game_path.clear()
+
+            def browsable(directory: Path) -> bool:
+                return directory == app_folder
+
+            with (
+                patch.object(window, "_directory_can_be_browsed", side_effect=browsable),
+                patch("cv2randomizer.ui.main_window.application_root", return_value=app_folder),
+                patch(
+                    "cv2randomizer.ui.main_window.QFileDialog.getExistingDirectory",
+                    return_value="",
+                ) as browse,
+            ):
+                window._browse_game_path()
+
+            self.assertEqual(browse.call_args.args[2], str(app_folder))
+            window.close()
+
     # Check saved output directory outside app
     def test_saved_output_directory_outside_app_data_is_ignored(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -288,8 +368,8 @@ class MainWindowIntegrationTests(unittest.TestCase):
             diagnostic_labels = {
                 label.text() for label in window.tabs.widget(2).findChildren(QLabel)
             }
-            self.assertEqual(window.windowTitle(), "Code Vein 2 Randomizer v0.9.3")
-            self.assertIn("v0.9.3", diagnostic_labels)
+            self.assertEqual(window.windowTitle(), "Code Vein 2 Randomizer v1.0.0")
+            self.assertIn("v1.0.0", diagnostic_labels)
             self.assertFalse(any("CV2.usmap" in text for text in diagnostic_labels))
             self.assertTrue(window.clear_cache_button.isEnabled())
             self.assertTrue(window.clear_output_button.isEnabled())
@@ -995,6 +1075,11 @@ class MainWindowIntegrationTests(unittest.TestCase):
                 "Disable Tutorial Pop-ups",
             )
             self.assertEqual(
+                window.tap_to_skip_dialogue_check.text(),
+                "Tap Instead of Holding to Skip Dialogue",
+            )
+            self.assertTrue(window.tap_to_skip_dialogue_check.isEnabled())
+            self.assertEqual(
                 window.low_blood_code_mastery_exp_check.text(),
                 "Unrestricted Blood Code Mastery",
             )
@@ -1083,13 +1168,13 @@ class MainWindowIntegrationTests(unittest.TestCase):
                 ),
                 (0, 0),
             )
-            self.assertEqual(miscellaneous_grid.count(), 7)
+            self.assertEqual(miscellaneous_grid.count(), 8)
             self.assertEqual(
                 [
                     miscellaneous_grid.getItemPosition(index)[:2]
                     for index in range(miscellaneous_grid.count())
                 ],
-                [(0, 0), (1, 0), (2, 0), (3, 0), (0, 1), (1, 1), (2, 1)],
+                [(0, 0), (1, 0), (2, 0), (3, 0), (0, 1), (1, 1), (2, 1), (3, 1)],
             )
             for control in (
                 window.unlock_all_booster_slots_check,
@@ -1099,6 +1184,7 @@ class MainWindowIntegrationTests(unittest.TestCase):
                 window.disable_tutorials_check,
                 window.low_blood_code_mastery_exp_check,
                 window.cheaper_booster_extractor_check,
+                window.tap_to_skip_dialogue_check,
             ):
                 self.assertIs(control.parentWidget(), miscellaneous)
                 self.assertTrue(
@@ -1111,6 +1197,8 @@ class MainWindowIntegrationTests(unittest.TestCase):
                 )
             window.low_blood_code_mastery_exp_check.setChecked(True)
             self.assertTrue(window._current_generation_options().low_blood_code_mastery_exp)
+            window.tap_to_skip_dialogue_check.setChecked(True)
+            self.assertTrue(window._current_generation_options().tap_to_skip_dialogue)
             self.assertFalse(hasattr(window, "test_unidentified_shop_materials_check"))
             self.assertFalse(hasattr(window, "disable_preorder_weapons_check"))
             self.assertTrue(
@@ -1405,7 +1493,7 @@ class MainWindowIntegrationTests(unittest.TestCase):
             }
             self.assertFalse(any(label.casefold() == "logs" for label in diagnostic_labels))
             self.assertTrue(any(label.casefold() == "settings" for label in diagnostic_labels))
-            self.assertIn("v0.9.3", diagnostic_labels)
+            self.assertIn("v1.0.0", diagnostic_labels)
             self.assertFalse(any("algorithm" in text.casefold() for text in diagnostic_labels))
             self.assertFalse(any("latest generate" in text.casefold() for text in diagnostic_labels))
             self.assertFalse(any("CV2.usmap" in text for text in diagnostic_labels))
@@ -1452,6 +1540,10 @@ class MainWindowIntegrationTests(unittest.TestCase):
                 "fully compatible with Code Vein 2 v2.0.3",
                 "Other versions may have missing or different files",
                 "left unchanged and counted by category in Spoiler.txt",
+                "Tap Instead of Holding to Skip Dialogue",
+                "quick press of your configured Interact button",
+                "keyboard or controller",
+                "unsupported layout",
             ):
                 self.assertIn(phrase, text)
             self.assertLess(
@@ -1487,7 +1579,7 @@ class MainWindowIntegrationTests(unittest.TestCase):
                 about_labels["aboutApplicationName"].text(),
                 "Code Vein 2 Randomizer",
             )
-            self.assertEqual(about_labels["aboutApplicationVersion"].text(), "Version v0.9.3")
+            self.assertEqual(about_labels["aboutApplicationVersion"].text(), "Version v1.0.0")
             self.assertEqual(
                 about_labels["aboutApplicationDescription"].text(),
                 "Item randomizer for Code Vein 2.",
@@ -1496,8 +1588,11 @@ class MainWindowIntegrationTests(unittest.TestCase):
             self.assertTrue(window.about_icon_label.property("iconPngLoaded"))
             self.assertTrue(window.about_icon_label.property("iconPath").endswith("ico\\icon.png"))
             self.assertFalse(window.about_icon_label.pixmap().isNull())
-            self.assertFalse(window.about_nexus_link.isEnabled())
-            self.assertEqual(window.about_nexus_link.text(), "Nexus Mods — Coming soon")
+            self.assertTrue(window.about_nexus_link.isEnabled())
+            self.assertIn(
+                '<a href="https://www.nexusmods.com/codevein2/mods/220"',
+                window.about_nexus_link.text(),
+            )
             self.assertIn("color:#005A9E", window.about_github_link.text())
             self.assertIn("text-decoration:underline", window.about_steam_link.text())
             self.assertEqual(window.about_page.findChildren(QScrollArea), [])
@@ -1514,11 +1609,15 @@ class MainWindowIntegrationTests(unittest.TestCase):
                 window.about_steam_link.linkActivated.emit(
                     "https://store.steampowered.com/app/2362060/CODE_VEIN_II/"
                 )
+                window.about_nexus_link.linkActivated.emit(
+                    "https://www.nexusmods.com/codevein2/mods/220"
+                )
             self.assertEqual(
                 [call.args[0].toString() for call in open_url.call_args_list],
                 [
                     "https://github.com/mmachida/CodeVein2-Randomizer",
                     "https://store.steampowered.com/app/2362060/CODE_VEIN_II/",
+                    "https://www.nexusmods.com/codevein2/mods/220",
                 ],
             )
 
@@ -1533,7 +1632,7 @@ class MainWindowIntegrationTests(unittest.TestCase):
 
             with patch(
                 "cv2randomizer.ui.main_window.NEXUS_MODS_URL",
-                "https://www.nexusmods.com/games/codevein2",
+                "https://www.nexusmods.com/codevein2/mods/220",
             ) as configured_url:
                 configured_page = window._build_about_tab()
                 self.assertIn(

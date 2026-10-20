@@ -67,6 +67,8 @@ if (args.Length == 5 && args[0] == "patch-booster-slot-unlocks")
 if (args.Length == 5 && args[0] == "patch-disable-tutorials")
     return TutorialFlagPatcher.Patch(args);
 
+if (args.Length == 6 && args[0] == "patch-dialogue-skip-subtitle-widget")
+    return DialogueSkipSubtitleWidgetPatcher.Patch(args);
 if (args.Length == 5 && args[0] is "patch-motorcycle-unlock-flag" or "patch-motorcycle-unlock-asset")
     return MotorcycleUnlockPatcher.Patch(args);
 

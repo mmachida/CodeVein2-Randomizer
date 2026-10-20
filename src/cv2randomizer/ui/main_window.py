@@ -59,6 +59,7 @@ from cv2randomizer.core.models import AppSettings, GenerationOptions
 from cv2randomizer.core.logging_config import activity_log_path
 from cv2randomizer.core.resources import (
     ApplicationResourceError,
+    application_root,
     application_resource,
     resolve_app_icon,
     resolve_cv2_usmap,
@@ -643,6 +644,14 @@ class MainWindow(QMainWindow):
             "Each required material costs 1. Haze cost is unchanged."
         )
         miscellaneous_layout.addWidget(self.cheaper_booster_extractor_check, 2, 1)
+        self.tap_to_skip_dialogue_check = DescribedCheckBox(
+            "Tap Instead of Holding to Skip Dialogue"
+        )
+        self.tap_to_skip_dialogue_check.setToolTip(
+            "Tap the game's configured Interact button to skip eligible dialogue. "
+            "Keyboard and controller remaps are supported; the game's skip-prohibited check remains active."
+        )
+        miscellaneous_layout.addWidget(self.tap_to_skip_dialogue_check, 3, 1)
         miscellaneous_outer_layout.addLayout(miscellaneous_layout)
         miscellaneous_outer_layout.addSpacing(6)
 
@@ -739,6 +748,7 @@ li { margin: 3px 0; }
 
 <h3>Other options</h3>
 <p>These options unlock features or change small settings. They do not shuffle item rewards. <i>Example: Disable Tutorial Pop-ups turns those messages off.</i></p>
+<p><b>Tap Instead of Holding to Skip Dialogue</b> lets a quick press of your configured Interact button skip eligible dialogue, whether you use a keyboard or controller. The game's skip-prohibited check still applies, and this option is skipped if the installed version has an unsupported layout.</p>
 
 <h3>Seed and game files</h3>
 <p>The spoiler shows each changed item and what it became. Extract Game Data saves files that Randomize can reuse next time.</p>
@@ -966,6 +976,7 @@ li { margin: 3px 0; }
         self.motorcycle_unlocked_check.setChecked(self._settings.motorcycle_unlocked)
         self.second_weapon_unlocked_check.setChecked(options.second_weapon_unlocked)
         self.disable_tutorials_check.setChecked(options.disable_tutorials)
+        self.tap_to_skip_dialogue_check.setChecked(options.tap_to_skip_dialogue)
         self._update_shop_mix_enabled()
 
     # Read current generation options
@@ -989,6 +1000,7 @@ li { margin: 3px 0; }
             motorcycle_unlocked=self.motorcycle_unlocked_check.isChecked(),
             second_weapon_unlocked=self.second_weapon_unlocked_check.isChecked(),
             disable_tutorials=self.disable_tutorials_check.isChecked(),
+            tap_to_skip_dialogue=self.tap_to_skip_dialogue_check.isChecked(),
             install_after_generation=True,
             generate_spoiler_log=False,
         )
@@ -1240,12 +1252,36 @@ li { margin: 3px 0; }
 
     # Resolve browse game path
     def _browse_game_path(self) -> None:
-        selected = QFileDialog.getExistingDirectory(self, "Select Code Vein 2 folder")
+        initial_directory = self._game_path_browse_start_directory()
+        selected = QFileDialog.getExistingDirectory(
+            self, "Select Code Vein 2 folder", initial_directory
+        )
         if selected:
             self.game_path.setText(selected)
             self._game_path_diagnostic.setText(selected)
             self._save_settings()
             self._start_game_check(selected)
+
+    # Choose game path browse start
+    def _game_path_browse_start_directory(self) -> str:
+        candidates: list[Path] = []
+        current_value = self.game_path.text().strip()
+        if current_value:
+            candidates.append(Path(current_value).expanduser())
+        candidates.append(application_root())
+
+        for candidate in candidates:
+            if self._directory_can_be_browsed(candidate):
+                return str(candidate)
+        return str(Path.home())
+
+    # Check directory can be browsed
+    @staticmethod
+    def _directory_can_be_browsed(directory: Path) -> bool:
+        try:
+            return directory.is_dir() and os.access(directory, os.R_OK)
+        except OSError:
+            return False
 
     # Update mapping warning
     def _update_mapping_warning(self, *_args) -> None:

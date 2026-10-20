@@ -5,7 +5,7 @@
 Code Vein 2 Randomizer is a tool that creates a MOD to randomize items in Code Vein II and DLC (Mask of Idris). Choose a seed and the options you want, then click **Randomize**. The original game archives stay untouched.
 Using the same seed, settings, and supported game version gives you the same result.
 
-<img width="994" height="495" alt="image" src="https://github.com/user-attachments/assets/f0579c8e-5849-44f0-85dd-40dcb578c82e" />
+<img width="997" height="498" alt="Captura de tela 2026-10-20 174504" src="https://github.com/user-attachments/assets/2896ca88-1d3b-4027-8704-b379431ca40e" />
 <img width="750" height="415" alt="image" src="https://github.com/user-attachments/assets/1afb859e-951a-475c-bdfb-4679f3a4b2e8" />
 
 ## What it can randomize
@@ -19,6 +19,8 @@ Using the same seed, settings, and supported game version gives you the same res
 Only rewards the app has checked are included. Unsupported scripted rewards stay as they are. Pre-order rewards, MagMell's Tool Shop, and unlimited shop stock are left alone. Key-item and general quest-item randomization are still in progress and cannot be switched on in the app.
 
 The app skips optional content that is not present in the installed game files. It does not check whether DLC is owned through a store.
+
+<img width="1280" height="720" alt="asd" src="https://github.com/user-attachments/assets/dfaa730b-4edc-4b7a-a83f-1fa4354ddc69" />
 
 ## Dependencies
 

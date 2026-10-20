@@ -123,6 +123,11 @@ from cv2randomizer.game.tutorial_disable_generation import (
     apply_tutorial_disable,
     inventory_for_tutorial_flags,
 )
+from cv2randomizer.game.dialogue_skip_generation import (
+    DialogueSkipResult,
+    DialogueSkipSerializer,
+    apply_tap_to_skip_dialogue,
+)
 from cv2randomizer.game.motorcycle_unlock_generation import (
     MOTORCYCLE_CACHE_PACKAGES,
     MOTORCYCLE_FORMA_ARTICLE_PACKAGE,
@@ -296,6 +301,16 @@ class GenerationError(RuntimeError):
     """Raised when generation cannot safely reach validated staging."""
 
 
+def _generation_error_cause(error: BaseException) -> GenerationError | None:
+    """Find cancellation or generation failures wrapped by an optional patch."""
+    current: BaseException | None = error
+    while current is not None:
+        if isinstance(current, GenerationError):
+            return current
+        current = current.__cause__
+    return None
+
+
 @dataclass(frozen=True, slots=True)
 class GenerationRequest:
     """User-selected inputs needed for one local generation run."""
@@ -346,6 +361,7 @@ class GenerationResult:
     initial_inventory_result: InitialInventoryGenerationResult | None = None
     motorcycle_unlock_result: MotorcycleUnlockResult | None = None
     tutorial_disable_result: TutorialDisableResult | None = None
+    dialogue_skip_result: DialogueSkipResult | None = None
     blood_code_mastery_result: BloodCodeMasteryResult | None = None
     world_direct_grant_results: tuple[WorldLootDirectGrantResult, ...] = ()
     content_availability: ContentAvailability | None = None
@@ -382,6 +398,7 @@ class GenerationEngine:
         booster_serializer: BoosterSerializer | None = None,
         booster_slot_unlock_serializer: BoosterSlotUnlockSerializer | None = None,
         tutorial_disable_serializer: TutorialDisableSerializer | None = None,
+        dialogue_skip_serializer: DialogueSkipSerializer | None = None,
         blood_code_mastery_serializer: BloodCodeMasterySerializer | None = None,
         motorcycle_unlock_serializer: MotorcycleUnlockSerializer | None = None,
         extractor_catalog_store: ExtractorCatalogStore | None = None,
@@ -422,6 +439,7 @@ class GenerationEngine:
         self.booster_serializer = booster_serializer or BoosterSerializer()
         self.booster_slot_unlock_serializer = booster_slot_unlock_serializer or BoosterSlotUnlockSerializer()
         self.tutorial_disable_serializer = tutorial_disable_serializer or TutorialDisableSerializer()
+        self.dialogue_skip_serializer = dialogue_skip_serializer or DialogueSkipSerializer()
         self.blood_code_mastery_serializer = blood_code_mastery_serializer or BloodCodeMasterySerializer()
         self.motorcycle_unlock_serializer = motorcycle_unlock_serializer or MotorcycleUnlockSerializer()
         self.extractor_catalog_store = extractor_catalog_store or ExtractorCatalogStore()
@@ -2158,6 +2176,7 @@ class GenerationEngine:
             or request.options.motorcycle_unlocked
             or request.options.second_weapon_unlocked
             or request.options.disable_tutorials
+            or request.options.tap_to_skip_dialogue
         )
         if request.mappings_path is not None and not isinstance(request.mappings_path, Path):
             raise GenerationError("mappings_path must be a filesystem path or None.")
@@ -2205,6 +2224,7 @@ class GenerationEngine:
         booster_slot_unlock_result: BoosterSlotUnlockResult | None = None
         motorcycle_unlock_result: MotorcycleUnlockResult | None = None
         tutorial_disable_result: TutorialDisableResult | None = None
+        dialogue_skip_result: DialogueSkipResult | None = None
         blood_code_mastery_result: BloodCodeMasteryResult | None = None
         defensive_gadget_preparation: DefensiveGadgetPreparation | None = None
         defensive_gadget_plan: DefensiveGadgetNpcPlan | None = None
@@ -3501,6 +3521,40 @@ class GenerationEngine:
                 except (OSError, RuntimeError, ValueError) as error:
                     raise GenerationError(f"Could not inspect tutorial StoryFlag tables: {error}") from error
                 performance["tutorial_disable_patch_seconds"] = time.perf_counter() - phase_started
+            if request.options.tap_to_skip_dialogue:
+                phase_started = time.perf_counter()
+                try:
+                    dialogue_skip_result = apply_tap_to_skip_dialogue(
+                        game_root=game_root,
+                        work_root=workspace.root,
+                        output_content_root=output_root,
+                        mappings_path=mappings,
+                        game_version=detection.version_id,
+                        data_revision=detection.catalog_revision,
+                        extractor=self.extractor,
+                        serializer=self.dialogue_skip_serializer,
+                        progress=progress,
+                    )
+                    if not dialogue_skip_result.applied:
+                        availability_warnings.append(
+                            "Tap Instead of Holding to Skip Dialogue was skipped for this game version: "
+                            f"{dialogue_skip_result.reason or 'the asset layout is unsupported.'}"
+                        )
+                except Exception as error:
+                    generation_error = _generation_error_cause(error)
+                    if generation_error is not None:
+                        raise generation_error
+                    LOGGER.warning(
+                        "Tap Instead of Holding to Skip Dialogue was skipped after patch validation failed: %s",
+                        error,
+                        exc_info=True,
+                    )
+                    dialogue_skip_result = DialogueSkipResult((), False, str(error))
+                    availability_warnings.append(
+                        "Tap Instead of Holding to Skip Dialogue was skipped because its assets could not be validated: "
+                        f"{error}"
+                    )
+                performance["dialogue_skip_patch_seconds"] = time.perf_counter() - phase_started
             if shop_stage is not None and (
                 shop_plan.assignments or shop_plan.linked_assignments
                 or request.options.unlock_npc_trader_shops
@@ -3681,6 +3735,7 @@ class GenerationEngine:
                 motorcycle_unlock_result,
                 tutorial_disable_result,
                 blood_code_mastery_result,
+                dialogue_skip=dialogue_skip_result,
             )
             changed_package_registry = _changed_package_registry(
                 output_root,
@@ -3699,6 +3754,7 @@ class GenerationEngine:
                 motorcycle_unlock=motorcycle_unlock_result,
                 tutorial_disable=tutorial_disable_result,
                 blood_code_mastery=blood_code_mastery_result,
+                dialogue_skip=dialogue_skip_result,
             )
             registry_paths = {
                 (output_root / relative).resolve()
@@ -3757,7 +3813,7 @@ class GenerationEngine:
                 simple_entries,
                 seed=canonical_seed_text(seed),
                 metadata=_spoiler_metadata(detection),
-                randomizer_settings=_spoiler_settings(request.options),
+                randomizer_settings=_spoiler_settings(request.options, dialogue_skip_result),
                 created_date=datetime.now().astimezone().date().isoformat(),
                 summary_lines=spoiler_assignment_summary(
                     simple_entries,
@@ -3928,6 +3984,7 @@ class GenerationEngine:
                 initial_inventory_result=initial_inventory_result,
                 motorcycle_unlock_result=motorcycle_unlock_result,
                 tutorial_disable_result=tutorial_disable_result,
+                dialogue_skip_result=dialogue_skip_result,
                 blood_code_mastery_result=blood_code_mastery_result,
                 world_direct_grant_results=world_direct_grant_results,
                 content_availability=source_availability,
@@ -4836,6 +4893,7 @@ def _expected_output_files(
     motorcycle_unlock: MotorcycleUnlockResult | None = None,
     tutorial_disable: TutorialDisableResult | None = None,
     blood_code_mastery: BloodCodeMasteryResult | None = None,
+    dialogue_skip: DialogueSkipResult | None = None,
 ) -> tuple[Path, ...]:
     paths: list[Path] = []
     if world is not None:
@@ -4863,6 +4921,8 @@ def _expected_output_files(
         paths.extend(tutorial_disable.output_files)
     if blood_code_mastery is not None:
         paths.extend(blood_code_mastery.output_files)
+    if dialogue_skip is not None:
+        paths.extend(dialogue_skip.output_files)
     if defensive_gadgets is not None:
         paths.extend(defensive_gadgets.output_files)
     if bequeathed_formae is not None:
@@ -4891,6 +4951,7 @@ def _changed_package_registry(
     motorcycle_unlock: MotorcycleUnlockResult | None = None,
     tutorial_disable: TutorialDisableResult | None = None,
     blood_code_mastery: BloodCodeMasteryResult | None = None,
+    dialogue_skip: DialogueSkipResult | None = None,
 ) -> tuple[dict[str, object], ...]:
     """Group subsystem-owned staged outputs into the exact file inventory for Retoc."""
     root = content_root.resolve()
@@ -4945,6 +5006,8 @@ def _changed_package_registry(
         register("miscellaneous", tutorial_disable.output_files)
     if blood_code_mastery is not None:
         register("miscellaneous", blood_code_mastery.output_files)
+    if dialogue_skip is not None:
+        register("miscellaneous", dialogue_skip.output_files)
 
     output: list[dict[str, object]] = []
     for entry in entries.values():
@@ -5623,7 +5686,10 @@ def _spoiler_metadata(detection: VersionDetection) -> dict[str, str]:
 
 
 # Find spoiler settings
-def _spoiler_settings(options: GenerationOptions) -> tuple[str, ...]:
+def _spoiler_settings(
+    options: GenerationOptions,
+    dialogue_skip_result: DialogueSkipResult | None = None,
+) -> tuple[str, ...]:
     """Return every player-facing option as a short Enabled/Disabled line."""
     settings = (
         ("World Loot (always on)", options.randomize_world_loot),
@@ -5641,6 +5707,12 @@ def _spoiler_settings(options: GenerationOptions) -> tuple[str, ...]:
         ("Unlock Motorcycle at Start", options.motorcycle_unlocked),
         ("Unlock Second Weapon Slot", options.second_weapon_unlocked),
         ("Disable Tutorial Pop-ups", options.disable_tutorials),
+        (
+            "Tap Instead of Holding to Skip Dialogue",
+            options.tap_to_skip_dialogue and (
+                dialogue_skip_result is None or dialogue_skip_result.applied
+            ),
+        ),
         ("Unrestricted Blood Code Mastery", options.low_blood_code_mastery_exp),
         ("Cheaper Booster Extractor", options.cheaper_booster_extractor),
     )
