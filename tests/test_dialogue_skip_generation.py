@@ -157,6 +157,8 @@ class DialogueSkipGenerationTests(unittest.TestCase):
                     "activationPoint": "first positive SetSkipIndicatorPercent_Interact progress",
                     "skipGuard": "IsInteractSkipProhibited",
                     "outputAction": "OnForceClose -> SkipStatement",
+                    "closeHandler": "unchanged",
+                    "inputRecovery": "native 0.5-second debounce and zero-progress reset; prohibited progress does not latch",
                     "outputFiles": [str(output), str(sidecar)],
                     "reopenedAndValidated": True,
                 }

@@ -34,7 +34,7 @@ Python and .NET do not need to be installed for the ready-to-run release.
 To run the project from source, you also need:
 
 - Python 3.12 or newer.
-- The .NET 10 SDK. The source app uses it to run its asset helper when extracting and building a mod.
+- The .NET 10 SDK. Extract and Randomize use the UAssetAPI helper in `tools/uassetapi-worldloot/`, which runs from its .NET project in a source checkout.
 - The checkout includes `tools/oo2core_9_win64.dll`, which Retoc uses to read Oodle-compressed game archives. You do not need to copy this DLL from the game installation.
 
 The checkout already includes the Retoc command-line tool and the `CV2.usmap` mapping file. Python installs the app's runtime packages—PySide6, platformdirs, and psutil—from `pyproject.toml`.
@@ -62,6 +62,8 @@ To run tests or build the Windows app, install the optional packages:
 
 Once the environment is ready, start the app with the command above. Choose your Code Vein II folder and click **Extract Game Data** if the app asks. The first extraction can take a few minutes. Later runs reuse the cache while the game's archives stay the same. Pick a seed and settings, then click **Randomize**.
 
+Running from source starts the Python app directly. The .NET launcher in `launcher/` is only used to package the ready-to-run release; you do not need it to start the Python app.
+
 ## Remove the mod
 
 Click **Uninstall Randomizer** in the app. It removes the files owned by this Randomizer and leaves other mods in `Paks/~mods` alone. You can also delete this Randomizer's mod files and `Spoiler.txt` from that folder yourself. The original game archives are not changed.
@@ -82,13 +84,15 @@ For the full Python test suite, use:
 
 These checks do not replace testing Extract and Randomize with a real game installation. Real-game and gameplay checks still need to be done manually.
 
-To build a Windows release, set up the optional Python packages, install the .NET 10 SDK, and make sure the pinned Retoc CLI and its license are in `workspace/tools/retoc-v0.1.5/`. The build script uses the included Oodle DLL at `tools/oo2core_9_win64.dll` and needs NuGet license files after restore. Then run:
+To build a Windows release, install the pinned Python build packages and the .NET 10 SDK. Make sure the pinned Retoc CLI and its license are in `workspace/tools/retoc-v0.1.5/`. The build also uses `tools/oo2core_9_win64.dll`, `workspace/research_assets/CV2.usmap`, and the NuGet license files restored by the script. Then run:
 
 ```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --requirement requirements-release.lock
 .\scripts\build_release.ps1
 ```
 
-The script builds under `release/<version>/` and runs startup and resource checks. Include Retoc's license and the generated third-party notices with distributed builds.
+The script builds the Python app as a temporary PyInstaller onedir payload, then embeds it into a self-contained .NET single-file executable using the launcher source in `launcher/`. It creates the payload ZIP automatically; no generated `Payload.zip`, `bin/`, or `obj/` files need to be committed. Build scratch files stay in `/Delete`. The release ZIP in `release/<version>/` contains only the versioned `.exe` and `README.txt`; the executable includes the app, helper, .NET runtime, and third-party notices. Release users need neither Python nor .NET installed. At runtime, the launcher temporarily extracts the app payload under `%TEMP%` and cleans it up after the app exits.
 
 ## License
 

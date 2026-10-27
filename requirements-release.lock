@@ -1,0 +1,17 @@
+# Windows x64 release build environment (CPython 3.12.10).
+# Install with: python -m pip install --requirement requirements-release.lock
+altgraph==0.17.5
+packaging==26.3
+pefile==2024.8.26
+platformdirs==4.13.0
+psutil==7.2.2
+pyinstaller==6.22.3
+pyinstaller-hooks-contrib==2026.8
+PySide6==6.12.0
+PySide6_Addons==6.12.0
+PySide6_Essentials==6.12.0
+PySide6_Pdf==6.12.0.140
+PySide6_WebEngine==6.12.0.140
+pywin32-ctypes==0.2.3
+setuptools==84.0.0
+shiboken6==6.12.0

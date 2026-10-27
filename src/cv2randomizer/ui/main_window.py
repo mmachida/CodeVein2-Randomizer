@@ -595,7 +595,7 @@ class MainWindow(QMainWindow):
         miscellaneous_layout.setColumnStretch(0, 1)
         miscellaneous_layout.setColumnStretch(1, 1)
         self.unlock_all_booster_slots_check = DescribedCheckBox(
-            "Unlock all 6 Booster Slots"
+            "Unlock all 6 Booster Slots (New Game only)"
         )
         self.unlock_all_booster_slots_check.setToolTip(
             "New games start with all six slots. Existing saves are unchanged."
@@ -609,14 +609,14 @@ class MainWindow(QMainWindow):
         )
         miscellaneous_layout.addWidget(self.unlock_npc_trader_shops_check, 1, 0)
         self.motorcycle_unlocked_check = DescribedCheckBox(
-            "Unlock Motorcycle at Start"
+            "Unlock Motorcycle at Start (New Game only)"
         )
         self.motorcycle_unlocked_check.setToolTip(
             "Start a new game with motorcycle access unlocked."
         )
         miscellaneous_layout.addWidget(self.motorcycle_unlocked_check, 2, 0)
         self.second_weapon_unlocked_check = DescribedCheckBox(
-            "Unlock Second Weapon Slot"
+            "Unlock Second Weapon Slot (New Game only)"
         )
         self.second_weapon_unlocked_check.setToolTip(
             "New games start with the second weapon slot unlocked."
@@ -645,7 +645,7 @@ class MainWindow(QMainWindow):
         )
         miscellaneous_layout.addWidget(self.cheaper_booster_extractor_check, 2, 1)
         self.tap_to_skip_dialogue_check = DescribedCheckBox(
-            "Tap Instead of Holding to Skip Dialogue"
+            "Tap Instead of Holding to Skip Dialogue (Experimental)"
         )
         self.tap_to_skip_dialogue_check.setToolTip(
             "Tap the game's configured Interact button to skip eligible dialogue. "
@@ -748,7 +748,7 @@ li { margin: 3px 0; }
 
 <h3>Other options</h3>
 <p>These options unlock features or change small settings. They do not shuffle item rewards. <i>Example: Disable Tutorial Pop-ups turns those messages off.</i></p>
-<p><b>Tap Instead of Holding to Skip Dialogue</b> lets a quick press of your configured Interact button skip eligible dialogue, whether you use a keyboard or controller. The game's skip-prohibited check still applies, and this option is skipped if the installed version has an unsupported layout.</p>
+<p><b>Tap Instead of Holding to Skip Dialogue (Experimental)</b> lets a quick press of your configured Interact button skip eligible dialogue, whether you use a keyboard or controller. The game's skip-prohibited check still applies, and this option is skipped if the installed version has an unsupported layout.</p>
 
 <h3>Seed and game files</h3>
 <p>The spoiler shows each changed item and what it became. Extract Game Data saves files that Randomize can reuse next time.</p>

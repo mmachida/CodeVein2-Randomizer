@@ -12,7 +12,7 @@ internal static class DialogueSkipSubtitleWidgetPatcher
     private const string SetterName = "SetSkipIndicatorPercent_Interact";
     private const string CloseName = "OnForceClose";
     private const string UbergraphName = "ExecuteUbergraph_WDT_Subtitles";
-    private const float DelayFallbackSeconds = 30.0f;
+    private const float NativeDebounceSeconds = 0.5f;
 
     // Patch the configured Interact progress callback
     public static int Patch(string[] args)
@@ -95,10 +95,10 @@ internal static class DialogueSkipSubtitleWidgetPatcher
             var timerCalls = graph.OfType<EX_CallMath>()
                 .Where(call => call.StackNode.Index == FPackageIndex.FromImport(timer).Index &&
                     call.Parameters.Length == 3 &&
-                    call.Parameters[1] is EX_FloatConst { Value: 0.5f })
+                    call.Parameters[1] is EX_FloatConst { Value: NativeDebounceSeconds })
                 .ToArray();
             if (timerCalls.Length != 1 || graph[58] != timerCalls[0] ||
-                timerCalls[0].Parameters[1] is not EX_FloatConst timerDuration)
+                timerCalls[0].Parameters[1] is not EX_FloatConst)
                 return Unsupported($"The subtitle skip-delay timer has an unsupported layout " +
                     $"(matches={timerCalls.Length}; calls={string.Join(';', graph.OfType<EX_CallMath>().Select(call => $"{call.StackNode.Index}/{call.Parameters.Length}/{(call.Parameters.Length > 1 ? call.Parameters[1].GetType().Name : "none")}"))}).");
 
@@ -120,8 +120,6 @@ internal static class DialogueSkipSubtitleWidgetPatcher
             };
             var latchAfterSkip = SetDelayFlag(delayPointer, false);
             var jumpToOriginalAfterSkip = new EX_Jump();
-            var latchAfterProhibitedProgress = SetDelayFlag(delayPointer, false);
-            var jumpToOriginalAfterProhibited = new EX_Jump();
             var resetDelayOnRelease = SetDelayFlag(delayPointer, true);
             var jumpToOriginalAfterReset = new EX_Jump();
             KismetExpression[] prefix =
@@ -132,32 +130,18 @@ internal static class DialogueSkipSubtitleWidgetPatcher
                 closeOnFirstProgress,
                 latchAfterSkip,
                 jumpToOriginalAfterSkip,
-                latchAfterProhibitedProgress,
-                jumpToOriginalAfterProhibited,
                 resetDelayOnRelease,
                 jumpToOriginalAfterReset,
             };
             var prefixSizes = prefix.Select(expression => expression.GetSize(asset)).ToArray();
-            var blockedOffset = checked(prefixSizes.Take(6).Aggregate(0u, (sum, size) => sum + size));
-            var resetOffset = checked(prefixSizes.Take(8).Aggregate(0u, (sum, size) => sum + size));
+            var resetOffset = checked(prefixSizes.Take(6).Aggregate(0u, (sum, size) => sum + size));
             var originalOffset = checked(prefixSizes.Aggregate(0u, (sum, size) => sum + size));
             jumpOnNonPositive.CodeOffset = resetOffset;
             jumpIfAlreadyHandled.CodeOffset = originalOffset;
-            jumpIfProhibited.CodeOffset = blockedOffset;
+            jumpIfProhibited.CodeOffset = originalOffset;
             jumpToOriginalAfterSkip.CodeOffset = originalOffset;
-            jumpToOriginalAfterProhibited.CodeOffset = originalOffset;
             jumpToOriginalAfterReset.CodeOffset = originalOffset;
             setter.ScriptBytecode = [.. prefix, .. setterOriginal];
-
-            var closeGuard = new EX_JumpIfNot
-            {
-                BooleanExpression = new EX_InstanceVariable { Variable = new KismetPropertyPointer(delayPointer.New) },
-            };
-            var closeGuardSize = closeGuard.GetSize(asset);
-            var originalCloseCallSize = closeOriginal[0].GetSize(asset);
-            closeGuard.CodeOffset = checked(closeGuardSize + originalCloseCallSize);
-            close.ScriptBytecode = [closeGuard, .. closeOriginal];
-            timerDuration.Value = DelayFallbackSeconds;
 
             var outputDirectory = Path.GetDirectoryName(output)!;
             Directory.CreateDirectory(outputDirectory);
@@ -166,7 +150,7 @@ internal static class DialogueSkipSubtitleWidgetPatcher
             asset.Write(temporaryHeader);
             CopySidecars(input, temporaryHeader);
             ValidatePatchedPackage(temporaryHeader, engineVersion, mappings, greater, notBool, prohibited,
-                delayPointer, blockedOffset, resetOffset, originalOffset, DelayFallbackSeconds);
+                delayPointer, resetOffset, originalOffset, NativeDebounceSeconds);
 
             var temporaryFiles = PackageFiles(temporaryHeader).Where(File.Exists).ToArray();
             if (temporaryFiles.Length == 0 || temporaryFiles.Any(file => new FileInfo(file).Length <= 0))
@@ -179,7 +163,7 @@ internal static class DialogueSkipSubtitleWidgetPatcher
                 committed.Add(outputFiles[index]);
             }
             ValidatePatchedPackage(output, engineVersion, mappings, greater, notBool, prohibited,
-                delayPointer, blockedOffset, resetOffset, originalOffset, DelayFallbackSeconds);
+                delayPointer, resetOffset, originalOffset, NativeDebounceSeconds);
             Console.WriteLine(JsonSerializer.Serialize(new
             {
                 status = "patched",
@@ -188,6 +172,8 @@ internal static class DialogueSkipSubtitleWidgetPatcher
                 activationPoint = $"first positive {SetterName} progress",
                 skipGuard = "IsInteractSkipProhibited",
                 outputAction = "OnForceClose -> SkipStatement",
+                closeHandler = "unchanged",
+                inputRecovery = "native 0.5-second debounce and zero-progress reset; prohibited progress does not latch",
                 outputFiles = committed,
                 reopenedAndValidated = true,
             }));
@@ -261,7 +247,6 @@ internal static class DialogueSkipSubtitleWidgetPatcher
         int notBool,
         int prohibited,
         KismetPropertyPointer delayPointer,
-        uint blockedOffset,
         uint resetOffset,
         uint originalOffset,
         float delaySeconds)
@@ -270,44 +255,37 @@ internal static class DialogueSkipSubtitleWidgetPatcher
         var setter = FindUniqueExport<StructExport>(reopened, SetterName).ScriptBytecode;
         var close = FindUniqueExport<StructExport>(reopened, CloseName).ScriptBytecode;
         var graph = FindUniqueExport<StructExport>(reopened, UbergraphName).ScriptBytecode;
-        var validSetter = setter is not null && setter.Length == 14 &&
+        var validSetter = setter is not null && setter.Length == 12 &&
             setter[0] is EX_JumpIfNot { CodeOffset: var resetTarget, BooleanExpression: EX_CallMath positive } &&
             resetTarget == resetOffset && positive.StackNode.Index == FPackageIndex.FromImport(greater).Index &&
             setter[1] is EX_JumpIfNot { CodeOffset: var readyTarget, BooleanExpression: EX_InstanceVariable ready } &&
             readyTarget == originalOffset && FieldNameEquals(ready.Variable, "EndSkip_Delay") &&
             setter[2] is EX_JumpIfNot { CodeOffset: var prohibitedTarget, BooleanExpression: EX_CallMath permitted } &&
-            prohibitedTarget == blockedOffset && permitted.StackNode.Index == FPackageIndex.FromImport(notBool).Index &&
+            prohibitedTarget == originalOffset && permitted.StackNode.Index == FPackageIndex.FromImport(notBool).Index &&
             permitted.Parameters.Length == 1 && permitted.Parameters[0] is EX_Context blocked &&
             IsFunctionCall(blocked, prohibited) && setter[3] is EX_LocalVirtualFunction { Parameters.Length: 0 } closeCall &&
             closeCall.VirtualFunctionName.ToString() == CloseName &&
             setter[4] is EX_LetBool { AssignmentExpression: EX_False, VariableExpression: EX_InstanceVariable skipLatch } &&
             FieldNameEquals(skipLatch.Variable, "EndSkip_Delay") &&
             setter[5] is EX_Jump { CodeOffset: var skipExit } && skipExit == originalOffset &&
-            setter[6] is EX_LetBool { AssignmentExpression: EX_False, VariableExpression: EX_InstanceVariable blockedLatch } &&
-            FieldNameEquals(blockedLatch.Variable, "EndSkip_Delay") &&
-            setter[7] is EX_Jump { CodeOffset: var blockedExit } && blockedExit == originalOffset &&
-            setter[8] is EX_LetBool { AssignmentExpression: EX_True, VariableExpression: EX_InstanceVariable resetFlag } &&
+            setter[6] is EX_LetBool { AssignmentExpression: EX_True, VariableExpression: EX_InstanceVariable resetFlag } &&
             FieldNameEquals(resetFlag.Variable, "EndSkip_Delay") &&
-            setter[9] is EX_Jump { CodeOffset: var resetExit } && resetExit == originalOffset &&
-            setter[10] is EX_LetValueOnPersistentFrame &&
-            setter[11] is EX_LocalFinalFunction { Parameters.Length: 1 } originalUpdate &&
+            setter[7] is EX_Jump { CodeOffset: var resetExit } && resetExit == originalOffset &&
+            setter[8] is EX_LetValueOnPersistentFrame &&
+            setter[9] is EX_LocalFinalFunction { Parameters.Length: 1 } originalUpdate &&
             originalUpdate.Parameters[0] is EX_IntConst { Value: 2530 };
-        var validClose = close is not null && close.Length == 4 &&
-            close[0] is EX_JumpIfNot { BooleanExpression: EX_InstanceVariable closeReady } &&
-            FieldNameEquals(closeReady.Variable, "EndSkip_Delay") &&
-            close[1] is EX_LocalFinalFunction { Parameters.Length: 1 } originalClose &&
-            originalClose.Parameters[0] is EX_IntConst { Value: 1225 };
+        var validClose = close is not null && close.Length == 3 &&
+            close[0] is EX_LocalFinalFunction { Parameters.Length: 1 } originalClose &&
+            originalClose.Parameters[0] is EX_IntConst { Value: 1225 } &&
+            close[1] is EX_Return;
         var validGraph = graph is not null && graph.Length == 120 &&
             graph.OfType<EX_CallMath>().SingleOrDefault(call => call.Parameters.Length == 3 &&
-                call.Parameters[1] is EX_FloatConst duration && duration.Value == delaySeconds) is not null;
+                call.Parameters[1] is EX_FloatConst duration && duration.Value == delaySeconds &&
+                duration.Value == NativeDebounceSeconds) is not null;
         if (!validSetter || !validClose || !validGraph || new FileInfo(Path.ChangeExtension(path, ".uexp")).Length <= 0)
             throw new InvalidDataException($"The reopened subtitle widget failed validation " +
                 $"(setter={validSetter}; close={validClose}; graph={validGraph}; " +
                 $"uexp={File.Exists(Path.ChangeExtension(path, ".uexp"))}).");
-        var closeGuard = (EX_JumpIfNot)close![0];
-        var expectedCloseTarget = checked(closeGuard.GetSize(reopened) + close[1].GetSize(reopened));
-        if (closeGuard.CodeOffset != expectedCloseTarget)
-            throw new InvalidDataException("The force-close guard does not preserve the original return path.");
     }
 
     // Check one prohibited-state call

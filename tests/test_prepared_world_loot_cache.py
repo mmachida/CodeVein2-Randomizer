@@ -3,6 +3,7 @@ from __future__ import annotations
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from cv2randomizer.game.game_data_cache import (
     _read_prepared_cached_asset,
@@ -74,6 +75,50 @@ class PreparedWorldLootCacheTests(unittest.TestCase):
                 **descriptor,
                 "prepared_asset": {**prepared, "relative_path": "../escape"},
             }))
+
+    # Retry transient cache publication locks
+    def test_prepared_package_retries_a_transient_rename_lock(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            work_root = root / "work"
+            input_root = work_root / "source" / "Content" / "Map"
+            output_root = work_root / ".cv2-prepared-world-loot" / "Map"
+            input_root.mkdir(parents=True)
+            output_root.mkdir(parents=True)
+            input_header = input_root / "Cell.umap"
+            input_uexp = input_root / "Cell.uexp"
+            input_header.write_bytes(b"vanilla header")
+            input_uexp.write_bytes(b"vanilla exports")
+            output_header = output_root / "Cell.umap"
+            output_uexp = output_root / "Cell.uexp"
+            output_header.write_bytes(b"prepared header")
+            output_uexp.write_bytes(b"vanilla exports")
+
+            original_replace = Path.replace
+            replace_calls = 0
+
+            def replace_once(source: Path, target: Path) -> Path:
+                nonlocal replace_calls
+                if source.name.endswith(".tmp") and replace_calls == 0:
+                    replace_calls += 1
+                    raise PermissionError(5, "Access is denied", str(source))
+                replace_calls += 1
+                return original_replace(source, target)
+
+            with (
+                patch("cv2randomizer.game.world_loot_dependencies.Path.replace", new=replace_once),
+                patch("cv2randomizer.game.world_loot_dependencies.time.sleep"),
+            ):
+                prepared = WorldLootDependencyResolver._store_prepared_world_package(
+                    work_root,
+                    root / "cache" / "prepared-assets",
+                    {"packagePath": "/Game/Map/Cell", "inputFile": str(input_header)},
+                    {"outputFiles": [str(output_header), str(output_uexp)]},
+                )
+
+            self.assertEqual(replace_calls, 2)
+            self.assertEqual(prepared["relative_path"], "Map/Cell")
+            self.assertTrue((root / "cache" / "prepared-assets" / "Map" / "Cell" / ".cv2randomizer-prepared-asset.json").is_file())
 
 
 if __name__ == "__main__":

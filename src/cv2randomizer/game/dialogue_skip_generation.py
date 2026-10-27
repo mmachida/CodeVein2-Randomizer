@@ -129,6 +129,9 @@ class DialogueSkipSerializer:
                 or response.get("activationPoint") != "first positive SetSkipIndicatorPercent_Interact progress"
                 or response.get("skipGuard") != "IsInteractSkipProhibited"
                 or response.get("outputAction") != "OnForceClose -> SkipStatement"
+                or response.get("closeHandler") != "unchanged"
+                or response.get("inputRecovery")
+                != "native 0.5-second debounce and zero-progress reset; prohibited progress does not latch"
                 or response.get("reopenedAndValidated") is not True
                 or not output_files
                 or {str(path).casefold() for path in output_files}

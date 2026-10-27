@@ -43,6 +43,8 @@ from .world_loot_serialization import (
 from .version_compatibility import is_game_data_layout_mismatch
 
 LOGGER = logging.getLogger(__name__)
+_PREPARED_CACHE_RENAME_RETRIES = 7
+_PREPARED_CACHE_RENAME_RETRY_SECONDS = 0.05
 
 
 # Allow audited flag pickups
@@ -64,6 +66,31 @@ def _can_rebind_profile_scripted_location(
     return bool(
         is_valid_scripted_reward_only_location(candidate)
     )
+
+
+# Publish prepared cache atomically
+def _publish_prepared_cache_entry(temporary: Path, destination: Path) -> None:
+    """Retry brief Windows file locks without replacing existing cache data."""
+    for attempt in range(_PREPARED_CACHE_RENAME_RETRIES + 1):
+        if destination.exists() or destination.is_symlink():
+            raise WorldLootDependencyError(
+                "Prepared World Loot cache destination appeared during publication."
+            )
+        try:
+            temporary.replace(destination)
+            return
+        except PermissionError:
+            if destination.exists() or destination.is_symlink():
+                raise WorldLootDependencyError(
+                    "Prepared World Loot cache destination appeared during publication."
+                )
+            if attempt >= _PREPARED_CACHE_RENAME_RETRIES:
+                raise
+            time.sleep(min(
+                _PREPARED_CACHE_RENAME_RETRY_SECONDS * (2 ** attempt),
+                0.5,
+            ))
+    raise WorldLootDependencyError("Prepared World Loot cache publication did not complete.")
 
 _BatchItem = TypeVar("_BatchItem")
 _BatchResult = TypeVar("_BatchResult")
@@ -2326,7 +2353,7 @@ class WorldLootDependencyResolver:
                 encoding="utf-8",
             )
             destination.parent.mkdir(parents=True, exist_ok=True)
-            temporary.replace(destination)
+            _publish_prepared_cache_entry(temporary, destination)
             result_files = [
                 {"name": row["name"], "size": row["size"], "sha256": row["sha256"]}
                 for row in rows

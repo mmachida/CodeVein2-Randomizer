@@ -1056,7 +1056,7 @@ class MainWindowIntegrationTests(unittest.TestCase):
             )
             self.assertEqual(
                 window.unlock_all_booster_slots_check.text(),
-                "Unlock all 6 Booster Slots",
+                "Unlock all 6 Booster Slots (New Game only)",
             )
             self.assertEqual(
                 window.unlock_npc_trader_shops_check.text(),
@@ -1064,11 +1064,11 @@ class MainWindowIntegrationTests(unittest.TestCase):
             )
             self.assertEqual(
                 window.motorcycle_unlocked_check.text(),
-                "Unlock Motorcycle at Start",
+                "Unlock Motorcycle at Start (New Game only)",
             )
             self.assertEqual(
                 window.second_weapon_unlocked_check.text(),
-                "Unlock Second Weapon Slot",
+                "Unlock Second Weapon Slot (New Game only)",
             )
             self.assertEqual(
                 window.disable_tutorials_check.text(),
@@ -1076,7 +1076,7 @@ class MainWindowIntegrationTests(unittest.TestCase):
             )
             self.assertEqual(
                 window.tap_to_skip_dialogue_check.text(),
-                "Tap Instead of Holding to Skip Dialogue",
+                "Tap Instead of Holding to Skip Dialogue (Experimental)",
             )
             self.assertTrue(window.tap_to_skip_dialogue_check.isEnabled())
             self.assertEqual(
@@ -1540,7 +1540,7 @@ class MainWindowIntegrationTests(unittest.TestCase):
                 "fully compatible with Code Vein 2 v2.0.3",
                 "Other versions may have missing or different files",
                 "left unchanged and counted by category in Spoiler.txt",
-                "Tap Instead of Holding to Skip Dialogue",
+                "Tap Instead of Holding to Skip Dialogue (Experimental)",
                 "quick press of your configured Interact button",
                 "keyboard or controller",
                 "unsupported layout",

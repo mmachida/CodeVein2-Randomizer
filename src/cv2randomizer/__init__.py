@@ -1,7 +1,7 @@
 """Code Vein 2 Randomizer application package."""
 
 APP_NAME = "CodeVein2Randomizer"
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 APP_DISPLAY_VERSION = "v" + __version__
 APP_DISPLAY_NAME = "Code Vein 2 Randomizer"
 APP_DESCRIPTION = "Item randomizer for Code Vein 2."
